@@ -6,6 +6,7 @@
   "scripts": {
     "start": "tsc && node dist/src/app.js",
     "test": "jest --watchAll",
+    "format": "prettier --write '*.ts'",
     "notify": "tsc && node dist/src/app-notifier.js",
     "top100": "tsc && node dist/coin-gecko-output.js"
   },
