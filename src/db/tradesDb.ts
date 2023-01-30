@@ -14,7 +14,7 @@ const schema = new Schema<Trade>({
 const TradeModel = model<Trade>('Trade', schema);
 
 export class TradesDb {
-  constructor(public ticker: Ticker) {}
+  constructor(public ticker: Ticker) { }
   inTrade: boolean;
 
   async findTicker(): Promise<Trade> {
@@ -34,13 +34,13 @@ export class TradesDb {
     return inTrade;
   }
 
-  async createNewPosition(lastBuy: number) {
+  async createNewPosition(lastBuy: number, action: ActionType) {
     const result = await this.findTicker();
-    const inTrade = this.convertAction(this.ticker.action);
+    const inTrade = this.convertAction(action);
     if (!result) {
       const doc = new TradeModel({
         ticker: this.ticker.pair,
-        nextAction: ActionType[this.ticker.action],
+        nextAction: ActionType[action],
         inTrade: inTrade,
         lastBuy: lastBuy,
       });

@@ -73,7 +73,7 @@ export abstract class BaseStrategy implements Strat {
     this.ticker = strat.exchange.ticker;
     this.candleStats = new CandleStatistics(this.ticker.interval);
     this.tradeAdvisor = new TradeAdvisor(this.strat);
-    this.loadDefaultIndicators();
+    this.loadDefaults();
     this.calculateIndicatorWeight();
   }
 
@@ -91,7 +91,7 @@ export abstract class BaseStrategy implements Strat {
 
   abstract loadIndicators();
 
-  private loadDefaultIndicators() {
+  private async loadDefaults() {
     this.ema20 = addIndicator('ema', { weight: 20, name: 'ema 20' });
     this.sma50 = addIndicator('sma', { weight: 50, name: 'sma 50' });
     this.sma200 = addIndicator('sma', { weight: 200, name: 'sma 200' });
@@ -102,7 +102,12 @@ export abstract class BaseStrategy implements Strat {
       inputType: 'candle',
       name: 'Volume SMA20',
     });
+    await this.loadTradeDb();
     this.loadIndicators();
+  }
+
+  private loadTradeDb() {
+    return this.tradeAdvisor.init();
   }
 
   private calculateIndicatorWeight() {
@@ -147,7 +152,6 @@ export abstract class BaseStrategy implements Strat {
   async update(candle: Candle) {
     this.ticker.candle = candle;
     this.previousCandle ? null : (this.previousCandle = this.candle);
-
     if (!candle.isFinal) {
       await this.realtimeAdvice(candle);
     } else {

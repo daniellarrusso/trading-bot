@@ -12,7 +12,8 @@ export class FibonnaciRegimeStrategy extends BaseStrategy {
 
     loadIndicators() { }
 
-    async realtimeAdvice(candle: Candle) { }
+    async realtimeAdvice(candle: Candle) {
+    }
 
     async advice() {
         // Get Periods -- turn into an indicator

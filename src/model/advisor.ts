@@ -1,17 +1,14 @@
 import { Candle } from './candle';
-import { BinanceService } from '../services/binance-service';
-import { ActionType } from './enums';
 import { TelegramBot } from './telegram-bot';
 import { ChatGroups } from '../../keys';
 import { IExchangeService } from '../services/IExchange-service';
 
 export abstract class Advisor {
-  actionType: ActionType;
   profitResults: number[];
   longQuantity = 0;
   message: string = '';
 
-  constructor(public exchange: IExchangeService) {}
+  constructor(public exchange: IExchangeService) { }
 
   abstract long(candle: Candle, amount?: number);
   abstract short(candle: Candle, half?: boolean);

@@ -3,7 +3,6 @@ import { ActionType, AdvisorType } from './model/enums';
 import { Strategy } from './model/strategy';
 import { ChatGroups, Settings } from '../keys';
 import { BinanceService } from './services/binance-service';
-import './utilities/extensions';
 import { MongoDbConnection } from './db/database-connection';
 import { TelegramBot } from './model/telegram-bot';
 

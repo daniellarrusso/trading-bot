@@ -86,7 +86,7 @@ export class Strategy {
         break;
     }
     if (this.strategyName !== 'grid') {
-      await this.tradesDb.createNewPosition(this.portfolio.buyPrice);
+      // await this.tradesDb.createNewPosition(this.portfolio.buyPrice);
     }
   }
 
