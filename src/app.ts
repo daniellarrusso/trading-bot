@@ -5,7 +5,6 @@ import { ChatGroups, Settings } from '../keys';
 import { BinanceService } from './services/binance-service';
 import './utilities/extensions';
 import { MongoDbConnection } from './db/database-connection';
-import { GridSettings } from './model/grid-settings';
 import { TelegramBot } from './model/telegram-bot';
 
 const fs = require('fs');
@@ -32,28 +31,11 @@ async function getExchangeFilters() {
       await telegram.sendMessage('Bot Started'); // send startup message
     }
     tickerStrategies = [
-      // new Strategy(stratName, new BinanceService(API, new Ticker('SOL', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('BTC', 'USDT', ActionType.Short, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('ETH', 'USDT', ActionType.Short, '4h')), trader),
       new Strategy(
         stratName,
         new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '4h')),
         trader
       ),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('ADA', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('CTSI', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('CKB', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('CAKE', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('SAND', 'USDT', ActionType.Short, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('DOT', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('MATIC', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('BNB', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('EGLD', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('LINK', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('ALGO', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('AVAX', 'USDT', ActionType.Short, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('ALPHA', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(stratName, new BinanceService(API, new Ticker('RUNE', 'USDT', ActionType.Long, '4h')), trader),
     ];
   }
 }
