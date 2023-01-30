@@ -1,0 +1,73 @@
+import { Candle } from './candle';
+import { Interval, Intervals } from '../model/interval-converter';
+
+export class CandleStatistics {
+  candleHistory: Candle[] = [];
+  candleHistorySlice: Candle[] = [];
+
+  price: number;
+  candleSticks: Candle[] = [];
+  lowerLow: boolean;
+  higherHigh: boolean;
+  daysWorth = [];
+  averageForDay: number;
+  intervalsInDay: number = 0;
+
+  get olhcHistorySize() {
+    if (!this.candleHistory.length) return 0;
+    return this.candleHistory.length;
+  }
+
+  constructor(interval: string) {
+    this.intervalsInDay = Intervals.find((i) => i.interval === interval).day;
+  }
+
+  getOHLCHistory = (lookBackPeriod: number): Candle[] => {
+    const size = this.olhcHistorySize - lookBackPeriod;
+    return this.candleHistory
+      .slice(size)
+  }
+
+  getHighLowForPeriod = (lookBackPeriod: number, isHigh: boolean): number => {
+    if (!isHigh)
+      return Math.min(...this.getOHLCHistory(lookBackPeriod).map(c => c.low))
+
+    return Math.max(...this.getOHLCHistory(lookBackPeriod).map(c => c.high))
+  }
+
+  getAverageForPeriod = (lookBackPeriod: number, ohlc: string) => {
+    if (lookBackPeriod > this.olhcHistorySize) return 0;
+    const length = this.getOHLCHistory(lookBackPeriod).length;
+    return this.getOHLCHistory(lookBackPeriod)
+      .map(c => c[ohlc])
+      .reduce((p, c) => p + c, 0) / length;
+  }
+
+  getAll
+
+  calculateStatistics(candle: Candle) {
+    this.lowerLow = candle.low < this.getHighLowForPeriod(this.olhcHistorySize, false);
+    this.higherHigh = candle.high > this.getHighLowForPeriod(this.olhcHistorySize, true);
+    this.candleHistory.push(candle);
+    this.candleSticks.push(candle);
+
+    const index = this.candleSticks.findIndex((c) => c.time.getHours() === 0);
+
+    if (index >= 0) {
+      this.daysWorth = this.candleSticks.filter((c, i) => i >= index);
+      this.averageForDay = this.daysWorth.reduce((a, o) => a + o.close, 0) / this.daysWorth.length;
+    }
+
+    if (this.candleSticks.length >= 100) {
+      this.candleSticks.shift();
+    }
+  }
+
+  private getCandleLength = (): number => this.candleSticks.length - 1;
+
+  fetchPeriod = (period: number): Candle => this.candleSticks[this.getCandleLength() - period];
+
+  logStats(): void {
+    // console.log(`High: ${this.highestPrice}. Low: ${this.lowestPrice}. Average: ${this.averagePrice}. Price: ${this.price}`);
+  }
+}

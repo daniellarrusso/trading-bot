@@ -1,0 +1,47 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Binance Pairs",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/coin-gecko-output.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Trader",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/app.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Sell EVERYTHING",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/app-sell-off.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        }
+    ]
+}

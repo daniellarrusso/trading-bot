@@ -1,0 +1,83 @@
+import { Candle } from '../model/candle';
+import { ApiAccount } from '../model/api-account';
+import { Ticker } from '../model/ticker';
+import Binance from 'node-binance-api';
+import { SettingsDb } from '../db/settingsDb';
+
+export class Trader {
+  private static instance: Trader;
+  private tickers: number;
+
+  public isTrading: boolean;
+  public tradingWith: string;
+  public apiAccount: ApiAccount;
+
+  tickersTrading: Ticker[] = [];
+  settingsDb: SettingsDb = new SettingsDb();
+
+  orderPlaced: boolean;
+
+  private constructor() {}
+
+  static getInstance(tickers: number = 150) {
+    if (!Trader.instance) {
+      Trader.instance = new Trader();
+      Trader.instance.tickers = tickers;
+    }
+    return Trader.instance;
+  }
+  async startService() {
+    await this.settingsDb.createSettings();
+  }
+  async refreshTradeSettings() {
+    const settings = await this.settingsDb.getSymbols();
+    this.setTickers(settings.maxTickers);
+    settings.excludedSymbols.forEach((s) => this.removeSymbol(s));
+  }
+
+  setTickers(val: number) {
+    this.tickers = val;
+  }
+
+  getTickers(): number {
+    return this.tickers;
+  }
+
+  public addTicker(ticker: Ticker): number {
+    if (this.canTrade()) return this.tickersTrading.push(ticker);
+    return 0;
+  }
+
+  public removeTicker(ticker: Ticker) {
+    const tickerToRemove = this.tickersTrading.findIndex((t) => t.pair === ticker.pair);
+    if (tickerToRemove >= 0) this.tickersTrading.splice(tickerToRemove, 1);
+    return tickerToRemove;
+  }
+
+  removeSymbol(symbol: string) {
+    const deleteIndex = this.tickersTrading.findIndex((t) => t.asset === symbol);
+    const res = deleteIndex ? this.tickersTrading.splice(deleteIndex, 1)[0] : null;
+    return res;
+  }
+
+  public canTrade(): boolean {
+    return this.tickersTrading.length < this.tickers;
+  }
+
+  public acivateTrader(candle: Candle) {
+    if (!this.isTrading) {
+      this.isTrading = true;
+      this.tradingWith = candle.pair;
+    }
+  }
+  public resetTrader() {
+    this.tradingWith = null;
+    this.isTrading = false;
+    this.tickersTrading.length = 0;
+  }
+
+  public inTrade(symbol): boolean {
+    const isTrading = (this.isTrading === true && this.tradingWith === symbol) || !this.tradingWith;
+    return isTrading;
+  }
+}
