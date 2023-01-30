@@ -23,6 +23,7 @@ import { RSI15trategy } from '../strategies/intraday/rsi-15';
 import { DCAWeeklytrategy } from '../strategies/DCA/dca-weekly.strategy';
 import { DCAAdvisor } from './dca.advisor';
 import { FibonnaciRegimeStrategy } from '../strategies/intraday/fibonnaci-regime';
+import { SimpleMAStrategy } from '../strategies/swing/simple-ma.strategy';
 
 export class Portfolio {
   constructor(
@@ -32,7 +33,7 @@ export class Portfolio {
     public indicator?: string,
     public shortLimit?: number,
     public longLimit?: number
-  ) { }
+  ) {}
 }
 
 export class Strategy {
@@ -62,8 +63,8 @@ export class Strategy {
       case 'heikinSwing':
         this.strat = new HeikinLongStrategy(this);
         break;
-      case 'maFib':
-        this.strat = new MAFibStrategy(this);
+      case 'moving-average':
+        this.strat = new SimpleMAStrategy(this);
         break;
       case 'breakoutVolume':
         this.strat = new BreakoutVolumeStrategy(this);
