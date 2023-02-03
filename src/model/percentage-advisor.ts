@@ -5,6 +5,9 @@ import { TelegramBot } from './telegram-bot';
 import { ChatGroups, Settings } from '../../keys';
 import { Strategy, Portfolio } from './strategy';
 import { Advisor } from './advisor';
+import { TradeResponse } from './trade-response';
+import { ActionType } from './enums';
+import { Side } from './literals';
 
 export class PercentageAdvisor extends Advisor {
   exchange: BinanceService;
@@ -36,26 +39,42 @@ export class PercentageAdvisor extends Advisor {
     }
   }
 
-  async long(candle: Candle) {
-    if (!candle) candle = this.exchange.ticker.candle;
+  async trade(price?: number) {
+    if (!price) price = this.ticker.candle.close;
+    const side: Side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
     try {
-      await this.exchange.placeMarketOrder('buy', this.currencyQuantity / candle.close);
+      const response: TradeResponse = await this.exchange.placeMarketOrder(
+        side,
+        this.currencyQuantity / price
+      );
       await this.logBalance();
+      return response;
     } catch (error) {
       console.log(error);
     }
   }
 
-  async short(candle: Candle) {
-    if (!candle) candle = this.exchange.ticker.candle;
-    try {
-      await this.exchange.placeMarketOrder('sell', this.currencyQuantity / candle.close);
-      await this.logBalance();
-    } catch (error) {
-      console.log(error.body);
-    }
+  async long(candle: Candle) {
+    // if (!candle) candle = this.exchange.ticker.candle;
+    // try {
+    //   const response: TradeResponse = this.exchange.placeMarketOrder('buy', this.currencyQuantity / candle.close);
+    //   await this.logBalance();
+    //   return response;
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
+  async short(candle: Candle) {
+    // if (!candle) candle = this.exchange.ticker.candle;
+    // try {
+    //   const response: TradeResponse = this.exchange.placeMarketOrder('sell', this.currencyQuantity / candle.close);
+    //   await this.logBalance();
+    //   return response;
+    // } catch (error) {
+    //   console.log(error.body);
+    // }
+  }
 
   async logBalance() {
     const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
@@ -63,10 +82,12 @@ export class PercentageAdvisor extends Advisor {
       await this.exchange.getTradingBalance();
     } catch (error) {
       let errorMessage = error?.message;
-      errorMessage += '. Could not get trading balance'
-      console.log(errorMessage)
+      errorMessage += '. Could not get trading balance';
+      console.log(errorMessage);
     }
-    console.log(`New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `);
+    console.log(
+      `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+    );
   }
 
   addProfitResults(lastSell, lastBuy) {

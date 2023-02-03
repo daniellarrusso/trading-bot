@@ -8,6 +8,9 @@ import { Strategy, Portfolio } from './strategy';
 import { Advisor } from './advisor';
 
 export class PortfolioAdvisor extends Advisor {
+  trade(price?: number): Promise<TradeResponse> {
+    throw new Error('Method not implemented.');
+  }
   exchange: BinanceService;
   assetAmount: number;
   currencyAmount: number;
@@ -77,7 +80,9 @@ export class PortfolioAdvisor extends Advisor {
 
   logBalance(candle: Candle) {
     const { currency, asset } = this.exchange.ticker;
-    console.log(`New Balance: Currency (${currency} ${this.currencyAmount}). Asset (${asset} ${this.assetAmount}) `);
+    console.log(
+      `New Balance: Currency (${currency} ${this.currencyAmount}). Asset (${asset} ${this.assetAmount}) `
+    );
   }
 
   addProfitResults(lastSell, lastBuy) {

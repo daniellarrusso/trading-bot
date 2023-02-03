@@ -206,7 +206,10 @@ export class BinanceService implements IExchangeService {
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
     const priceString = this.normalisePrice(price);
     const stop = this.normalisePrice(stopPrice);
-    return this.exchange[side](this.ticker.pair, quantity, priceString, { stopPrice: stop, type: 'STOP_LOSS' });
+    return this.exchange[side](this.ticker.pair, quantity, priceString, {
+      stopPrice: stop,
+      type: 'STOP_LOSS',
+    });
   }
 
   placeLimitOrder(side: Side, quantity: number, price: number) {
@@ -215,21 +218,28 @@ export class BinanceService implements IExchangeService {
   }
 
   placeMarketOrder(side: Side, quantity: number) {
+    // return Promise.resolve(this.fakeTradeResponse(quantity));
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
-    if (side === 'buy')
-      return this.exchange.marketBuy(this.ticker.pair, quantity)
+    if (side === 'buy') return this.exchange.marketBuy(this.ticker.pair, quantity);
     return this.exchange.marketSell(this.ticker.pair, quantity);
+  }
+
+  fakeTradeResponse(quantity: number) {
+    const { pair, close } = this.ticker.candle;
+    const res = new TradeResponse(close, pair, (close * quantity).toFixed(2), this.ticker.action);
+    return res;
   }
 
   marketOrderSpoof(order: IOrder): Promise<any> {
     order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
     return new Promise((resolve, reject) => {
       console.log(
-        `${order.isLong ? 'Buying' : 'Selling'} using this.exchange[${order.type}](${this.ticker.pair},${order.quantity
+        `${order.isLong ? 'Buying' : 'Selling'} using this.exchange[${order.type}](${this.ticker.pair},${
+          order.quantity
         })`
       );
       setTimeout(() => {
-        const response = new TradeResponse(order.price);
+        const response = {} as TradeResponse;
         response.cummulativeQuoteQty = String(order.quantity);
         resolve(response);
       }, 1000);
@@ -253,7 +263,9 @@ export class BinanceService implements IExchangeService {
       assetAmount = round(quantity, +this.ticker.tickSize);
       return this.exchange[tradeType](this.ticker.pair, assetAmount);
     } catch (error) {
-      console.error(`Get Balance Error Error ${this.ticker.pair} Error: ${error.body} \nAmount: ${assetAmount}`);
+      console.error(
+        `Get Balance Error Error ${this.ticker.pair} Error: ${error.body} \nAmount: ${assetAmount}`
+      );
       assetAmount = round(quantity, +this.ticker.tickSize);
       return this.exchange[tradeType](this.ticker.pair, assetAmount);
     }
@@ -305,8 +317,20 @@ function getCandle(tick, ticker): Candle {
       green: false,
     } as Candle;
   }
-  const [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] =
-    tick;
+  const [
+    time,
+    open,
+    high,
+    low,
+    close,
+    volume,
+    closeTime,
+    assetVolume,
+    trades,
+    buyBaseVolume,
+    buyAssetVolume,
+    ignored,
+  ] = tick;
   const candle = {
     pair: ticker.pair,
     open: +open,

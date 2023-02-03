@@ -6,6 +6,7 @@ import { Advisor } from './advisor';
 import { BacktestAdvisor } from './backtest-advisor';
 import { Ticker } from './ticker';
 import { Settings } from '../../keys';
+import { TradeResponse } from './trade-response';
 
 export class TradeAdvisor {
   advisor: Advisor;
@@ -41,46 +42,27 @@ export class TradeAdvisor {
     await this.strategy.tradesDb.createNewPosition(0, this.initialAction);
   }
 
-  isLong() {
+  get isLong() {
     return this.actionType === ActionType.Short ? true : false;
   }
 
   async trade() {
-    if (!this.isLong() && this.trader.canTrade()) {
-      try {
-        if (this.trader.addTicker(this.ticker) === 0) return;
-        await this.advisor.long(this.candle);
-        if (!this.startingPrice) this.startingPrice = this.candle.close;
-        this._lastBuy = this.candle;
-        this.actionType = this.ticker.setActionType();
-        this.logTrade(this.candle, 'BUY');
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      try {
-        await this.advisor.short(this.candle);
-        this.trader.removeTicker(this.ticker);
-        this.lastSell = this.candle;
-        this.actionType = this.ticker.setActionType();
-        this.logTrade(this.candle, 'SELL');
-        this.calculateProfit();
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    if (!this.isBacktest) {
-      await this.strategy.tradesDb.trade();
+    if (!this.trader.canTrade()) return;
+    try {
+      const res = await this.advisor.trade();
+      await this.logTrade(res);
+    } catch (error) {
+      console.log(error);
     }
   }
 
   async goLong() {
     try {
       if (this.trader.addTicker(this.ticker) === 0) return;
-      await this.advisor.long(this.candle);
+      const res = await this.advisor.long(this.candle);
       if (!this.startingPrice) this.startingPrice = this.candle.close;
       this._lastBuy = this.candle;
-      this.logTrade(this.candle, 'BUY');
+      this.logTrade(res);
     } catch (error) {
       console.log(error);
     }
@@ -88,10 +70,10 @@ export class TradeAdvisor {
 
   async goShort() {
     try {
-      await this.advisor.short(this.candle);
+      const res = await this.advisor.short(this.candle);
       this.trader.removeTicker(this.ticker);
       this.lastSell = this.candle;
-      this.logTrade(this.candle, 'SELL');
+      this.logTrade(res);
     } catch (error) {
       console.log(error);
     }
@@ -110,9 +92,30 @@ export class TradeAdvisor {
     this._lastBuy = null; // have sold so reset buy price
   }
 
-  logTrade(candle: Candle, message) {
-    console.log(`${candle.time} --- TRADE MESSAGE --- ${candle.pair}  traded ${message} ${candle.price}`);
-    this.advisor.notifyTelegramBot();
+  async logTrade(trade: TradeResponse) {
+    await this.strategy.logTradeDb(this.isBacktest);
+    this.logMessage(trade);
+    this.setTraderAction();
+  }
+
+  setTraderAction() {
+    if (!this.isLong) {
+      // will buy {
+      this.trader.addTicker(this.ticker);
+      this._lastBuy = this.candle;
+    } else {
+      this.trader.removeTicker(this.ticker);
+      this.lastSell = this.candle;
+      this.calculateProfit();
+    }
+    this.actionType = this.ticker.setActionType();
+  }
+
+  logMessage(trade: TradeResponse) {
+    const { action, asset, currency, candle } = this.ticker;
+    let message = `${Settings.usdAmount}+${currency} ${ActionType[action]} on ${trade.cummulativeQuoteQty}+${asset}. Entry Price: ${candle.price}`;
+    console.log(message);
+    this.advisor.notifyTelegramBot(message);
   }
 
   async endAdvisor(closingPrice) {
@@ -123,7 +126,7 @@ export class TradeAdvisor {
     };
     this.advisor.end(prices);
     this._lastBuy = null;
-    await this.strategy.tradesDb.checkIfAlreadyExists();
+    if (this.actionType !== this.initialAction) this.actionType = this.ticker.setActionType();
     this.trader.resetTrader();
   }
 }

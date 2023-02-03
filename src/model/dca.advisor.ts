@@ -5,10 +5,14 @@ import { Candle } from './candle';
 import { ActionType } from './enums';
 import { Strategy } from './strategy';
 import { TelegramBot } from './telegram-bot';
+import { TradeResponse } from './trade-response';
 
 const ks = new KrakenService();
 
 export class DCAAdvisor extends Advisor {
+  trade(price?: number): Promise<TradeResponse> {
+    throw new Error('Method not implemented.');
+  }
   actionType: ActionType;
   profitResults: number[];
   longQuantity: number;
@@ -23,8 +27,8 @@ export class DCAAdvisor extends Advisor {
     super(strategy.exchange);
   }
 
-  async long(candle: Candle, amount?: number) { }
-  async short(candle: Candle, half?: boolean) { }
+  async long(candle: Candle, amount?: number) {}
+  async short(candle: Candle, half?: boolean) {}
   end(closingPrice: any) {
     console.log('Method not implemented.');
   }

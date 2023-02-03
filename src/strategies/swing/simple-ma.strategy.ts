@@ -20,10 +20,11 @@ export class SimpleMAStrategy extends BaseStrategy {
 
   async advice() {
     this.checkTradeStatus(() => {
-      return this.cci.result < 0;
+      return true;
     });
 
     if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+      // this.tradeAdvisor.trade();
       if (this.ema20.result > this.sma50.result) {
         this.tradeAdvisor.trade();
       }

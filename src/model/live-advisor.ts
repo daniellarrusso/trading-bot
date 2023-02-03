@@ -10,6 +10,9 @@ import { Advisor } from './advisor';
 import { MarketOrder } from './limit-order';
 
 export class LiveAdvisor extends Advisor {
+  trade(price?: number): Promise<TradeResponse> {
+    throw new Error('Method not implemented.');
+  }
   exchange: BinanceService;
   assetAmount: number;
   currencyAmount: number;
@@ -49,7 +52,6 @@ export class LiveAdvisor extends Advisor {
 
   async short(candle: Candle) {
     try {
-
       const trade: TradeResponse = await this.exchange.placeMarketOrder('sell', 500 / candle.close);
       this.currencyAmount += +trade.cummulativeQuoteQty;
       this.assetAmount -= +trade.origQty;

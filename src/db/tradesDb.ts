@@ -14,7 +14,7 @@ const schema = new Schema<Trade>({
 const TradeModel = model<Trade>('Trade', schema);
 
 export class TradesDb {
-  constructor(public ticker: Ticker) { }
+  constructor(public ticker: Ticker) {}
   inTrade: boolean;
 
   async findTicker(): Promise<Trade> {
@@ -26,6 +26,7 @@ export class TradesDb {
     const result = await this.findTicker();
     if (result) {
       this.inTrade == result.inTrade;
+      return this.inTrade;
     }
   }
 

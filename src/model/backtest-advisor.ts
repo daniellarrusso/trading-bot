@@ -1,29 +1,32 @@
 import { Candle } from './candle';
 import { TradeResponse } from './trade-response';
 import { Advisor } from './advisor';
+import { ActionType } from './enums';
+import { Settings } from '../../keys';
 
 export class BacktestAdvisor extends Advisor {
   assetAmount = 0;
-  currencyAmount = 8000;
+  currencyAmount = 1000;
   profitResults = [];
 
-  long(candle: Candle) {
-    // buy with btc
-    const trade: TradeResponse = new TradeResponse(candle.close); // spoofed trade
-    trade.symbol = candle.pair;
-    trade.side = 'BUY';
-    trade.cummulativeQuoteQty = '' + this.calculateQuantity(candle.close, trade.side);
-    trade.price = candle.close;
+  trade(price?: number) {
+    const { candle, pair, action } = this.exchange.ticker;
+    const side = action === ActionType.Short ? 'SELL' : 'BUY';
+    const trade: TradeResponse = new TradeResponse(
+      price || candle.close,
+      pair,
+      this.calculateQuantity(price || candle.close, side),
+      action
+    );
     return Promise.resolve(trade);
   }
 
+  long(candle: Candle) {
+    return Promise.resolve({});
+  }
+
   short(candle: Candle) {
-    const trade: TradeResponse = new TradeResponse(candle.close); // spoofed trade
-    trade.cummulativeQuoteQty = '' + this.assetAmount;
-    trade.symbol = candle.pair;
-    trade.side = 'SELL';
-    trade.cummulativeQuoteQty = '' + this.calculateQuantity(candle.close, trade.side);
-    return Promise.resolve(trade);
+    return Promise.resolve({});
   }
 
   calculateQuantity(price: number, side: string): string {
@@ -38,7 +41,7 @@ export class BacktestAdvisor extends Advisor {
       this.assetAmount = 0;
     }
 
-    return String(quantity);
+    return String(Settings.usdAmount / price);
   }
 
   addProfitResults(lastSell, lastBuy) {
@@ -55,11 +58,15 @@ export class BacktestAdvisor extends Advisor {
       console.log('Profit from Backtest: ' + finalResult);
     }
 
-    console.log('Market Rise/Fall: ' + ((prices.closingPrice - prices.startingPrice) / prices.startingPrice) * 100);
+    console.log(
+      'Market Rise/Fall: ' + ((prices.closingPrice - prices.startingPrice) / prices.startingPrice) * 100
+    );
     this.profitResults.length = 0;
     this.currencyAmount = !this.currencyAmount ? this.assetAmount * prices.closingPrice : this.currencyAmount;
     this.assetAmount = !this.assetAmount ? this.currencyAmount / prices.closingPrice : this.assetAmount;
-    console.log(`USDT Profit: ${this.currencyAmount}, Asset Profit: ${this.currencyAmount / prices.closingPrice}`);
+    console.log(
+      `USDT Profit: ${this.currencyAmount}, Asset Profit: ${this.currencyAmount / prices.closingPrice}`
+    );
   }
 
   setup() {

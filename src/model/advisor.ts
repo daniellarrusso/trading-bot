@@ -2,18 +2,20 @@ import { Candle } from './candle';
 import { TelegramBot } from './telegram-bot';
 import { ChatGroups } from '../../keys';
 import { IExchangeService } from '../services/IExchange-service';
+import { TradeResponse } from './trade-response';
 
 export abstract class Advisor {
   profitResults: number[];
   longQuantity = 0;
   message: string = '';
 
-  constructor(public exchange: IExchangeService) { }
+  constructor(public exchange: IExchangeService) {}
 
   abstract long(candle: Candle, amount?: number);
+  abstract trade(price?: number): Promise<TradeResponse>;
   abstract short(candle: Candle, half?: boolean);
   abstract end(closingPrice: any);
-  abstract notifyTelegramBot(): void;
+  abstract notifyTelegramBot(message?: string): void;
   abstract addProfitResults(lastSell: Candle, lastBuy: Candle);
   doSetup(sendMessage: boolean): void {
     const messageService = new TelegramBot(ChatGroups.mainAccount);

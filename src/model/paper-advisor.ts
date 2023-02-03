@@ -7,6 +7,9 @@ import { Strategy } from './strategy';
 import { ActionType } from './enums';
 
 export class PaperAdvisor extends Advisor {
+  trade(price?: number): Promise<TradeResponse> {
+    throw new Error('Method not implemented.');
+  }
   assetAmount = 0;
   currencyAmount = 10000;
   profitResults = [];
@@ -26,11 +29,13 @@ export class PaperAdvisor extends Advisor {
   }
 
   async long(candle: Candle) {
-    const trade: TradeResponse = new TradeResponse(candle.close); // spoofed trade
-    trade.symbol = candle.pair;
-    trade.side = 'BUY';
-    trade.cummulativeQuoteQty = '' + this.calculateQuantity(candle.close, trade.side);
-    trade.price = candle.close;
+    const side = candle.close === ActionType.Short ? 'SELL' : 'BUY';
+    const trade: TradeResponse = new TradeResponse(
+      candle.close,
+      candle.pair,
+      this.calculateQuantity(candle.close || candle.close, side),
+      candle.close
+    );
     let quantity = 0;
     if (this.exchange.ticker.currency === 'BTC') {
       let perBTC = 1 / candle.close;
@@ -49,14 +54,14 @@ export class PaperAdvisor extends Advisor {
   }
 
   short(candle: Candle) {
-    const trade: TradeResponse = new TradeResponse(candle.close); // spoofed trade
-    trade.cummulativeQuoteQty = '' + this.assetAmount;
-    trade.symbol = candle.pair;
-    trade.side = 'SELL';
-    trade.cummulativeQuoteQty = '' + this.calculateQuantity(candle.close, trade.side);
-    console.log(
-      'Quantity sold: ' + this.longQuantity ? this.longQuantity : this.strategy.portfolio.total
+    const side = candle.close === ActionType.Short ? 'SELL' : 'BUY';
+    const trade: TradeResponse = new TradeResponse(
+      candle.close,
+      candle.pair,
+      this.calculateQuantity(candle.close || candle.close, side),
+      candle.close
     );
+    console.log('Quantity sold: ' + this.longQuantity ? this.longQuantity : this.strategy.portfolio.total);
     return Promise.resolve(trade);
   }
 

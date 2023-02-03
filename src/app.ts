@@ -30,8 +30,8 @@ async function getExchangeFilters() {
       await telegram.sendMessage('Bot Started'); // send startup message
     }
     tickerStrategies = [
-      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '4h')), trader),
-      new Strategy(stratName, new BinanceService(new Ticker('ETH', 'USDT', ActionType.Long, '4h')), trader),
+      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')), trader),
+      //   new Strategy(stratName, new BinanceService(new Ticker('ETH', 'USDT', ActionType.Long, '4h')), trader),
     ];
   }
 }

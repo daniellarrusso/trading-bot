@@ -1,9 +1,16 @@
+import { ActionType } from './enums';
+
 export class TradeResponse {
   orderId: number;
-  symbol: string;
   origQty: string;
   side: string;
-  cummulativeQuoteQty: string;
   status: string;
-  constructor(public price: number) {}
+  constructor(
+    public price: number,
+    public symbol: string,
+    public cummulativeQuoteQty: string,
+    public action: ActionType
+  ) {
+    action === ActionType.Long ? (this.side = 'BUY') : (this.side = 'SELL');
+  }
 }

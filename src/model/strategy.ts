@@ -113,4 +113,8 @@ export class Strategy {
         break;
     }
   }
+
+  async logTradeDb(isBackTest: boolean) {
+    if (!isBackTest) await this.tradesDb.trade();
+  }
 }
