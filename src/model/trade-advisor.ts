@@ -49,6 +49,7 @@ export class TradeAdvisor {
   async trade() {
     if (!this.trader.canTrade()) return;
     try {
+      if (!this.startingPrice && this.isLong) this.startingPrice = this.candle.close;
       const res = await this.advisor.trade();
       await this.logTrade(res);
     } catch (error) {
