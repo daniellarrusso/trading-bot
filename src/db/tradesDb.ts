@@ -15,7 +15,6 @@ const TradeModel = model<Trade>('Trade', schema);
 
 export class TradesDb {
   constructor(public ticker: Ticker) {}
-  inTrade: boolean;
 
   async findTicker(): Promise<Trade> {
     const result = await TradeModel.findOne({ ticker: this.ticker.pair });
@@ -25,8 +24,7 @@ export class TradesDb {
   async checkIfAlreadyExists() {
     const result = await this.findTicker();
     if (result) {
-      this.inTrade == result.inTrade;
-      return this.inTrade;
+      return result.inTrade ? ActionType.Short : ActionType.Long;
     }
   }
 

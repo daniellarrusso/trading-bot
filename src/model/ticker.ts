@@ -20,8 +20,9 @@ export class Ticker {
     return this._action;
   }
 
-  setActionType(): ActionType {
-    this._action = this._action === ActionType.Long ? ActionType.Short : ActionType.Long;
+  setActionType(action?: ActionType): ActionType {
+    if (action) this._action = action;
+    else this._action = this._action === ActionType.Long ? ActionType.Short : ActionType.Long;
     return this._action;
   }
 }

@@ -126,7 +126,8 @@ export class TradeAdvisor {
     };
     this.advisor.end(prices);
     this._lastBuy = null;
-    if (this.actionType !== this.initialAction) this.actionType = this.ticker.setActionType();
+    const action = await this.strategy.tradesDb.checkIfAlreadyExists();
+    this.actionType = this.ticker.setActionType(action);
     this.trader.resetTrader();
   }
 }

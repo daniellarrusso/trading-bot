@@ -43,11 +43,9 @@ export class PercentageAdvisor extends Advisor {
     if (!price) price = this.ticker.candle.close;
     const side: Side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
     try {
-      const response: TradeResponse = await this.exchange.placeMarketOrder(
-        side,
-        this.currencyQuantity / price
-      );
+      const response: any = await this.exchange.placeMarketOrder(side, this.currencyQuantity / price);
       await this.logBalance();
+      console.log(response);
       return response;
     } catch (error) {
       console.log(error);
@@ -77,17 +75,17 @@ export class PercentageAdvisor extends Advisor {
   }
 
   async logBalance() {
-    const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
     try {
       await this.exchange.getTradingBalance();
+      const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+      console.log(
+        `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+      );
     } catch (error) {
       let errorMessage = error?.message;
       errorMessage += '. Could not get trading balance';
       console.log(errorMessage);
     }
-    console.log(
-      `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
-    );
   }
 
   addProfitResults(lastSell, lastBuy) {
