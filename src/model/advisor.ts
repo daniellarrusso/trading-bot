@@ -15,7 +15,7 @@ export abstract class Advisor {
   abstract trade(price?: number): Promise<TradeResponse>;
   abstract short(candle: Candle, half?: boolean);
   abstract end(closingPrice: any);
-  abstract notifyTelegramBot(message?: string): void;
+  abstract notifyTelegramBot(message: string): void;
   abstract addProfitResults(lastSell: Candle, lastBuy: Candle);
   doSetup(sendMessage: boolean): void {
     const messageService = new TelegramBot(ChatGroups.mainAccount);

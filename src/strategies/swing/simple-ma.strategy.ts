@@ -39,7 +39,7 @@ export class SimpleMAStrategy extends BaseStrategy {
   logStatus(advice: any): void {
     let enabled = this.canTrade ? 'YES' : 'NO';
     const usedIndicators = this.logger.displayIndicators();
-    let message = `${this.ticker.pair} PRICE: ${this.candle.price}. Enabled: ${enabled}. Strategy: ${usedIndicators} Profit: ${advice}`;
+    let message = `${this.ticker.pair} PRICE: ${this.ticker.printPrice}. Enabled: ${enabled}. Strategy: ${usedIndicators} Profit: ${advice}`;
     this.consoleColour(message);
   }
 }

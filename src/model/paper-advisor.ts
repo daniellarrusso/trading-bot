@@ -7,9 +7,6 @@ import { Strategy } from './strategy';
 import { ActionType } from './enums';
 
 export class PaperAdvisor extends Advisor {
-  trade(price?: number): Promise<TradeResponse> {
-    throw new Error('Method not implemented.');
-  }
   assetAmount = 0;
   currencyAmount = 10000;
   profitResults = [];
@@ -19,6 +16,12 @@ export class PaperAdvisor extends Advisor {
   constructor(public strategy: Strategy) {
     super(strategy.exchange);
     this.telegram = new TelegramBot(ChatGroups.mainAccount);
+  }
+  notifyTelegramBot(message: string): void {
+    this.telegram.sendMessage(message);
+  }
+  trade(price?: number): Promise<TradeResponse> {
+    throw new Error('Method not implemented.');
   }
 
   setup() {
@@ -80,14 +83,6 @@ export class PaperAdvisor extends Advisor {
   addProfitResults(lastSell, lastBuy) {
     const amount = ((lastSell.close - lastBuy.close) / lastBuy.close) * 100;
     this.profitResults.push(amount);
-  }
-
-  async notifyTelegramBot() {
-    const { action, pair, candle, interval } = this.exchange.ticker;
-    const side = ActionType[action] === 'Long' ? 'SELL' : 'BUY';
-    this.message = `Trade using ${this.strategy.strategyName}  on  ${interval} `;
-    this.message += `${candle.pair}. Entry Price: ${candle.price}`;
-    this.telegram.sendMessage(this.message);
   }
 
   end(closingPrice: any) {

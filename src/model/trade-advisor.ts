@@ -88,7 +88,7 @@ export class TradeAdvisor {
     if (!this._lastBuy) return; // no profit to calculate
     // this.addProfitResults();
     this.roundtripProfit = ((this.lastSell.close - this._lastBuy.close) / this._lastBuy.close) * 100;
-    console.log(`'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit} (${this.ticker.pair})`);
+    console.log(`'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${this.ticker.pair})`);
     this.advisor.addProfitResults(this.lastSell, this._lastBuy);
     this._lastBuy = null; // have sold so reset buy price
   }
@@ -113,8 +113,10 @@ export class TradeAdvisor {
   }
 
   logMessage(trade: TradeResponse) {
-    const { action, asset, currency, candle } = this.ticker;
-    let message = `${Settings.usdAmount}+${currency} ${ActionType[action]} on ${trade.cummulativeQuoteQty}+${asset}. Entry Price: ${candle.price}`;
+    const { action, asset, currency, candle, tickSize } = this.ticker;
+    let message = `${candle.printTime}: ${Settings.usdAmount} ${currency} ${ActionType[action]} on ${
+      trade.origQty ?? this.strategy.exchange.roundStep(Settings.usdAmount / candle.close)
+    } ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
     console.log(message);
     this.advisor.notifyTelegramBot(message);
   }

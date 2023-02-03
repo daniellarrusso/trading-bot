@@ -15,7 +15,7 @@ export class BacktestAdvisor extends Advisor {
     const trade: TradeResponse = new TradeResponse(
       price || candle.close,
       pair,
-      this.calculateQuantity(price || candle.close, side),
+      Settings.usdAmount.toString(),
       action
     );
     return Promise.resolve(trade);

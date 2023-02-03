@@ -21,7 +21,8 @@ export class GridOrders {
   }
 
   async createGridOrder(midPrice: number) {
-    if (!this.gridHistory) this.gridHistory = new GridHistory(midPrice, this.strat.exchange.ticker.assetQuantity);
+    if (!this.gridHistory)
+      this.gridHistory = new GridHistory(midPrice, this.strat.exchange.ticker.assetQuantity);
     const { pair } = this.strat.exchange.ticker;
     const existingBuyOrder = await this.getExistingOrder('BUY');
     const existingSellOrder = await this.getExistingOrder('SELL');
@@ -42,7 +43,7 @@ export class GridOrders {
 
     this.orderList.map((o) => {
       if (!o) {
-        this.strat.advisor.notifyTelegramBot();
+        this.strat.advisor.notifyTelegramBot('Deprecated');
       }
       console.log(
         `grid-orders.orderList:: Side ${o.side}, ${pair} Amount: ${o.quantity}, @${o.price}, OrderId: ${o.orderId}`
@@ -69,9 +70,12 @@ export class GridOrders {
     const interval = this.settings.interval;
     price = side === 'buy' ? price - interval : price + interval;
     const order = new LimitOrder(+price.toFixed(this.tickSize), this.settings.quantity, side);
-    if ((price < this.settings.minPrice && side == 'buy') || (side == 'sell' && price > this.settings.maxPrice)) {
+    if (
+      (price < this.settings.minPrice && side == 'buy') ||
+      (side == 'sell' && price > this.settings.maxPrice)
+    ) {
       console.log(side.toUpperCase() + ' ' + this.pair + ': Price exceeds range!!');
-      this.strat.advisor.notifyTelegramBot();
+      this.strat.advisor.notifyTelegramBot('deprecated');
       return false;
     }
     try {

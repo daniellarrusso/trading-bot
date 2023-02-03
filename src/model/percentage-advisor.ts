@@ -42,8 +42,9 @@ export class PercentageAdvisor extends Advisor {
   async trade(price?: number) {
     if (!price) price = this.ticker.candle.close;
     const side: Side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
+    const quantity = this.currencyQuantity / price;
     try {
-      const response: any = await this.exchange.placeMarketOrder(side, this.currencyQuantity / price);
+      const response: TradeResponse = await this.exchange.placeMarketOrder(side, quantity);
       await this.logBalance();
       console.log(response);
       return response;
@@ -97,7 +98,7 @@ export class PercentageAdvisor extends Advisor {
     throw new Error('Method not implemented.');
   }
 
-  async notifyTelegramBot() {
-    this.telegram.sendMessage(this.message);
+  async notifyTelegramBot(message: string): Promise<void> {
+    await this.telegram.sendMessage(message);
   }
 }

@@ -6,11 +6,11 @@ import { TradeResponse } from '../model/trade-response';
 import { IOrder, LimitOrder } from '../model/limit-order';
 import { Indicator } from '../model/indicator';
 import { Heikin } from '../model/heikin';
-import { ActionType } from '../model/enums';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { IExchangeService } from './IExchange-service';
 import { Side } from '../model/literals';
+import moment from 'moment';
 
 const FEE = Settings.fee;
 const history = Settings.history;
@@ -42,11 +42,16 @@ export class BinanceService implements IExchangeService {
     this.ticker.tickSize = filters.find((price) => price.filterType === 'PRICE_FILTER').tickSize;
     this.ticker.minQty = filters.find((price) => price.filterType === 'LOT_SIZE').minQty;
     this.ticker.stepSize = filters.find((price) => price.filterType === 'LOT_SIZE').stepSize;
+    this.ticker.roundStep = this.exchange.roundStep;
   }
 
   async getPrice() {
     const price = await this.exchange.prices(this.ticker.pair);
     return price[this.ticker.pair];
+  }
+
+  roundStep(qty) {
+    return this.exchange.roundStep(+qty, this.ticker.stepSize);
   }
 
   getHistory(ticker: Ticker): Promise<any> {
@@ -162,6 +167,7 @@ export class BinanceService implements IExchangeService {
         closeTime: new Date(+closeTime + 1),
         isFinal: isFinal,
         candleSize: getCandleSize(+open, +close),
+        printTime: printTime(closeTime + 1),
       };
       ticker.candle = tick;
       cb(tick);
@@ -345,6 +351,7 @@ function getCandle(tick, ticker): Candle {
     closeTime: new Date(closeTime + 1),
     isFinal: true,
     candleSize: getCandleSize(+open, +close),
+    printTime: printTime(closeTime + 1),
   } as Candle;
   return candle;
 }
@@ -358,6 +365,10 @@ function handleError(err) {
   } else {
     return err;
   }
+}
+
+function printTime(dt: Date) {
+  return moment(dt).format('h:mma Do MMM YYYY');
 }
 
 function round(amount: number, tickSize) {

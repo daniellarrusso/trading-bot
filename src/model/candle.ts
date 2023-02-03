@@ -12,4 +12,5 @@ export class Candle {
   green: boolean;
   isFinal: boolean;
   candleSize: number;
+  printTime: string;
 }

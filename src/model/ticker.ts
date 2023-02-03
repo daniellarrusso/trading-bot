@@ -11,6 +11,8 @@ export class Ticker {
   stepSize: string;
   candle: Candle;
   private _action: ActionType;
+  roundStep: any;
+
   constructor(public asset: string, public currency: string, action: ActionType, public interval: string) {
     this.pair = asset + currency;
     this._action = action;
@@ -18,6 +20,10 @@ export class Ticker {
 
   get action() {
     return this._action;
+  }
+
+  get printPrice() {
+    return this.candle.close.normalise(this.tickSize);
   }
 
   setActionType(action?: ActionType): ActionType {
