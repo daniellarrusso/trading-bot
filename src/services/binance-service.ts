@@ -42,16 +42,11 @@ export class BinanceService implements IExchangeService {
     this.ticker.tickSize = filters.find((price) => price.filterType === 'PRICE_FILTER').tickSize;
     this.ticker.minQty = filters.find((price) => price.filterType === 'LOT_SIZE').minQty;
     this.ticker.stepSize = filters.find((price) => price.filterType === 'LOT_SIZE').stepSize;
-    this.ticker.roundStep = this.exchange.roundStep;
   }
 
   async getPrice() {
     const price = await this.exchange.prices(this.ticker.pair);
     return price[this.ticker.pair];
-  }
-
-  roundStep(qty) {
-    return this.exchange.roundStep(+qty, this.ticker.stepSize);
   }
 
   getHistory(ticker: Ticker): Promise<any> {

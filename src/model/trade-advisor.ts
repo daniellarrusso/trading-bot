@@ -46,6 +46,10 @@ export class TradeAdvisor {
     return this.actionType === ActionType.Short ? true : false;
   }
 
+  formatQuantity(qty: number) {
+    return this.strategy.exchange.exchange.roundStep(+qty, this.ticker.stepSize);
+  }
+
   async trade() {
     if (!this.trader.canTrade()) return;
     try {
@@ -115,7 +119,7 @@ export class TradeAdvisor {
   logMessage(trade: TradeResponse) {
     const { action, asset, currency, candle, tickSize } = this.ticker;
     let message = `${candle.printTime}: ${Settings.usdAmount} ${currency} ${ActionType[action]} on ${
-      trade.origQty ?? this.strategy.exchange.roundStep(Settings.usdAmount / candle.close)
+      trade.origQty ?? this.formatQuantity(Settings.usdAmount / candle.close)
     } ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
     console.log(message);
     this.advisor.notifyTelegramBot(message);
