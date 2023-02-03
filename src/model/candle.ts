@@ -1,5 +1,3 @@
-import { Ticker } from './ticker';
-
 export class Candle {
   pair: string;
   open: number;
