@@ -2,8 +2,7 @@
 
 ## ToDo
 
-- [x] momentjs time of trade - trade-advisor.ts
-- [x] Fix market rise profit.... calculate profits
+- Limit Buy implement & Examples
 
 ## Crypto Hopper Ideas
 

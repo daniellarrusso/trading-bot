@@ -118,9 +118,13 @@ export class TradeAdvisor {
 
   logMessage(trade: TradeResponse) {
     const { action, asset, currency, candle, tickSize } = this.ticker;
-    let message = `${candle.printTime}: ${Settings.usdAmount} ${currency} ${ActionType[action]} on ${
-      trade.origQty ?? this.formatQuantity(Settings.usdAmount / candle.close)
-    } ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
+    const quantity = trade.origQty ?? this.formatQuantity(Settings.usdAmount / candle.close);
+    const currencyAmount = trade.cummulativeQuoteQty ?? Settings.usdAmount;
+
+    let message = `${candle.printTime}: ${currencyAmount} ${currency} ${
+      ActionType[action]
+    } on ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
+
     console.log(message);
     this.advisor.notifyTelegramBot(message);
   }

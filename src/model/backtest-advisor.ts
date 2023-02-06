@@ -11,7 +11,6 @@ export class BacktestAdvisor extends Advisor {
 
   trade(price?: number) {
     const { candle, pair, action } = this.exchange.ticker;
-    const side = action === ActionType.Short ? 'SELL' : 'BUY';
     const trade: TradeResponse = new TradeResponse(
       price || candle.close,
       pair,
@@ -27,21 +26,6 @@ export class BacktestAdvisor extends Advisor {
 
   short(candle: Candle) {
     return Promise.resolve({});
-  }
-
-  calculateQuantity(price: number, side: string): string {
-    let quantity = 0;
-    if (side === 'BUY') {
-      quantity = this.currencyAmount / price;
-      this.assetAmount = quantity;
-      this.currencyAmount = 0;
-    } else {
-      quantity = this.assetAmount * price;
-      this.currencyAmount = quantity;
-      this.assetAmount = 0;
-    }
-
-    return String(Settings.usdAmount / price);
   }
 
   addProfitResults(lastSell, lastBuy) {
