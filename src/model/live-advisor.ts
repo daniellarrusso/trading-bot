@@ -1,84 +1,71 @@
 import { BinanceService } from '../services/binance-service';
-import { Candle } from './candle';
-import { Trader } from '../services/trader-service';
-import { TradeResponse } from './trade-response';
 import { Ticker } from './ticker';
 import { TelegramBot } from './telegram-bot';
-import { ChatGroups } from '../../keys';
-import { Strategy } from './strategy';
+import { ChatGroups, Settings } from '../../keys';
+import { Strategy, Portfolio } from './strategy';
 import { Advisor } from './advisor';
-import { MarketOrder } from './limit-order';
+import { TradeResponse } from './trade-response';
+import { ActionType } from './enums';
+import { ordertypes, Side } from './literals';
 
 export class LiveAdvisor extends Advisor {
-  trade(price?: number): Promise<TradeResponse> {
-    throw new Error('Method not implemented.');
-  }
   exchange: BinanceService;
-  assetAmount: number;
-  currencyAmount: number;
   profitResults = [];
   telegram: TelegramBot;
-  trader: Trader;
+  portfolio: Portfolio;
   ticker: Ticker;
+  orderType: ordertypes;
 
-  constructor(public strategy: Strategy) {
+  get currencyQuantity() {
+    return Settings.usdAmount;
+  }
+
+  constructor(strategy: Strategy) {
     super(strategy.exchange);
     this.telegram = new TelegramBot(ChatGroups.mainAccount);
-    this.exchange
-      .getTradingBalance()
-      .then((ticker: Ticker) => {
-        this.assetAmount = +ticker.assetQuantity;
-        this.currencyAmount = +ticker.currencyQuantity;
-        this.ticker = ticker;
-        console.log(
-          `Starting Live Trade Advisor: Currency (${ticker.currency} ${this.currencyAmount}). Asset (${ticker.asset} ${this.assetAmount})`
-        );
-      })
-      .catch((err) => console.log(err));
-  }
-
-  async long(candle: Candle) {
-    this.trader.acivateTrader(candle);
-    if (this.trader.inTrade(candle.pair)) {
-      const trade: TradeResponse = await this.exchange.placeMarketOrder('buy', 500 / candle.close);
-      this.assetAmount += +trade.origQty;
-      this.currencyAmount -= +trade.cummulativeQuoteQty;
-      this.logBalance(candle);
-    } else {
-      const message = 'Trying to trade ' + candle.pair + ' Already in trade with ' + this.trader.tradingWith;
-      return Promise.reject(message);
+    this.portfolio = strategy.portfolio;
+    if (!this.portfolio) {
+      throw new Error('Portfolio not set');
     }
   }
-
-  async short(candle: Candle) {
+  async setup(orderType: ordertypes): Promise<void> {
+    this.orderType = orderType;
     try {
-      const trade: TradeResponse = await this.exchange.placeMarketOrder('sell', 500 / candle.close);
-      this.currencyAmount += +trade.cummulativeQuoteQty;
-      this.assetAmount -= +trade.origQty;
-      this.logBalance(candle);
-      this.trader.resetTrader();
+      this.ticker = await this.exchange.getTradingBalance();
+      console.log(
+        `Starting Percentage Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
+      );
     } catch (error) {
       console.log(error);
     }
   }
 
-  calculateQuantity(price: number, side: string): string {
-    let quantity = 0;
-    if (side === 'BUY') {
-      quantity = this.currencyAmount / price;
-      this.currencyAmount = 0;
-    } else {
-      quantity = this.assetAmount * price;
-      this.assetAmount = 0;
+  async trade(price?: number, side?: Side) {
+    if (!price) price = this.ticker.candle.close;
+    if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
+    const quantity = this.currencyQuantity / price;
+    try {
+      const response: TradeResponse = await this.exchange[this.orderType](side, quantity);
+      await this.logBalance();
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.log(error);
     }
-
-    return String(quantity);
   }
 
-  logBalance(candle: Candle) {
-    console.log(
-      `New Balance: Currency (${this.ticker.currency} ${this.currencyAmount}). Asset (${this.ticker.asset} ${this.assetAmount}) `
-    );
+  async logBalance() {
+    try {
+      await this.exchange.getTradingBalance();
+      const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+      console.log(
+        `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+      );
+    } catch (error) {
+      let errorMessage = error?.message;
+      errorMessage += '. Could not get trading balance';
+      console.log(errorMessage);
+    }
   }
 
   addProfitResults(lastSell, lastBuy) {
@@ -90,11 +77,7 @@ export class LiveAdvisor extends Advisor {
     throw new Error('Method not implemented.');
   }
 
-  setup() {
-    console.log('No setup required');
-  }
-
-  async notifyTelegramBot() {
-    this.telegram.sendMessage(this.message);
+  async notifyTelegramBot(message: string): Promise<void> {
+    await this.telegram.sendMessage(message);
   }
 }

@@ -7,6 +7,7 @@ import { BacktestAdvisor } from './backtest-advisor';
 import { Ticker } from './ticker';
 import { Settings } from '../../keys';
 import { TradeResponse } from './trade-response';
+import { ordertypes, Side } from './literals';
 
 export class TradeAdvisor {
   advisor: Advisor;
@@ -50,35 +51,12 @@ export class TradeAdvisor {
     return this.strategy.exchange.exchange.roundStep(+qty, this.ticker.stepSize);
   }
 
-  async trade() {
+  async trade(price?: number, side?: Side) {
     if (!this.trader.canTrade()) return;
     try {
       if (!this.startingPrice && this.isLong) this.startingPrice = this.candle.close;
-      const res = await this.advisor.trade();
+      const res = await this.advisor.trade(price, side);
       await this.logTrade(res);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async goLong() {
-    try {
-      if (this.trader.addTicker(this.ticker) === 0) return;
-      const res = await this.advisor.long(this.candle);
-      if (!this.startingPrice) this.startingPrice = this.candle.close;
-      this._lastBuy = this.candle;
-      this.logTrade(res);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async goShort() {
-    try {
-      const res = await this.advisor.short(this.candle);
-      this.trader.removeTicker(this.ticker);
-      this.lastSell = this.candle;
-      this.logTrade(res);
     } catch (error) {
       console.log(error);
     }
@@ -98,9 +76,9 @@ export class TradeAdvisor {
   }
 
   async logTrade(trade: TradeResponse) {
-    await this.strategy.logTradeDb(this.isBacktest);
     this.logMessage(trade);
     this.setTraderAction();
+    await this.strategy.logTradeDb(this.isBacktest);
   }
 
   setTraderAction() {

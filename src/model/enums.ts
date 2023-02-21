@@ -6,12 +6,6 @@ export enum ActionType {
   NoAction,
 }
 
-export enum OrderType {
-  buy = 'buy',
-  sell = 'sell',
-  marketSell = 'marketSell',
-}
-
 export enum SellReason {
   'StopLoss',
   'Profit',
@@ -23,7 +17,5 @@ export enum AdvisorType {
   'paper',
   'live',
   'backtest',
-  'portfolio',
-  'percentage',
   'DCA',
 }

@@ -1,15 +1,14 @@
-import { Candle } from './candle';
 import { TradeResponse } from './trade-response';
 import { Advisor } from './advisor';
-import { ActionType } from './enums';
 import { Settings } from '../../keys';
+import { Side } from './literals';
 
 export class BacktestAdvisor extends Advisor {
   assetAmount = 0;
   currencyAmount = 1000;
   profitResults = [];
 
-  trade(price?: number) {
+  trade(price?: number, side?: Side) {
     const { candle, pair, action } = this.exchange.ticker;
     const trade: TradeResponse = new TradeResponse(
       price || candle.close,
@@ -18,14 +17,6 @@ export class BacktestAdvisor extends Advisor {
       action
     );
     return Promise.resolve(trade);
-  }
-
-  long(candle: Candle) {
-    return Promise.resolve({});
-  }
-
-  short(candle: Candle) {
-    return Promise.resolve({});
   }
 
   addProfitResults(lastSell, lastBuy) {

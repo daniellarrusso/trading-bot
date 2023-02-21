@@ -12,7 +12,7 @@ const fs = require('fs');
 const USEDATA = false;
 Settings.backTest = true;
 
-const advisorType: AdvisorType = AdvisorType.percentage;
+const advisorType: AdvisorType = AdvisorType.paper;
 const BTCPAIRS = false;
 const STARTUPMESSAGE = false;
 const trader = Settings.trader;
@@ -32,7 +32,7 @@ async function getExchangeFilters() {
     }
     tickerStrategies = [
       new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')), trader),
-      //   new Strategy(stratName, new BinanceService(new Ticker('ETH', 'USDT', ActionType.Long, '4h')), trader),
+      // new Strategy(stratName, new BinanceService(new Ticker('ETH', 'USDT', ActionType.Long, '4h')), trader),
     ];
   }
 }
@@ -53,7 +53,7 @@ async function setup() {
     const history = await strategy.exchange.getHistory(strategy.exchange.ticker);
     await strategy.strat.loadHistory(history); // backtesting takes place inside strat
     strategy.setAdvisor(advisorType);
-    await strategy.advisor.doSetup(false);
+    await strategy.advisor.doSetup(false, 'placeLimitOrder');
   }
   getLatest(tickers);
 }

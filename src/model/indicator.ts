@@ -1,4 +1,3 @@
-import { SMA } from '../indicators/sma';
 import { Candle } from './candle';
 
 export class IndicatorSettings {
@@ -30,7 +29,6 @@ export abstract class Indicator {
 
   constructor(public settings: IndicatorSettings) {
     this.weight = settings.weight;
-    this.name = settings.name;
     this.maWeight = settings.maWeight ? settings.maWeight : this.maWeight;
     if (settings.input) {
       this.input = settings.input;

@@ -25,7 +25,7 @@ import { AlternateTimeframe } from '../model/alternate-timeframe';
 
 export abstract class BaseStrategy implements Strat {
   protected ticker: Ticker;
-  protected logger: Logger = new Logger();
+  protected logger: Logger;
   protected ema20: Indicator;
   protected sma50: Indicator;
   protected sma200: Indicator;
@@ -71,6 +71,7 @@ export abstract class BaseStrategy implements Strat {
   constructor(public strat: Strategy) {
     this.pair = strat.exchange.ticker.pair;
     this.ticker = strat.exchange.ticker;
+    this.logger = new Logger(this.ticker);
     this.candleStats = new CandleStatistics(this.ticker.interval);
     this.tradeAdvisor = new TradeAdvisor(this.strat);
     this.loadDefaults();
@@ -92,10 +93,10 @@ export abstract class BaseStrategy implements Strat {
   abstract loadIndicators();
 
   private async loadDefaults() {
-    this.ema20 = addIndicator('ema', { weight: 20, name: 'ema 20' });
-    this.sma50 = addIndicator('sma', { weight: 50, name: 'sma 50' });
-    this.sma200 = addIndicator('sma', { weight: 200, name: 'sma 200' });
-    this.rsi14 = addIndicator('rsi', { weight: 14, name: 'RSI 14' });
+    this.ema20 = addIndicator('ema', { weight: 20, name: 'ema20' });
+    this.sma50 = addIndicator('sma', { weight: 50, name: 'sma50' });
+    this.sma200 = addIndicator('sma', { weight: 200, name: 'sma200' });
+    this.rsi14 = addIndicator('rsi', { weight: 14, name: 'rsi14' });
     this.volume20 = addIndicator('sma', {
       weight: 20,
       input: 'volume',
@@ -199,7 +200,9 @@ export abstract class BaseStrategy implements Strat {
       this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
       this.candleStats.logStats();
       this.tradeStatus = await this.strat.tradesDb.findTicker();
-      this._lastBuyprice = this.tradeStatus?.inTrade ? this.tradeStatus.lastBuy : this.tradeAdvisor.lastBuyClose;
+      this._lastBuyprice = this.tradeStatus?.inTrade
+        ? this.tradeStatus.lastBuy
+        : this.tradeAdvisor.lastBuyClose;
       if (this._lastBuyprice) {
         this.profit = this.returnPercentageIncrease(this.candle.close, this.lastBuyprice);
       }
@@ -228,7 +231,9 @@ export abstract class BaseStrategy implements Strat {
     const percentToMessage = this.profitMargins.find((percent) => percent.percent == pr && !percent.notified);
 
     if (percentToMessage) {
-      !this.backtestMode ? this.telegram.sendMessage(`${this.ticker.pair} has reached ${pr} percent profit`) : false;
+      !this.backtestMode
+        ? this.telegram.sendMessage(`${this.ticker.pair} has reached ${pr} percent profit`)
+        : false;
       percentToMessage.notified = true;
       this.profitMargins.filter((p) => p !== percentToMessage).map((c) => (c.notified = false));
     }
@@ -266,7 +271,7 @@ export abstract class BaseStrategy implements Strat {
     }
   }
 
-  protected resetParameters() { }
+  protected resetParameters() {}
 
   abstract realtimeAdvice(candle: Candle): Promise<void>;
 
@@ -280,7 +285,13 @@ export abstract class BaseStrategy implements Strat {
     const endTime = new Date(this.candle.closeTime.getTime() + 1000);
     if (!this.dailyCandles && !this.backtestMode) {
       try {
-        this.dailyCandles = await this.strat.exchange.getHistoryWithIndicator(pair, '1d', indicator, null, true);
+        this.dailyCandles = await this.strat.exchange.getHistoryWithIndicator(
+          pair,
+          '1d',
+          indicator,
+          null,
+          true
+        );
       } catch (error) {
         console.log(error.body);
       }
@@ -299,7 +310,9 @@ function lastSunday(month, year) {
   var d = new Date();
   var lastDayOfMonth = new Date(Date.UTC(year || d.getFullYear(), month + 1, 0));
   var day = lastDayOfMonth.getDay();
-  return new Date(Date.UTC(lastDayOfMonth.getFullYear(), lastDayOfMonth.getMonth(), lastDayOfMonth.getDate() - day));
+  return new Date(
+    Date.UTC(lastDayOfMonth.getFullYear(), lastDayOfMonth.getMonth(), lastDayOfMonth.getDate() - day)
+  );
 }
 
 function isBST(date) {

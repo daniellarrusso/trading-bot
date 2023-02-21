@@ -26,7 +26,7 @@ export class Ticker {
   }
 
   setActionType(action?: ActionType): ActionType {
-    if (action) this._action = action;
+    if (action !== undefined) this._action = action;
     else this._action = this._action === ActionType.Long ? ActionType.Short : ActionType.Long;
     return this._action;
   }

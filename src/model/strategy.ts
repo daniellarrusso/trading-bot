@@ -10,11 +10,9 @@ import { PaperAdvisor } from './paper-advisor';
 import { TradesDb } from '../db/tradesDb';
 import { BacktestAdvisor } from './backtest-advisor';
 import { AdvisorType } from './enums';
-import { PortfolioAdvisor } from './portfolio-advisor';
-import { LiveAdvisor } from './live-advisor';
 import { GridStrategy } from '../strategies/grid';
 import { HeikinLongStrategy } from '../strategies/swing/heikin-long';
-import { PercentageAdvisor } from './percentage-advisor';
+import { LiveAdvisor } from './live-advisor';
 import { MAFibStrategy } from '../strategies/old/ma-fib';
 import { BreakoutVolumeStrategy } from '../strategies/swing/breakout-volume';
 import { TemplateStrategy } from '../strategies/template-strategy';
@@ -96,14 +94,8 @@ export class Strategy {
       case (advisor = AdvisorType.paper):
         this.advisor = this.strat.setTradeAdvisor(new PaperAdvisor(this));
         break;
-      case (advisor = AdvisorType.portfolio):
-        this.advisor = this.strat.setTradeAdvisor(new PortfolioAdvisor(this));
-        break;
       case (advisor = AdvisorType.live):
         this.advisor = this.strat.setTradeAdvisor(new LiveAdvisor(this));
-        break;
-      case (advisor = AdvisorType.percentage):
-        this.advisor = this.strat.setTradeAdvisor(new PercentageAdvisor(this));
         break;
       case (advisor = AdvisorType.DCA):
         this.advisor = this.strat.setTradeAdvisor(new DCAAdvisor(this));
