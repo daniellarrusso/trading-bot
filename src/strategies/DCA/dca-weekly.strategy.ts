@@ -25,12 +25,12 @@ export class DCAWeeklytrategy extends BaseStrategy {
 
     /// Go Long
     if (this.candle.green) {
-      this.tradeAdvisor.goShort();
+      this.tradeAdvisor.trade(this.candle.close, 'buy');
     }
 
     // Go Short
     if (!this.candle.green) {
-      this.tradeAdvisor.goLong();
+      this.tradeAdvisor.trade(this.candle.close, 'sell');
     }
   }
 

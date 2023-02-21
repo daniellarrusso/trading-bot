@@ -14,6 +14,8 @@ export class SimpleMAStrategy extends BaseStrategy {
 
   loadIndicators() {
     this.cci = addIndicator('sniper-cci', { weight: 14, weights: [5, 35], name: 't3-cci' });
+    this.logger.addIndicator(this.ema20);
+    this.logger.addIndicator(this.sma50);
   }
 
   async realtimeAdvice() {}
@@ -26,12 +28,12 @@ export class SimpleMAStrategy extends BaseStrategy {
     if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
       // this.tradeAdvisor.trade();
       if (this.ema20.result > this.sma50.result) {
-        this.tradeAdvisor.trade();
+        await this.tradeAdvisor.trade();
       }
     }
     if (this.tradeAdvisor.actionType === ActionType.Short) {
       if (this.ema20.result < this.sma50.result) {
-        this.tradeAdvisor.trade();
+        await this.tradeAdvisor.trade();
       }
     }
   }

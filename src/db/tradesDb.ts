@@ -52,7 +52,7 @@ export class TradesDb {
     }
   }
 
-  async trade() {
+  async trade(): Promise<void> {
     const resToUpdate = await TradeModel.findOne({ ticker: this.ticker.pair });
     const inTrade = this.convertAction(this.ticker.action);
     resToUpdate.nextAction = ActionType[this.ticker.action];
@@ -60,6 +60,6 @@ export class TradesDb {
     resToUpdate.lastBuy = inTrade ? this.ticker.candle.close : 0;
     const prevAction = this.ticker.action === ActionType.Long ? ActionType.Short : ActionType.Long;
     resToUpdate.transactions.push({ action: ActionType[prevAction], amount: this.ticker.candle.close });
-    const res = await resToUpdate.save();
+    await resToUpdate.save();
   }
 }

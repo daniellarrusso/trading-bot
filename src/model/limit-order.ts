@@ -1,12 +1,11 @@
 import { BinanceService } from '../services/binance-service';
-import { OrderType } from './enums';
 import { TradeResponse } from './trade-response';
 
 export class LimitOrder {
   orderId: number;
   triggered: boolean;
   complete: boolean = false;
-  constructor(public price: any, public quantity: number, public side: string) { }
+  constructor(public price: any, public quantity: number, public side: string) {}
 }
 
 export interface IOrder {
@@ -83,7 +82,7 @@ export class LimitOrderPercentage implements IOrder {
   quantity: number = 0;
   tradeResponse: TradeResponse;
   inTrade: boolean;
-  constructor(public price: number, public isLong: boolean) { }
+  constructor(public price: number, public isLong: boolean) {}
 
   async createOrder(exchange: BinanceService, percentage) {
     this.exchange = exchange;

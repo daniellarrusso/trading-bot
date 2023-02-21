@@ -1,4 +1,3 @@
-import { SMA } from '../indicators/sma';
 import { Candle } from './candle';
 
 export class IndicatorSettings {

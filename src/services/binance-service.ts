@@ -215,7 +215,11 @@ export class BinanceService implements IExchangeService {
 
   placeLimitOrder(side: Side, quantity: number, price: number) {
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
-    return this.exchange[side](this.ticker.pair, quantity, this.normalisePrice(price));
+    return this.exchange[side](
+      this.ticker.pair,
+      quantity,
+      this.normalisePrice(price || this.ticker.candle.close)
+    );
   }
 
   placeMarketOrder(side: Side, quantity: number) {

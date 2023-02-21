@@ -5,7 +5,6 @@ import { Trader } from '../../services/trader-service';
 import { Strategy } from '../../model/strategy';
 import { PaperAdvisor } from '../../model/paper-advisor';
 import { PortfolioStrategy } from '../portfolio-strategy';
-import { PortfolioAdvisor } from '../../model/portfolio-advisor';
 import { BacktestAdvisor } from '../../model/backtest-advisor';
 import { Candle } from '../../model/candle';
 
