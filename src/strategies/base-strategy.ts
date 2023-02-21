@@ -93,10 +93,10 @@ export abstract class BaseStrategy implements Strat {
   abstract loadIndicators();
 
   private async loadDefaults() {
-    this.ema20 = addIndicator('ema', { weight: 20, name: 'ema 20' });
-    this.sma50 = addIndicator('sma', { weight: 50, name: 'sma 50' });
-    this.sma200 = addIndicator('sma', { weight: 200, name: 'sma 200' });
-    this.rsi14 = addIndicator('rsi', { weight: 14, name: 'RSI 14' });
+    this.ema20 = addIndicator('ema', { weight: 20, name: 'ema20' });
+    this.sma50 = addIndicator('sma', { weight: 50, name: 'sma50' });
+    this.sma200 = addIndicator('sma', { weight: 200, name: 'sma200' });
+    this.rsi14 = addIndicator('rsi', { weight: 14, name: 'rsi14' });
     this.volume20 = addIndicator('sma', {
       weight: 20,
       input: 'volume',

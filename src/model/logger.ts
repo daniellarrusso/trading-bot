@@ -15,7 +15,10 @@ export class Logger {
 
   displayIndicators(): string {
     let message = '';
-    this.indicatorList.forEach((t) => (message += t.name + ': ' + this.formatResult(t.result) + ' '));
+    this.indicatorList.forEach(
+      (indicator) =>
+        (message += indicator.name + indicator.weight + ': ' + this.formatResult(indicator.result) + ' ')
+    );
     return message;
   }
 }
