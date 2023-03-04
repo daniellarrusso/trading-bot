@@ -1,9 +1,10 @@
 import { Candle } from '../model/candle';
-import { Portfolio, Strategy } from '../model/strategy';
+import { Strategy } from '../model/strategy';
 import { Percentage } from '../model/percentage';
 import { CandleStatistics } from '../model/candle-statistics';
 import { PortfolioTrades } from '../model/portfolio-trades';
 import { PortfolioTrade } from '../model/portfolio-trade';
+import { Portfolio } from '../model/portfolio';
 
 export class PortfolioStrategy {
   candle: Candle;
@@ -13,7 +14,12 @@ export class PortfolioStrategy {
   messageLogged: boolean;
   // percentages: Percentage[] = [new Percentage(1.01), new Percentage(1.03), new Percentage(1.05), new Percentage(1.08), new Percentage(1.13)];
   // percentages: Percentage[] = [new Percentage(1.08), new Percentage(1.13),new Percentage(1.21)];
-  percentages: Percentage[] = [new Percentage(1.03), new Percentage(1.05), new Percentage(1.08), new Percentage(1.13)];
+  percentages: Percentage[] = [
+    new Percentage(1.03),
+    new Percentage(1.05),
+    new Percentage(1.08),
+    new Percentage(1.13),
+  ];
   constructor(public strat: Strategy, public stats: CandleStatistics) {
     this.trades = new PortfolioTrades(this.strat, this.stats);
     this.portfolio = this.strat.portfolio;

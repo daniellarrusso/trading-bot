@@ -22,17 +22,7 @@ import { DCAWeeklytrategy } from '../strategies/DCA/dca-weekly.strategy';
 import { DCAAdvisor } from './dca.advisor';
 import { FibonnaciRegimeStrategy } from '../strategies/intraday/fibonnaci-regime';
 import { SimpleMAStrategy } from '../strategies/swing/simple-ma.strategy';
-
-export class Portfolio {
-  constructor(
-    public total: number = 10000,
-    public multiplier: number = 1,
-    public buyPrice: number = 0,
-    public indicator?: string,
-    public shortLimit?: number,
-    public longLimit?: number
-  ) {}
-}
+import { Portfolio } from './portfolio';
 
 export class Strategy {
   advisor: Advisor;

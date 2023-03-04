@@ -1,12 +1,11 @@
-import { textChangeRangeIsUnchanged } from 'typescript';
 import { Candle } from '../model/candle';
 import { GridHistory, GridSettings } from '../model/grid-settings';
-import { LimitOrder, MarketOrder } from '../model/limit-order';
-import { Portfolio, Strategy } from '../model/strategy';
+import { LimitOrder } from '../model/limit-order';
+import { Strategy } from '../model/strategy';
 import { Ticker } from '../model/ticker';
-import { Trader } from '../services/trader-service';
 import { BaseStrategy } from './base-strategy';
 import { GridOrders } from '../model/grid-orders';
+import { Portfolio } from '../model/portfolio';
 
 export class GridStrategy extends BaseStrategy {
   settings: GridSettings;
@@ -67,7 +66,10 @@ export class GridStrategy extends BaseStrategy {
 
       if (!this.settings.quantity) this.settings.quantity = +this.ticker.assetQuantity;
       this.settings.quantity /= this.settings.ordersPlaced;
-      this.settings.quantity = this.strat.exchange.exchange.roundStep(this.settings.quantity, this.ticker.stepSize);
+      this.settings.quantity = this.strat.exchange.exchange.roundStep(
+        this.settings.quantity,
+        this.ticker.stepSize
+      );
       this.logSellOrders(currentPrice);
       this.logBuyOrders(currentPrice);
       try {
@@ -102,7 +104,9 @@ export class GridStrategy extends BaseStrategy {
   private logMessage() {
     const { asset } = this.ticker;
     const trade = this.gridOrders.lastTrade;
-    const message = `${trade.quantity} ${asset} ${trade.side} for ${this.strat.exchange.normalisePrice(trade.price)}`;
+    const message = `${trade.quantity} ${asset} ${trade.side} for ${this.strat.exchange.normalisePrice(
+      trade.price
+    )}`;
     this.consoleColour(message);
     this.telegram.sendMessage(message);
   }

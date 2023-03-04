@@ -2,11 +2,12 @@ import { BinanceService } from '../services/binance-service';
 import { Ticker } from './ticker';
 import { TelegramBot } from './telegram-bot';
 import { ChatGroups, Settings } from '../../keys';
-import { Strategy, Portfolio } from './strategy';
+import { Strategy } from './strategy';
 import { Advisor } from './advisor';
 import { TradeResponse } from './trade-response';
 import { ActionType } from './enums';
 import { ordertypes, Side } from './literals';
+import { Portfolio } from './portfolio';
 
 export class LiveAdvisor extends Advisor {
   exchange: BinanceService;

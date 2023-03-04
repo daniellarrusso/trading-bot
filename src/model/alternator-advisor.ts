@@ -1,4 +1,4 @@
-import { Portfolio } from './strategy';
+import { Portfolio } from './portfolio';
 
 export class AlternatorAdvisor {
   private readonly _orderQuantity: number;
