@@ -5,10 +5,10 @@ import { Trader } from '../services/trader-service';
 import { Advisor } from './advisor';
 import { BacktestAdvisor } from './backtest-advisor';
 import { Ticker } from './ticker';
-import { Settings } from '../../keys';
 import { TradeResponse } from './trade-response';
 import { ordertypes, Side } from './literals';
 import { Trades } from './trades';
+import { Settings } from '../../settings';
 
 export class TradeAdvisor {
     advisor: Advisor;
