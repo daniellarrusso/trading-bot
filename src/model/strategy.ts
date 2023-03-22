@@ -1,28 +1,28 @@
-import { Ticker } from './ticker';
-import { BinanceService } from '../services/binance-service';
-import { Advisor } from './advisor';
-import { GridSettings } from './grid-settings';
-import { Strat } from './interfaces/strat';
-import { BaseStrategy } from '../strategies/base-strategy';
-import { FifteenHourStrategy } from '../strategies/old/fifteen-hour';
-import { Trader } from '../services/trader-service';
-import { PaperAdvisor } from './paper-advisor';
-import { TradesDb } from '../db/tradesDb';
-import { BacktestAdvisor } from './backtest-advisor';
-import { AdvisorType } from './enums';
-import { GridStrategy } from '../strategies/grid';
-import { HeikinLongStrategy } from '../strategies/swing/heikin-long';
-import { LiveAdvisor } from './live-advisor';
-import { MAFibStrategy } from '../strategies/old/ma-fib';
-import { BreakoutVolumeStrategy } from '../strategies/swing/breakout-volume';
-import { TemplateStrategy } from '../strategies/template-strategy';
-import { DailyRSIStrategy } from '../strategies/swing/daily-rsi';
-import { RSI15trategy } from '../strategies/intraday/rsi-15';
-import { DCAWeeklytrategy } from '../strategies/DCA/dca-weekly.strategy';
-import { DCAAdvisor } from './dca.advisor';
-import { FibonnaciRegimeStrategy } from '../strategies/intraday/fibonnaci-regime';
-import { SimpleMAStrategy } from '../strategies/swing/simple-ma.strategy';
-import { Portfolio } from './portfolio';
+import { Ticker } from "./ticker";
+import { BinanceService } from "../services/binance-service";
+import { Advisor } from "./advisor";
+import { GridSettings } from "./grid-settings";
+import { Strat } from "./interfaces/strat";
+import { BaseStrategy } from "../strategies/base-strategy";
+import { FifteenHourStrategy } from "../strategies/old/fifteen-hour";
+import { Trader } from "../services/trader-service";
+import { PaperAdvisor } from "./paper-advisor";
+import { TradesDb } from "../db/tradesDb";
+import { BacktestAdvisor } from "./backtest-advisor";
+import { AdvisorType } from "./enums";
+import { GridStrategy } from "../strategies/grid";
+import { HeikinLongStrategy } from "../strategies/swing/heikin-long";
+import { LiveAdvisor } from "./live-advisor";
+import { MAFibStrategy } from "../strategies/old/ma-fib";
+import { BreakoutVolumeStrategy } from "../strategies/swing/breakout-volume";
+import { TemplateStrategy } from "../strategies/template-strategy";
+import { DailyRSIStrategy } from "../strategies/swing/daily-rsi";
+import { RSI15trategy } from "../strategies/intraday/rsi-15";
+import { DCAWeeklytrategy } from "../strategies/DCA/dca-weekly.strategy";
+import { DCAAdvisor } from "./dca.advisor";
+import { FibonnaciRegimeStrategy } from "../strategies/intraday/fibonnaci-regime";
+import { SimpleMAStrategy } from "../strategies/swing/simple-ma.strategy";
+import { Portfolio } from "./portfolio";
 
 export class Strategy {
   advisor: Advisor;
@@ -42,39 +42,39 @@ export class Strategy {
   }
   async init() {
     switch (this.strategyName) {
-      case 'fifteen':
+      case "fifteen":
         this.strat = new FifteenHourStrategy(this);
         break;
-      case 'grid':
+      case "grid":
         this.strat = new GridStrategy(this);
         break;
-      case 'heikinSwing':
+      case "heikinSwing":
         this.strat = new HeikinLongStrategy(this);
         break;
-      case 'moving-average':
+      case "moving-average":
         this.strat = new SimpleMAStrategy(this);
         break;
-      case 'breakoutVolume':
+      case "breakoutVolume":
         this.strat = new BreakoutVolumeStrategy(this);
         break;
-      case 'daily-rsi':
+      case "daily-rsi":
         this.strat = new DailyRSIStrategy(this);
         break;
-      case 'rsi-15':
+      case "rsi-15":
         this.strat = new RSI15trategy(this);
         break;
-      case 'dca':
+      case "dca":
         this.strat = new DCAWeeklytrategy(this);
         break;
-      case 'fib-regime':
+      case "fib-regime":
         this.strat = new FibonnaciRegimeStrategy(this);
         break;
       default:
-        console.log('WARNING!!! Template Strategy is running');
+        console.log("WARNING!!! Template Strategy is running");
         this.strat = new TemplateStrategy(this);
         break;
     }
-    if (this.strategyName !== 'grid') {
+    if (this.strategyName !== "grid") {
       // await this.tradesDb.createNewPosition(this.portfolio.buyPrice);
     }
   }
