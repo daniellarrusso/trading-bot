@@ -10,7 +10,19 @@ import { ElliotWave } from './elliot-wave-oscillator';
 import { AverageTrueRange } from './atr';
 import { Countdown } from './countdown-pressure';
 
-function addIndicator(name: string, settings: IndicatorSettings): Indicator {
+export type IndicatorName =
+  | 'rsi'
+  | 'ema'
+  | 'sma'
+  | 'cci'
+  | 'sniper-cci'
+  | 'donchian'
+  | 'ewo'
+  | 'atr'
+  | 'countdown'
+  | 'stochastic';
+
+function addIndicator(name: IndicatorName, settings: IndicatorSettings): Indicator {
   switch (name) {
     case 'rsi':
       return new RSI(settings);

@@ -1,4 +1,4 @@
-import { addIndicator } from '../indicators/base-indicator';
+import { addIndicator, IndicatorName } from '../indicators/base-indicator';
 import { BinanceService } from '../services/binance-service';
 import { Candle } from './candle';
 import { Indicator, IndicatorSettings } from './indicator';
@@ -73,7 +73,7 @@ export class AlternateTimeframe implements Observer {
     this.updateIndicator();
   }
 
-  createIndicator(name: string, settings: IndicatorSettings) {
+  createIndicator(name: IndicatorName, settings: IndicatorSettings) {
     if (!this.indicators.find((i) => i.name.toLowerCase() === name.toLowerCase())) {
       const indicatorToAdd = addIndicator(name, settings);
       indicatorToAdd.manualUpdate = true;
