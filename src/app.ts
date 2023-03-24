@@ -18,7 +18,7 @@ const STARTUPMESSAGE = false;
 const trader = Settings.trader;
 
 const interval = '4h';
-const stratName = 'moving-average';
+const stratName = 'notifier';
 const db = new MongoDbConnection();
 const telegram = new TelegramBot(ChatGroups.mainAccount);
 
@@ -31,7 +31,7 @@ async function getExchangeFilters() {
       await telegram.sendMessage('Bot Started'); // send startup message
     }
     tickerStrategies = [
-      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1d')), trader),
+      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '4h')), trader),
       // new Strategy(
       //   stratName,
       //   new BinanceService(new Ticker("ETH", "USDT", ActionType.Long, "4h")),
