@@ -2,12 +2,13 @@ import { addIndicator } from '../../indicators/base-indicator';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class SimpleMAStrategy extends BaseStrategy {
   cci: Indicator;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Swing EWO MA Strategy';
   }

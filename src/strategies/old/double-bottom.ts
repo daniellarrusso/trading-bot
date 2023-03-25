@@ -4,6 +4,7 @@ import { Indicator } from '../../model/indicator';
 import { Intervals } from '../../model/interval-converter';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -23,7 +24,7 @@ export class DoubleBottomStrategy extends BaseStrategy {
   // new
   redHeikinTouched: boolean;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Double Bottom Strategy';
   }
@@ -84,7 +85,12 @@ export class DoubleBottomStrategy extends BaseStrategy {
       if (this.takeProfs && this.profit < 2) {
         this.takeProfs = false;
       }
-      if (!this.takeProfs && this.rsi14.result < 69 && this.rsi14.previousResult > 69 && this.intervalsInTrade > 4) {
+      if (
+        !this.takeProfs &&
+        this.rsi14.result < 69 &&
+        this.rsi14.previousResult > 69 &&
+        this.intervalsInTrade > 4
+      ) {
         this.sell(`RSI: ${this.rsi14.result} SELL`);
       }
 
@@ -105,7 +111,9 @@ export class DoubleBottomStrategy extends BaseStrategy {
   }
 
   logStatus(advice: any): void {
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let canTrade = `RSI: ${this.rsi14.result}. CCI:  READY? ${this.canTrade ? 'OK' : 'NO'}`;
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);

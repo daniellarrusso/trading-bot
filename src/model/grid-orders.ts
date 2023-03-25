@@ -1,3 +1,4 @@
+import { IExchangeService } from '../services/IExchange-service';
 import { Candle } from './candle';
 import { GridHistory, GridSettings } from './grid-settings';
 import { LimitOrder, MarketOrder } from './limit-order';
@@ -15,9 +16,9 @@ export class GridOrders {
   pair: string;
   gridHistory: GridHistory;
 
-  constructor(public settings: GridSettings, public strat: Strategy) {
-    this.tickSize = this.strat.exchange.ticker.tickSize.length - 2;
-    this.pair = this.strat.exchange.ticker.pair;
+  constructor(public settings: GridSettings, public strat: IExchangeService) {
+    this.tickSize = this.strat.ticker.tickSize.length - 2;
+    this.pair = this.strat.ticker.pair;
   }
 
   async createGridOrder(midPrice: number) {
@@ -43,7 +44,7 @@ export class GridOrders {
 
     this.orderList.map((o) => {
       if (!o) {
-        this.strat.advisor.notifyTelegramBot('Deprecated');
+        // this.strat.advisor.notifyTelegramBot('Deprecated');
       }
       console.log(
         `grid-orders.orderList:: Side ${o.side}, ${pair} Amount: ${o.quantity}, @${o.price}, OrderId: ${o.orderId}`
@@ -75,7 +76,7 @@ export class GridOrders {
       (side == 'sell' && price > this.settings.maxPrice)
     ) {
       console.log(side.toUpperCase() + ' ' + this.pair + ': Price exceeds range!!');
-      this.strat.advisor.notifyTelegramBot('deprecated');
+      // this.strat.advisor.notifyTelegramBot('deprecated');
       return false;
     }
     try {

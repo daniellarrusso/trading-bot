@@ -3,6 +3,10 @@ import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import { SettingsDb } from '../db/settingsDb';
 import { Strategy } from '../model/strategy';
+import { IExchangeService } from './IExchange-service';
+import { Exchange } from '../app';
+import { BinanceService } from './binance-service';
+import { KrakenService } from './kraken-service';
 
 export class Trader {
   private static instance: Trader;
@@ -31,8 +35,24 @@ export class Trader {
     await this.settingsDb.createSettings();
   }
 
-  addStrategy(strategy: Strategy) {
-    this.strategies.push(strategy);
+  addStrategy(name: string, exchange: Exchange, ticker: Ticker) {
+    const exchangeService = this.createExchange(exchange, ticker);
+    const strat = new Strategy(name, exchangeService);
+    this.strategies.push(strat);
+  }
+
+  createExchange(exchangeName: Exchange, ticker: Ticker) {
+    switch (exchangeName) {
+      case 'binance':
+        return new BinanceService(ticker);
+        break;
+      case 'kraken':
+        return new KrakenService();
+        break;
+      default:
+        throw Error('Error setting up exchange');
+        break;
+    }
   }
 
   async refreshTradeSettings() {

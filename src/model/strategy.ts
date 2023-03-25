@@ -1,19 +1,13 @@
-import { Ticker } from './ticker';
-import { BinanceService } from '../services/binance-service';
 import { Advisor } from './advisor';
 import { GridSettings } from './grid-settings';
 import { Strat } from './interfaces/strat';
-import { BaseStrategy } from '../strategies/base-strategy';
 import { FifteenHourStrategy } from '../strategies/old/fifteen-hour';
-import { Trader } from '../services/trader-service';
 import { PaperAdvisor } from './paper-advisor';
 import { TradesDb } from '../db/tradesDb';
-import { BacktestAdvisor } from './backtest-advisor';
 import { AdvisorType } from './enums';
 import { GridStrategy } from '../strategies/grid';
 import { HeikinLongStrategy } from '../strategies/swing/heikin-long';
 import { LiveAdvisor } from './live-advisor';
-import { MAFibStrategy } from '../strategies/old/ma-fib';
 import { BreakoutVolumeStrategy } from '../strategies/swing/breakout-volume';
 import { TemplateStrategy } from '../strategies/template-strategy';
 import { DailyRSIStrategy } from '../strategies/swing/daily-rsi';
@@ -24,6 +18,7 @@ import { FibonnaciRegimeStrategy } from '../strategies/intraday/fibonnaci-regime
 import { SimpleMAStrategy } from '../strategies/swing/simple-ma.strategy';
 import { Portfolio } from './portfolio';
 import { NotifierStrategy } from '../notifiers/notifier.strategy';
+import { IExchangeService } from '../services/IExchange-service';
 
 export class Strategy {
   advisor: Advisor;
@@ -32,50 +27,47 @@ export class Strategy {
 
   constructor(
     public strategyName: string,
-    public exchange: BinanceService,
-
+    public exchange: IExchangeService,
     public portfolio: Portfolio = new Portfolio(0, 1),
     public gridSettings: GridSettings = null
   ) {
-    this.advisor = new BacktestAdvisor(this.exchange);
-    this.tradesDb = new TradesDb(this.exchange.ticker);
     this.init();
   }
   async init() {
     switch (this.strategyName) {
       case 'fifteen':
-        this.strat = new FifteenHourStrategy(this);
+        this.strat = new FifteenHourStrategy(this.exchange);
         break;
       case 'grid':
-        this.strat = new GridStrategy(this);
+        this.strat = new GridStrategy(this.exchange);
         break;
       case 'heikinSwing':
-        this.strat = new HeikinLongStrategy(this);
+        this.strat = new HeikinLongStrategy(this.exchange);
         break;
       case 'moving-average':
-        this.strat = new SimpleMAStrategy(this);
+        this.strat = new SimpleMAStrategy(this.exchange);
         break;
       case 'breakoutVolume':
-        this.strat = new BreakoutVolumeStrategy(this);
+        this.strat = new BreakoutVolumeStrategy(this.exchange);
         break;
       case 'daily-rsi':
-        this.strat = new DailyRSIStrategy(this);
+        this.strat = new DailyRSIStrategy(this.exchange);
         break;
       case 'rsi-15':
-        this.strat = new RSI15trategy(this);
+        this.strat = new RSI15trategy(this.exchange);
         break;
       case 'dca':
-        this.strat = new DCAWeeklytrategy(this);
+        this.strat = new DCAWeeklytrategy(this.exchange);
         break;
       case 'fib-regime':
-        this.strat = new FibonnaciRegimeStrategy(this);
+        this.strat = new FibonnaciRegimeStrategy(this.exchange);
         break;
       case 'notifier':
-        this.strat = new NotifierStrategy(this);
+        this.strat = new NotifierStrategy(this.exchange);
         break;
       default:
         console.log('WARNING!!! Template Strategy is running');
-        this.strat = new TemplateStrategy(this);
+        this.strat = new TemplateStrategy(this.exchange);
         break;
     }
     if (this.strategyName !== 'grid') {
@@ -86,21 +78,17 @@ export class Strategy {
   setAdvisor(advisor?: AdvisorType) {
     switch (advisor) {
       case (advisor = AdvisorType.paper):
-        this.advisor = this.strat.setTradeAdvisor(new PaperAdvisor(this));
+        this.advisor = this.strat.setTradeAdvisor(new PaperAdvisor(this.exchange));
         break;
       case (advisor = AdvisorType.live):
-        this.advisor = this.strat.setTradeAdvisor(new LiveAdvisor(this));
+        this.advisor = this.strat.setTradeAdvisor(new LiveAdvisor(this.exchange));
         break;
       case (advisor = AdvisorType.DCA):
-        this.advisor = this.strat.setTradeAdvisor(new DCAAdvisor(this));
+        this.advisor = this.strat.setTradeAdvisor(new DCAAdvisor(this.exchange));
         break;
       default:
-        this.advisor = this.strat.setTradeAdvisor(new PaperAdvisor(this));
+        this.advisor = this.strat.setTradeAdvisor(new PaperAdvisor(this.exchange));
         break;
     }
-  }
-
-  async logTradeDb(isBackTest: boolean) {
-    if (!isBackTest) await this.tradesDb.trade();
   }
 }

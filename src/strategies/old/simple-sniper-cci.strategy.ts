@@ -5,6 +5,7 @@ import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Logger } from '../../model/logger';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -23,7 +24,7 @@ export class SimpleSniperCCIStrategy extends BaseStrategy {
   heikin4hr: Candle;
   heikinRequest: any;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Simple Cniper CCI Strategy';
   }
@@ -48,7 +49,9 @@ export class SimpleSniperCCIStrategy extends BaseStrategy {
       this.heikinRequest = await this.strat.exchange.getHistoryWithIndicator('BTCUSDT', '4h');
     }
 
-    const match: Candle = this.heikinRequest.heikin.candles.find((c) => c.time.getTime() == this.candle.time.getTime());
+    const match: Candle = this.heikinRequest.heikin.candles.find(
+      (c) => c.time.getTime() == this.candle.time.getTime()
+    );
     this.heikin4hr = match !== undefined ? match : this.heikin4hr;
 
     this.checkTradeStatus(() => {

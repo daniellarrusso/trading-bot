@@ -3,11 +3,12 @@ import { Strategy } from '../model/strategy';
 import { BaseStrategy } from '../strategies/base-strategy';
 import { Notification } from '../model/notification';
 import { Notifier } from '../model/notifier';
+import { IExchangeService } from '../services/IExchange-service';
 
 export class NotifierStrategy extends BaseStrategy {
   notifcations = new Notifier(this.ticker);
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Notifier';
   }

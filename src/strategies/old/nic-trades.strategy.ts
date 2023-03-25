@@ -4,6 +4,7 @@ import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Logger } from '../../model/logger';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -17,15 +18,20 @@ export class NicTradesStrategy extends BaseStrategy {
   smaLong: Indicator;
   buyTrigger: boolean;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Nic Trades Strategy';
   }
 
-  async realtimeAdvice(candle: Candle) { }
+  async realtimeAdvice(candle: Candle) {}
 
   loadIndicators() {
-    this.cci = addIndicator('sniper-cci', { weight: 14, name: 'sniper-cci', input: 'close', inputType: 'heikin' });
+    this.cci = addIndicator('sniper-cci', {
+      weight: 14,
+      name: 'sniper-cci',
+      input: 'close',
+      inputType: 'heikin',
+    });
     this.rsi = addIndicator('rsi', { weight: 14, name: 'rsi', input: 'close', inputType: 'heikin' });
     this.ema = addIndicator('ema', { weight: 20, name: 'ema20', input: 'close', inputType: 'heikin' });
     this.ema4hr = addIndicator('ema', { weight: 20, name: 'ema20', input: 'close', inputType: 'heikin' });
@@ -71,8 +77,9 @@ export class NicTradesStrategy extends BaseStrategy {
 
   logStatus(advice: any): void {
     // logs strat specific info
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
-      } Heikin: ${this.heikin.close} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;

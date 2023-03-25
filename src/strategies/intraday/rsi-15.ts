@@ -3,12 +3,13 @@ import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class RSI15trategy extends BaseStrategy {
   displayIndicators: Indicator[] = [];
   sellIntervals: number;
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Template';
     this.hasDailyCandles = false;

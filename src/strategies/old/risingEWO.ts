@@ -5,6 +5,7 @@ import { ActionType } from '../../model/enums';
 import { Heikin } from '../../model/heikin';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -21,7 +22,7 @@ export class RisingEwoStrategy extends BaseStrategy {
   upTrend: boolean;
   rsiHits: number = 0;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Rising EWO MA Strategy';
   }
@@ -109,7 +110,9 @@ export class RisingEwoStrategy extends BaseStrategy {
   }
 
   logStatus(advice: any): void {
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let nextAction = 'looking to: ';
     let canTrade = `EWO: ${this.ewo.result}. CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';

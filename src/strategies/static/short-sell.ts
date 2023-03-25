@@ -2,6 +2,7 @@ import { addIndicator } from '../../indicators/base-indicator';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -11,10 +12,10 @@ export class ShortSellStrategy extends BaseStrategy {
   prevVolume: number;
   atr: Indicator;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Short Sell Strategy';
-    this.sellPrice = this.strat.portfolio.shortLimit;
+    // this.sellPrice = this.strat.portfolio.shortLimit;
   }
 
   loadIndicators() {
@@ -26,10 +27,10 @@ export class ShortSellStrategy extends BaseStrategy {
   }
 
   async advice() {
-    const { shortLimit, indicator } = this.strat.portfolio;
-    this.sellPrice = shortLimit ? shortLimit : this[indicator]?.result;
-    this.sellPrice -= this.atr.result;
-    this.sellPrice = this.sellPrice.normalise(this.strat.exchange.ticker.tickSize);
+    // const { shortLimit, indicator } = this.strat.portfolio;
+    // this.sellPrice = shortLimit ? shortLimit : this[indicator]?.result;
+    // this.sellPrice -= this.atr.result;
+    // this.sellPrice = this.sellPrice.normalise(this.strat.exchange.ticker.tickSize);
 
     this.tradeAdvisor.actionType = ActionType.Short;
 

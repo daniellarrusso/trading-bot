@@ -1,6 +1,7 @@
 import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -10,10 +11,10 @@ export class VolumeCatcherStrategy extends BaseStrategy {
   prevVolume: number;
   stop: number;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Volume Catcher Strategy';
-    this.sellPrice = this.strat.portfolio.shortLimit;
+    this.sellPrice = 100000000;
   }
 
   loadIndicators() {}
@@ -21,10 +22,10 @@ export class VolumeCatcherStrategy extends BaseStrategy {
   async realtimeAdvice(candle: Candle) {}
 
   async advice() {
-    const { shortLimit, indicator } = this.strat.portfolio;
-    if (indicator) {
-      this.sellPrice = this[indicator].result;
-    }
+    // const { shortLimit, indicator } = this.strat.portfolio;
+    // if (indicator) {
+    //   this.sellPrice = this[indicator].result;
+    // }
 
     // this.sellPrice = this.sellPrice.normalise(this.candle.ticker.tickSize)
 

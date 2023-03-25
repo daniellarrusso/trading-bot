@@ -6,6 +6,7 @@ import { Ticker } from '../model/ticker';
 import { BaseStrategy } from './base-strategy';
 import { GridOrders } from '../model/grid-orders';
 import { Portfolio } from '../model/portfolio';
+import { IExchangeService } from '../services/IExchange-service';
 
 export class GridStrategy extends BaseStrategy {
   settings: GridSettings;
@@ -18,9 +19,9 @@ export class GridStrategy extends BaseStrategy {
   gridHistory: GridHistory;
   isBusy: boolean = false;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
-    this.settings = strat.gridSettings;
+    // this.settings = {} // strat.gridSettings;
     if (!this.settings) throw new Error('Grid Settings Required');
     this.ticker = this.strat.exchange.ticker;
     this.strategyName = 'GRID BOT Strategy';

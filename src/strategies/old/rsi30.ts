@@ -5,6 +5,7 @@ import { Indicator } from '../../model/indicator';
 import { Logger } from '../../model/logger';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -31,7 +32,7 @@ export class IntradayRSIStrategy extends BaseStrategy {
   realTrader: boolean;
   newUpTrend: boolean;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'RSI Intraday Strategy';
   }
@@ -87,9 +88,13 @@ export class IntradayRSIStrategy extends BaseStrategy {
   }
 
   logStatus(advice: any): void {
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let nextAction = 'looking to: ';
-    let canTrade = `EWO: ${this.ewo.result}. RSI: ${this.rsi.result}  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
+    let canTrade = `EWO: ${this.ewo.result}. RSI: ${this.rsi.result}  - READY? ${
+      this.canTrade ? 'OK' : 'NO'
+    }`;
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);

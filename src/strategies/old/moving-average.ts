@@ -1,11 +1,12 @@
 import { BuyTrigger } from '../../model/buyTrigger';
 import { ActionType } from '../../model/enums';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class MovingAverageStrategy extends BaseStrategy {
   buyTrigger = new BuyTrigger();
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Moving Average Strategy';
   }

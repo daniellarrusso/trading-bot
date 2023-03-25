@@ -6,6 +6,7 @@ import { Indicator } from '../../model/indicator';
 import { Logger } from '../../model/logger';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -27,7 +28,7 @@ export class SniperEwoStrategy extends BaseStrategy {
   alternateTimeFrameCandle: CandlesIndicatorResponse;
   realTrader: boolean;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Sniper Heikin Strategy';
   }
@@ -97,7 +98,9 @@ export class SniperEwoStrategy extends BaseStrategy {
 
   logStatus(advice: any): void {
     // logs strat specific info
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let nextAction = 'looking to: ';
     let canTrade = `EWO: ${this.ewo.result}. CCI: ${this.sniperCCI} - READY? ${this.canTrade ? 'OK' : 'NO'}`;
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';

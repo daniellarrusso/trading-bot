@@ -8,6 +8,7 @@ import { Indicator } from '../../model/indicator';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { PriceTracker } from '../../model/price-tracker';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -31,14 +32,19 @@ export class HeikinScalpStrategy extends BaseStrategy {
   made80: boolean;
   sellTrigger: BuyTrigger = new BuyTrigger();
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Heikin Scalp Strategy';
   }
 
   loadIndicators() {
     this.rsi = addIndicator('rsi', { weight: 14, input: 'close', inputType: 'heikin', name: 'RSI 14' });
-    this.cci = addIndicator('sniper-cci', { weight: 14, input: 'close', inputType: 'heikin', name: 'Sniper CCI' });
+    this.cci = addIndicator('sniper-cci', {
+      weight: 14,
+      input: 'close',
+      inputType: 'heikin',
+      name: 'Sniper CCI',
+    });
     this.volumeMa = addIndicator('sma', { weight: 20, input: 'volume', inputType: 'candle' });
   }
 
@@ -89,7 +95,9 @@ export class HeikinScalpStrategy extends BaseStrategy {
   }
 
   logStatus(advice: any): void {
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI: - ${this.rsi.result}. CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';

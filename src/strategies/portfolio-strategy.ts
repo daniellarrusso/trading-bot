@@ -5,6 +5,7 @@ import { CandleStatistics } from '../model/candle-statistics';
 import { PortfolioTrades } from '../model/portfolio-trades';
 import { PortfolioTrade } from '../model/portfolio-trade';
 import { Portfolio } from '../model/portfolio';
+import { IExchangeService } from '../services/IExchange-service';
 
 export class PortfolioStrategy {
   candle: Candle;
@@ -20,9 +21,9 @@ export class PortfolioStrategy {
     new Percentage(1.08),
     new Percentage(1.13),
   ];
-  constructor(public strat: Strategy, public stats: CandleStatistics) {
+  constructor(public strat: IExchangeService, public stats: CandleStatistics) {
     this.trades = new PortfolioTrades(this.strat, this.stats);
-    this.portfolio = this.strat.portfolio;
+    // this.portfolio = this.strat.portfolio;
     this.orderQuantity = this.portfolio.total / this.portfolio.multiplier;
   }
 

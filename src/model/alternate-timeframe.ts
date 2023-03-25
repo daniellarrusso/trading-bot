@@ -6,6 +6,7 @@ import { Interval, IntervalType } from './interval-converter';
 import { Observer } from './observer';
 import { DaylightSavings } from './daylight-savings';
 import moment from 'moment';
+import { IExchangeService } from '../services/IExchange-service';
 
 export class AlternateTimeframe implements Observer {
   interval: Interval;
@@ -14,7 +15,7 @@ export class AlternateTimeframe implements Observer {
   indicators: Indicator[] = [];
   private nextInterval: number = 0;
   daylightSavings: DaylightSavings;
-  constructor(interval: Interval, public service: BinanceService) {
+  constructor(interval: Interval, public service: IExchangeService) {
     this.interval = interval;
     this.daylightSavings = new DaylightSavings();
     this.daylightSavings.addObserver(this);

@@ -3,6 +3,7 @@ import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class InvertedCandleStrategy extends BaseStrategy {
@@ -16,7 +17,7 @@ export class InvertedCandleStrategy extends BaseStrategy {
   boughtAbove70: boolean;
   candleCounter = 0;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Inverted Candle Strategy';
   }
@@ -26,14 +27,14 @@ export class InvertedCandleStrategy extends BaseStrategy {
     this.ema = addIndicator('ema', { weight: 20, name: 'ema20' });
     this.sma = addIndicator('sma', { weight: 50, name: 'sma50' });
   }
-  async realtimeAdvice(candle: Candle) { }
+  async realtimeAdvice(candle: Candle) {}
 
   async advice() {
     const candle = this.candle;
     const lastBuy = this.tradeAdvisor?.lastBuy;
     const rsi = this.rsi.result;
-    const lowestPrice = this.candleStats.getHighLowForPeriod(21, false)
-    const highestPrice = this.candleStats.getHighLowForPeriod(21, true)
+    const lowestPrice = this.candleStats.getHighLowForPeriod(21, false);
+    const highestPrice = this.candleStats.getHighLowForPeriod(21, true);
     const choppines = this.returnPercentageIncrease(lowestPrice, highestPrice);
 
     this.checkTradeStatus(() => {
@@ -68,8 +69,9 @@ export class InvertedCandleStrategy extends BaseStrategy {
 
   logStatus(advice: any): void {
     // logs strat specific info
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
-      } Heikin: ${this.heikin.close} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;

@@ -4,6 +4,7 @@ import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -25,7 +26,7 @@ export class AstralPatternStrategy extends BaseStrategy {
   astralCountMet: boolean;
   takeProfit: number;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Astral Pattern Strategy';
   }
@@ -37,7 +38,7 @@ export class AstralPatternStrategy extends BaseStrategy {
     this.atr = addIndicator('atr', { weight: 30 });
   }
 
-  async realtimeAdvice() { }
+  async realtimeAdvice() {}
 
   async advice() {
     const candle3 = this.astralArray[this.astralArray.length - 3];
@@ -127,10 +128,13 @@ export class AstralPatternStrategy extends BaseStrategy {
   }
 
   logStatus(advice: any): void {
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let nextAction = 'looking to: ';
-    let canTrade = `Met: ${this.astralCountMet}, Buy Count: - ${this.buyCloseCount}. SellCount: ${this.sellCloseCount
-      }  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
+    let canTrade = `Met: ${this.astralCountMet}, Buy Count: - ${this.buyCloseCount}. SellCount: ${
+      this.sellCloseCount
+    }  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);

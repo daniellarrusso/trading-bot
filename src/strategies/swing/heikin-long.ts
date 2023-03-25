@@ -7,6 +7,7 @@ import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -19,7 +20,7 @@ export class HeikinLongStrategy extends BaseStrategy {
   longTriggered: boolean = false;
   buyTrigger: number = 0;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Heikin Long Strategy';
     this.hasDailyCandles = true;
@@ -60,7 +61,11 @@ export class HeikinLongStrategy extends BaseStrategy {
     }
 
     if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
-      if (this.longTriggered && this.candle.close > this.buyTrigger && this.dailyCandles.indicator.result > 50) {
+      if (
+        this.longTriggered &&
+        this.candle.close > this.buyTrigger &&
+        this.dailyCandles.indicator.result > 50
+      ) {
         this.tradeAdvisor.trade();
       }
     }

@@ -4,6 +4,7 @@ import { CallbackDelay } from '../../model/callback-delay';
 import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -12,7 +13,7 @@ export class WickScalpStrategy extends BaseStrategy {
   prevLiveCandle: Candle;
   notified: boolean = false;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Wick Scalp Strategy';
   }
@@ -48,7 +49,9 @@ export class WickScalpStrategy extends BaseStrategy {
 
   logStatus(advice: any): void {
     const dailyH = this.heikin.green + ' ' + this.heikin.close;
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI:  ${this.rsi14.result}. READY? ${this.canTrade ? 'OK' : 'NO'}`;
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';

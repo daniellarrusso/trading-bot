@@ -2,11 +2,12 @@ import { RSI } from '../../indicators/rsi';
 import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class DCAWeeklytrategy extends BaseStrategy {
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Template';
   }

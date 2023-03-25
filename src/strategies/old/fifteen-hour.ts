@@ -6,6 +6,7 @@ import { Heikin } from '../../model/heikin';
 import { Indicator } from '../../model/indicator';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -19,8 +20,8 @@ export class FifteenHourStrategy extends BaseStrategy {
   majorCandles: Heikin[] = [];
   majorCandle: Heikin;
 
-  constructor(public strat: Strategy) {
-    super(strat);
+  constructor(exchange: IExchangeService) {
+    super(exchange);
     this.strategyName = 'Fifteen Minute - Hour Strategy';
   }
 
@@ -40,7 +41,7 @@ export class FifteenHourStrategy extends BaseStrategy {
 
     if (!this.alternateTimeframe || this.candle.time.getHours() !== endTime.getHours()) {
       try {
-        this.alternateTimeframe = await this.strat.exchange.getHistoryWithIndicator(this.pair, '1h', null, null);
+        this.alternateTimeframe = await this.exchange.getHistoryWithIndicator(this.pair, '1h', null, null);
       } catch (error) {
         console.log(error.body);
       }
@@ -52,7 +53,7 @@ export class FifteenHourStrategy extends BaseStrategy {
 
     if (!this.dailyCandles || this.candle.time.getDay() !== endTime.getDay()) {
       try {
-        this.dailyCandles = await this.strat.exchange.getHistoryWithIndicator(
+        this.dailyCandles = await this.exchange.getHistoryWithIndicator(
           this.pair,
           '1d',
           addIndicator('rsi', { weight: 14 }),
@@ -71,8 +72,10 @@ export class FifteenHourStrategy extends BaseStrategy {
       return ema.result > sma.result;
     });
 
-    const prevHourHeikin = this.alternateTimeframe.heikin.candles[this.alternateTimeframe.heikin.candles.length - 3];
-    const currentHeikin = this.alternateTimeframe.heikin.candles[this.alternateTimeframe.heikin.candles.length - 2];
+    const prevHourHeikin =
+      this.alternateTimeframe.heikin.candles[this.alternateTimeframe.heikin.candles.length - 3];
+    const currentHeikin =
+      this.alternateTimeframe.heikin.candles[this.alternateTimeframe.heikin.candles.length - 2];
 
     const isInside = this.inBetween(prevHourHeikin.open, prevHourHeikin.close, currentHeikin.close);
 
@@ -123,7 +126,9 @@ export class FifteenHourStrategy extends BaseStrategy {
   resetParameters() {}
 
   logStatus(advice: any): void {
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } `;
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Next Action: ${this.tradeStatus.nextAction}. Profit: ${advice}`;
     this.consoleColour(message);
   }

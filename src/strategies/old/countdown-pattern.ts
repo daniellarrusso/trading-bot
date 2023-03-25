@@ -1,6 +1,7 @@
 import { addIndicator } from '../../indicators/base-indicator';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -10,7 +11,7 @@ export class CountdownPatternStrategy extends BaseStrategy {
   buyTrigger: boolean = false;
   stopPrice: number;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Countdown Pattern Strategy';
   }

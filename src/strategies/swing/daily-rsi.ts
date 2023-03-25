@@ -6,6 +6,7 @@ import { AlternateTimeframe } from '../../model/alternate-timeframe';
 import { Interval } from '../../model/interval-converter';
 import { Strategy } from '../../model/strategy';
 import { BaseStrategy } from '../base-strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 
 export class DailyRSIStrategy extends BaseStrategy {
   // Custom Indicators
@@ -17,7 +18,7 @@ export class DailyRSIStrategy extends BaseStrategy {
   hourTf: AlternateTimeframe;
 
   rsi: Indicator;
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Daily RSI';
     this.hasDailyCandles = true;
@@ -62,7 +63,11 @@ export class DailyRSIStrategy extends BaseStrategy {
 
     /// Go Long
     if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
-      if (this.candle.close > this.high && this.rsi.movingAverage > 50 && this.ema20.result > this.sma50.result) {
+      if (
+        this.candle.close > this.high &&
+        this.rsi.movingAverage > 50 &&
+        this.ema20.result > this.sma50.result
+      ) {
         this.tradeAdvisor.trade();
       }
     }

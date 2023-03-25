@@ -3,6 +3,7 @@ import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { Strategy } from '../../model/strategy';
+import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class TakeProfitStrategy extends BaseStrategy {
@@ -14,7 +15,7 @@ export class TakeProfitStrategy extends BaseStrategy {
   buyTrigger: boolean;
   stopPrice = 0;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Take Profit Strat';
   }
@@ -32,7 +33,7 @@ export class TakeProfitStrategy extends BaseStrategy {
   }
   async advice() {
     const candle = this.candle;
-    const lastBuy = this.tradeAdvisor?.lastBuy ? this.tradeAdvisor.lastBuy.close : this.strat.portfolio?.buyPrice;
+    const lastBuy = this.tradeAdvisor?.lastBuy.close;
     const ema = this.ema.result;
     const sma = this.sma.result;
     const smaLong = this.smaLong.result;
@@ -48,7 +49,8 @@ export class TakeProfitStrategy extends BaseStrategy {
       if (trendBroken) {
         this.buyTrigger = true;
         this.tradeAdvisor.trade();
-        this.stopPrice = candle.high - (candle.high - this.candleStats.getHighLowForPeriod(21, false)) * 0.786;
+        this.stopPrice =
+          candle.high - (candle.high - this.candleStats.getHighLowForPeriod(21, false)) * 0.786;
       }
     }
     if (this.tradeAdvisor.actionType === ActionType.Short) {
@@ -71,8 +73,9 @@ export class TakeProfitStrategy extends BaseStrategy {
   logStatus(advice: any): void {
     // logs strat specific info
     const size = this.ticker.tickSize.length - 2;
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
-      } Heikin: ${this.heikin.close} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close.toFixed(

@@ -10,6 +10,7 @@ import { StopType } from '../../model/stop';
 import { CallbackDelay } from '../../model/callback-delay';
 import { DelayStrategy } from '../../model/delay-strategy';
 import { Wave } from '../../model/wave';
+import { IExchangeService } from '../../services/IExchange-service';
 
 export class TrendBrokenStrategy extends BaseStrategy {
   rsi: Indicator;
@@ -28,7 +29,7 @@ export class TrendBrokenStrategy extends BaseStrategy {
   moveLow: number;
   moveEnded: number;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Trend Broken Strat';
   }
@@ -44,7 +45,6 @@ export class TrendBrokenStrategy extends BaseStrategy {
     throw new Error('Method not implemented.');
   }
   async advice() {
-
     const candle = this.candle;
     const lastBuy = this.tradeAdvisor?.lastBuy;
     const ema = this.ema.result;
@@ -52,8 +52,8 @@ export class TrendBrokenStrategy extends BaseStrategy {
     const smaLong = this.smaLong.result;
     const rsi = this.rsi.result;
     const { result: cci, previousResult: prevCci } = this.cci;
-    const low = this.candleStats.getHighLowForPeriod(21, false)
-    const high = this.candleStats.getHighLowForPeriod(21, true)
+    const low = this.candleStats.getHighLowForPeriod(21, false);
+    const high = this.candleStats.getHighLowForPeriod(21, true);
 
     this.checkTradeStatus(() => {
       return true;
@@ -91,8 +91,9 @@ export class TrendBrokenStrategy extends BaseStrategy {
 
   logStatus(advice: any): void {
     // logs strat specific info
-    const heikin = ` ${this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
-      } Heikin: ${this.heikin.close} `;
+    const heikin = ` ${
+      this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
+    } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
     nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;

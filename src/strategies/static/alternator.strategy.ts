@@ -7,12 +7,13 @@ import { PaperAdvisor } from '../../model/paper-advisor';
 import { PortfolioStrategy } from '../portfolio-strategy';
 import { BacktestAdvisor } from '../../model/backtest-advisor';
 import { Candle } from '../../model/candle';
+import { IExchangeService } from '../../services/IExchange-service';
 
 export class AlternatorStrategy extends BaseStrategy {
   rsi: Indicator;
   portfolio: PortfolioStrategy;
 
-  constructor(public strat: Strategy) {
+  constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Alternator Strategy';
   }

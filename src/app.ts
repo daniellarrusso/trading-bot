@@ -5,15 +5,13 @@ import { BinanceService } from './services/binance-service';
 import { MongoDbConnection } from './db/database-connection';
 import './utilities/extensions';
 import { Settings } from '../settings';
+import { IExchangeService } from './services/IExchange-service';
 
 const fs = require('fs');
 
-const USEDATA = false;
 Settings.backTest = true;
-
 const advisorType: AdvisorType = AdvisorType.paper;
 const BTCPAIRS = false;
-const STARTUPMESSAGE = false;
 const trader = Settings.trader;
 
 const interval = '4h';
@@ -22,16 +20,17 @@ const db = new MongoDbConnection();
 
 export interface StrategySettings {
   name: string;
-  exchange: string;
+  exchange: IExchangeService;
+  ticker: Ticker;
 }
+
+export type Exchange = 'binance' | 'kraken' | 'kucoin';
 
 async function getExchangeFilters() {
   await db.connect(); // connect to database
   await trader.startService();
 
-  trader.addStrategy(
-    new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '4h')))
-  );
+  trader.addStrategy(stratName, 'binance', new Ticker('BTC', 'USDT', ActionType.Long, '4h'));
 }
 
 async function loadStrategy() {

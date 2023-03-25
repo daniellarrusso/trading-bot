@@ -3,14 +3,11 @@ import { Logger } from '../model/logger';
 import { Heikin } from '../model/heikin';
 import { Indicator } from '../model/indicator';
 import { CandleStatistics } from '../model/candle-statistics';
-import moment from 'moment';
-import { Strategy } from '../model/strategy';
 import { Strat } from '../model/interfaces/strat';
 import { TradeAdvisor } from '../model/trade-advisor';
 import { BacktestAdvisor } from '../model/backtest-advisor';
 import { DelayStrategy } from '../model/delay-strategy';
-import { Interval, Intervals } from '../model/interval-converter';
-import { IAdvisor } from '../model/interfaces/advisor-interface';
+import { Interval } from '../model/interval-converter';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { TelegramBot } from '../model/telegram-bot';
 import { ChatGroups, Settings } from '../../settings';
@@ -20,9 +17,9 @@ import { Trade } from '../model/interfaces/mongoTrade';
 import { Advisor } from '../model/advisor';
 import { ActionType } from '../model/enums';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
-import { DaylightSavings } from '../model/daylight-savings';
 import { AlternateTimeframe } from '../model/alternate-timeframe';
 import { printDate } from '../utilities/utility';
+import { IExchangeService } from '../services/IExchange-service';
 
 export abstract class BaseStrategy implements Strat {
   protected ticker: Ticker;
@@ -69,12 +66,12 @@ export abstract class BaseStrategy implements Strat {
   protected canBuy: boolean;
   protected canSell: boolean;
 
-  constructor(public strat: Strategy) {
-    this.pair = strat.exchange.ticker.pair;
-    this.ticker = strat.exchange.ticker;
+  constructor(public exchange: IExchangeService) {
+    this.ticker = this.exchange.ticker;
+    this.pair = this.ticker.pair;
     this.logger = new Logger(this.ticker);
     this.candleStats = new CandleStatistics(this.ticker.interval);
-    this.tradeAdvisor = new TradeAdvisor(this.strat);
+    this.tradeAdvisor = new TradeAdvisor(this.exchange);
     this.loadDefaults();
     this.calculateIndicatorWeight();
   }
@@ -134,13 +131,13 @@ export abstract class BaseStrategy implements Strat {
     // reset settings
     console.log(`${this.strategyName} running on ${this.ticker.interval} intervals against ${this.pair}`);
     this.tradeAdvisor.endAdvisor(this.candle?.close);
-    this.strat.strategyName = this.strategyName;
+    this.strategyName = this.strategyName;
     this.hasTraded = false;
     this.resetParameters();
   }
 
   createAlternateTimeframe(interval: Interval, cb: any) {
-    const tf = new AlternateTimeframe(interval, this.strat.exchange);
+    const tf = new AlternateTimeframe(interval, this.exchange);
     cb(tf);
     return tf;
   }
@@ -197,7 +194,7 @@ export abstract class BaseStrategy implements Strat {
     this.canSell = this.tradeAdvisor.actionType === ActionType.Short;
     this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
     if (this.age > this.history) {
-      this.tradeStatus = await this.strat.tradesDb.findTicker();
+      this.tradeStatus = await this.tradeAdvisor.tradesDb.findTicker();
       this._lastBuyprice = this.tradeStatus?.inTrade
         ? this.tradeStatus.lastBuy
         : this.tradeAdvisor.lastBuyClose;
@@ -283,20 +280,14 @@ export abstract class BaseStrategy implements Strat {
     const endTime = new Date(this.candle.closeTime.getTime() + 1000);
     if (!this.dailyCandles && !this.backtestMode) {
       try {
-        this.dailyCandles = await this.strat.exchange.getHistoryWithIndicator(
-          pair,
-          '1d',
-          indicator,
-          null,
-          true
-        );
+        this.dailyCandles = await this.exchange.getHistoryWithIndicator(pair, '1d', indicator, null, true);
       } catch (error) {
         console.log(error.body);
       }
     }
     if (endTime.getHours() === hour) {
       try {
-        this.dailyCandles = await this.strat.exchange.getHistoryWithIndicator(pair, '1d', indicator);
+        this.dailyCandles = await this.exchange.getHistoryWithIndicator(pair, '1d', indicator);
       } catch (error) {
         console.log(error.body);
       }
