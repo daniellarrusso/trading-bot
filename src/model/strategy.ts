@@ -33,7 +33,7 @@ export class Strategy {
   constructor(
     public strategyName: string,
     public exchange: BinanceService,
-    public trader: Trader,
+
     public portfolio: Portfolio = new Portfolio(0, 1),
     public gridSettings: GridSettings = null
   ) {

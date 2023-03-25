@@ -1,8 +1,8 @@
 import { Candle } from '../model/candle';
 import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
-import Binance from 'node-binance-api';
 import { SettingsDb } from '../db/settingsDb';
+import { Strategy } from '../model/strategy';
 
 export class Trader {
   private static instance: Trader;
@@ -13,6 +13,7 @@ export class Trader {
   public apiAccount: ApiAccount;
 
   tickersTrading: Ticker[] = [];
+  strategies: Strategy[] = [];
   settingsDb: SettingsDb = new SettingsDb();
 
   orderPlaced: boolean;
@@ -29,6 +30,11 @@ export class Trader {
   async startService() {
     await this.settingsDb.createSettings();
   }
+
+  addStrategy(strategy: Strategy) {
+    this.strategies.push(strategy);
+  }
+
   async refreshTradeSettings() {
     const settings = await this.settingsDb.getSymbols();
     this.setTickers(settings.maxTickers);

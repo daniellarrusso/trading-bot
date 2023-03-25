@@ -3,9 +3,8 @@ import { ActionType, AdvisorType } from './model/enums';
 import { Strategy } from './model/strategy';
 import { BinanceService } from './services/binance-service';
 import { MongoDbConnection } from './db/database-connection';
-import { TelegramBot } from './model/telegram-bot';
 import './utilities/extensions';
-import { ChatGroups, Settings } from '../settings';
+import { Settings } from '../settings';
 
 const fs = require('fs');
 
@@ -20,35 +19,32 @@ const trader = Settings.trader;
 const interval = '4h';
 const stratName = 'notifier';
 const db = new MongoDbConnection();
-const telegram = new TelegramBot(ChatGroups.mainAccount);
 
-let tickerStrategies;
+export interface StrategySettings {
+  name: string;
+  exchange: string;
+}
+
 async function getExchangeFilters() {
   await db.connect(); // connect to database
   await trader.startService();
-  if (!USEDATA) {
-    if (STARTUPMESSAGE) {
-      await telegram.sendMessage('Bot Started'); // send startup message
-    }
-    tickerStrategies = [
-      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')), trader),
-      new Strategy(stratName, new BinanceService(new Ticker('ETH', 'USDT', ActionType.Long, '1m')), trader),
-    ];
-  }
+
+  trader.addStrategy(
+    new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '4h')))
+  );
 }
 
 async function loadStrategy() {
   await getExchangeFilters();
-  if (USEDATA) await readBinancePairs();
   await setup();
 }
 
 loadStrategy();
 
 async function setup() {
-  const tickers = tickerStrategies.length;
+  const tickers = trader.strategies.length;
   for (let i = 0; i < tickers; i++) {
-    const strategy: Strategy = tickerStrategies[i];
+    const strategy: Strategy = trader.strategies[i];
     await strategy.exchange.getExchangeInfo(); // assigns filters etc to Ticker
     const history = await strategy.exchange.getHistory(strategy.exchange.ticker);
     await strategy.strat.loadHistory(history); // backtesting takes place inside strat
@@ -60,7 +56,7 @@ async function setup() {
 
 function getLatest(tickers: any) {
   for (let i = 0; i < tickers; i++) {
-    const strategy: Strategy = tickerStrategies[i];
+    const strategy: Strategy = trader.strategies[i];
     strategy.exchange.getOHLCLatest(strategy.exchange.ticker, async (c) => {
       await strategy.strat.update(c);
     });
@@ -68,7 +64,7 @@ function getLatest(tickers: any) {
 }
 
 async function readBinancePairs() {
-  tickerStrategies = [];
+  let tickerStrategies = [];
   return new Promise((resolve, reject) => {
     fs.readFile('binance.json', async (err, data) => {
       if (err) throw err;
@@ -78,8 +74,7 @@ async function readBinancePairs() {
         .map((s) => {
           return new Strategy(
             stratName,
-            new BinanceService(new Ticker(s.asset, BTCPAIRS ? 'BTC' : s.currency, ActionType.Long, interval)),
-            trader
+            new BinanceService(new Ticker(s.asset, BTCPAIRS ? 'BTC' : s.currency, ActionType.Long, interval))
           );
         });
       resolve(tickerStrategies);
