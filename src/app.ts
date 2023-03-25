@@ -31,12 +31,8 @@ async function getExchangeFilters() {
       await telegram.sendMessage('Bot Started'); // send startup message
     }
     tickerStrategies = [
-      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '4h')), trader),
-      // new Strategy(
-      //   stratName,
-      //   new BinanceService(new Ticker("ETH", "USDT", ActionType.Long, "4h")),
-      //   trader
-      // ),
+      new Strategy(stratName, new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')), trader),
+      new Strategy(stratName, new BinanceService(new Ticker('ETH', 'USDT', ActionType.Long, '1m')), trader),
     ];
   }
 }
@@ -65,8 +61,8 @@ async function setup() {
 function getLatest(tickers: any) {
   for (let i = 0; i < tickers; i++) {
     const strategy: Strategy = tickerStrategies[i];
-    strategy.exchange.getOHLCLatest(strategy.exchange.ticker, (c) => {
-      strategy.strat.update(c);
+    strategy.exchange.getOHLCLatest(strategy.exchange.ticker, async (c) => {
+      await strategy.strat.update(c);
     });
   }
 }

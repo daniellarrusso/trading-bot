@@ -22,6 +22,7 @@ import { ActionType } from '../model/enums';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { DaylightSavings } from '../model/daylight-savings';
 import { AlternateTimeframe } from '../model/alternate-timeframe';
+import { printDate } from '../utilities/utility';
 
 export abstract class BaseStrategy implements Strat {
   protected ticker: Ticker;
@@ -194,18 +195,14 @@ export abstract class BaseStrategy implements Strat {
     this.delayOn = this.delayStrat.checkDelay();
     this.canBuy = this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade;
     this.canSell = this.tradeAdvisor.actionType === ActionType.Short;
-
+    this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
     if (this.age > this.history) {
-      this.tradeAdvisor.advisor = this.strat.advisor;
-      this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
-      this.candleStats.logStats();
       this.tradeStatus = await this.strat.tradesDb.findTicker();
       this._lastBuyprice = this.tradeStatus?.inTrade
         ? this.tradeStatus.lastBuy
         : this.tradeAdvisor.lastBuyClose;
-      if (this._lastBuyprice) {
-        this.profit = this.returnPercentageIncrease(this.candle.close, this.lastBuyprice);
-      }
+      this.profit = this._lastBuyprice && this.returnPercentageIncrease(this.candle.close, this.lastBuyprice);
+
       await Settings.trader.refreshTradeSettings();
       await this.advice();
       this.logStatus(this.profit);
@@ -214,7 +211,6 @@ export abstract class BaseStrategy implements Strat {
       await this.backTest();
     }
     this.previousCandle = this.candle;
-    this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
   }
 
   private profitNotifier() {
@@ -270,6 +266,8 @@ export abstract class BaseStrategy implements Strat {
       this.canTrade = Settings.trader.canTrade();
     }
   }
+
+  printDate = printDate;
 
   protected resetParameters() {}
 

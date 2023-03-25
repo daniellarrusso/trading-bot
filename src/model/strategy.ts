@@ -23,7 +23,7 @@ import { DCAAdvisor } from './dca.advisor';
 import { FibonnaciRegimeStrategy } from '../strategies/intraday/fibonnaci-regime';
 import { SimpleMAStrategy } from '../strategies/swing/simple-ma.strategy';
 import { Portfolio } from './portfolio';
-import { NotifierStrategy } from '../notifiers/notifier';
+import { NotifierStrategy } from '../notifiers/notifier.strategy';
 
 export class Strategy {
   advisor: Advisor;
