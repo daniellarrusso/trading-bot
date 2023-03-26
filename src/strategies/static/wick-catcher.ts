@@ -48,13 +48,13 @@ export class WickCatcherStrategy extends BaseStrategy {
     // console.log('Volume Increase:' + this.returnPercentageIncrease(this.liveCandle.volume, this.prevVolume))
     // console.log('Price Action:' + this.returnPercentageIncrease(this.liveCandle.close, this.liveCandle.open))
     // console.log('Buy Limit: ' + this.buyLimit)
-    if (!Settings.trader.orderPlaced && buyZone) {
-      /// place a buy STOP_LOSS_LIMIT order
-      // send message to say buy limit order triggered
-      Settings.trader.orderPlaced = true;
-      await this.placeOrder();
-      this.telegram.sendMessage(`BUY ORDER Triggered on wick low for ${this.ticker.pair} `);
-    }
+    // if (!trader.getorderPlaced && buyZone) {
+    //   /// place a buy STOP_LOSS_LIMIT order
+    //   // send message to say buy limit order triggered
+    //   Settings.trader.orderPlaced = true;
+    //   await this.placeOrder();
+    //   this.telegram.sendMessage(`BUY ORDER Triggered on wick low for ${this.ticker.pair} `);
+    // }
     this.prevVolume = candle.volume;
   }
 

@@ -3,10 +3,10 @@ import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import { SettingsDb } from '../db/settingsDb';
 import { Strategy } from '../model/strategy';
-import { IExchangeService } from './IExchange-service';
-import { Exchange } from '../app';
 import { BinanceService } from './binance-service';
 import { KrakenService } from './kraken-service';
+import { MongoDbConnection } from '../db/database-connection';
+import { Exchange } from '../model/types';
 
 export class Trader {
   private static instance: Trader;
@@ -32,6 +32,8 @@ export class Trader {
     return Trader.instance;
   }
   async startService() {
+    const db = new MongoDbConnection();
+    await db.connect(); // connect to database
     await this.settingsDb.createSettings();
   }
 
@@ -45,13 +47,10 @@ export class Trader {
     switch (exchangeName) {
       case 'binance':
         return new BinanceService(ticker);
-        break;
       case 'kraken':
         return new KrakenService();
-        break;
       default:
         throw Error('Error setting up exchange');
-        break;
     }
   }
 
@@ -59,6 +58,7 @@ export class Trader {
     const settings = await this.settingsDb.getSymbols();
     this.setTickers(settings.maxTickers);
     settings.excludedSymbols.forEach((s) => this.removeSymbol(s));
+    settings.excludedTickers.forEach((t) => this.removeTicker(t));
   }
 
   setTickers(val: number) {
@@ -74,9 +74,11 @@ export class Trader {
     return 0;
   }
 
-  public removeTicker(ticker: Ticker) {
-    const tickerToRemove = this.tickersTrading.findIndex((t) => t.pair === ticker.pair);
+  public removeTicker(ticker: Ticker | string) {
+    if (typeof ticker !== 'string') ticker = ticker.pair;
+    const tickerToRemove = this.tickersTrading.findIndex((t) => t.pair === ticker);
     if (tickerToRemove >= 0) this.tickersTrading.splice(tickerToRemove, 1);
+    this.strategies = this.strategies.filter((s) => s.exchange.ticker.pair !== ticker);
     return tickerToRemove;
   }
 

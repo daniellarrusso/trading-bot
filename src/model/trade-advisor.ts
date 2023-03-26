@@ -15,9 +15,9 @@ import { TradesDb } from '../db/tradesDb';
 export class TradeAdvisor {
   advisor: Advisor;
   candle: Candle;
-  trader: Trader = Settings.trader;
   private _lastBuy: Candle;
   lastSell: Candle;
+  trader = Trader.getInstance();
   startingPrice: number;
   roundtripProfit: number;
   initialAction: ActionType;

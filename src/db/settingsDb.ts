@@ -2,12 +2,14 @@ import { model, Schema } from 'mongoose';
 
 export interface Settings {
   excludedSymbols: string[];
+  excludedTickers: string[];
   dcaAmount: number;
   maxTickers: number;
 }
 
 const schema = new Schema<Settings>({
   excludedSymbols: [],
+  excludedTickers: [],
   dcaAmount: { type: Number },
   maxTickers: { type: Number },
 });
@@ -33,6 +35,7 @@ export class SettingsDb {
     const doc = new SettingsModel({
       dcaAmount: 500,
       excludedSymbols: ['SHIB', 'APE'],
+      excludedTickers: ['ETHUSDT'],
       maxTickers: 0,
     });
     const exists = await this.hasSettings();

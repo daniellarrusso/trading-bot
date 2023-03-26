@@ -1,6 +1,5 @@
 import Binance from 'node-binance-api';
 import { Candle } from '../model/candle';
-import { Settings } from '../../settings';
 import { apiKeys } from '../../keys';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
@@ -14,7 +13,7 @@ import { Side } from '../model/literals';
 import moment from 'moment';
 
 // const FEE = Settings.fee;
-const history = Settings?.history | 1000;
+const history = 1000;
 
 export class BinanceService implements IExchangeService {
   exchange: any;

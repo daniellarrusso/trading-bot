@@ -20,6 +20,7 @@ import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { AlternateTimeframe } from '../model/alternate-timeframe';
 import { printDate } from '../utilities/utility';
 import { IExchangeService } from '../services/IExchange-service';
+import { Trader } from '../services/trader-service';
 
 export abstract class BaseStrategy implements Strat {
   protected ticker: Ticker;
@@ -65,6 +66,7 @@ export abstract class BaseStrategy implements Strat {
   }
   protected canBuy: boolean;
   protected canSell: boolean;
+  protected trader = Trader.getInstance();
 
   constructor(public exchange: IExchangeService) {
     this.ticker = this.exchange.ticker;
@@ -200,7 +202,7 @@ export abstract class BaseStrategy implements Strat {
         : this.tradeAdvisor.lastBuyClose;
       this.profit = this._lastBuyprice && this.returnPercentageIncrease(this.candle.close, this.lastBuyprice);
 
-      await Settings.trader.refreshTradeSettings();
+      await this.trader.refreshTradeSettings();
       await this.advice();
       this.logStatus(this.profit);
       this.profitNotifier();
@@ -260,7 +262,7 @@ export abstract class BaseStrategy implements Strat {
         this.canTrade = false;
       }
     } else {
-      this.canTrade = Settings.trader.canTrade();
+      this.canTrade = Trader.getInstance().canTrade();
     }
   }
 
