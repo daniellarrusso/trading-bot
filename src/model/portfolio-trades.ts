@@ -1,5 +1,3 @@
-import { BinanceService } from '../services/binance-service';
-import { Strategy } from './strategy';
 import { CandleStatistics } from './candle-statistics';
 import { PortfolioTrade } from './portfolio-trade';
 import { TelegramBot } from './telegram-bot';
@@ -8,7 +6,6 @@ import { Percentage } from './percentage';
 import { Candle } from './candle';
 import { LimitOrder } from './limit-order';
 import { TimeSync } from './timeSync';
-import { Advisor } from './advisor';
 import { IExchangeService } from '../services/IExchange-service';
 
 export class PortfolioTrades {

@@ -5,10 +5,8 @@ import { Candle } from '../model/candle';
 import { ActionType } from '../model/enums';
 import { Indicator } from '../model/indicator';
 import { Logger } from '../model/logger';
-import { Strategy } from '../model/strategy';
 import { TelegramBot } from '../model/telegram-bot';
 import { IExchangeService } from '../services/IExchange-service';
-import { Trader } from '../services/trader-service';
 import { BaseStrategy } from '../strategies/base-strategy';
 
 export class DailyHeikinNotifier extends BaseStrategy {

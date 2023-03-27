@@ -1,6 +1,6 @@
 import { BuyTrigger } from '../../model/buyTrigger';
 import { ActionType } from '../../model/enums';
-import { Strategy } from '../../model/strategy';
+
 import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 

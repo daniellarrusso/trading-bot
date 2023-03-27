@@ -1,6 +1,6 @@
 import { addIndicator } from '../../indicators/base-indicator';
 import { Indicator } from '../../model/indicator';
-import { Strategy } from '../../model/strategy';
+
 import { IExchangeService } from '../../services/IExchange-service';
 import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';

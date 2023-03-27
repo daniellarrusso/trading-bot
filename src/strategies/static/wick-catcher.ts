@@ -4,7 +4,7 @@ import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { LimitOrder } from '../../model/limit-order';
-import { Strategy } from '../../model/strategy';
+
 import { TradeResponse } from '../../model/trade-response';
 import { BinanceService } from '../../services/binance-service';
 import { IExchangeService } from '../../services/IExchange-service';

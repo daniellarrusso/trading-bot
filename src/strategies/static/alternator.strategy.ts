@@ -2,7 +2,7 @@ import { Indicator } from '../../model/indicator';
 import { addIndicator } from '../../indicators/base-indicator';
 import { BaseStrategy } from '../base-strategy';
 import { Trader } from '../../services/trader-service';
-import { Strategy } from '../../model/strategy';
+
 import { PaperAdvisor } from '../../model/paper-advisor';
 import { PortfolioStrategy } from '../portfolio-strategy';
 import { BacktestAdvisor } from '../../model/backtest-advisor';

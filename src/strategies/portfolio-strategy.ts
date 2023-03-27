@@ -1,5 +1,4 @@
 import { Candle } from '../model/candle';
-import { Strategy } from '../model/strategy';
 import { Percentage } from '../model/percentage';
 import { CandleStatistics } from '../model/candle-statistics';
 import { PortfolioTrades } from '../model/portfolio-trades';

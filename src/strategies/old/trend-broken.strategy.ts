@@ -4,7 +4,7 @@ import { addIndicator } from '../../indicators/base-indicator';
 import { BaseStrategy } from '../base-strategy';
 import { ActionType } from '../../model/enums';
 import { Trader } from '../../services/trader-service';
-import { Strategy } from '../../model/strategy';
+
 import { Candle } from '../../model/candle';
 import { StopType } from '../../model/stop';
 import { CallbackDelay } from '../../model/callback-delay';
