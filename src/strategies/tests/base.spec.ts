@@ -11,8 +11,6 @@ describe('baseStrat', () => {
   });
   describe('profitNotifier', () => {
     it('should notify telegram if profit less than minus 10', () => {
-      strat.profit = -12;
-
       let spy = jest
         .spyOn(strat.telegram, 'sendMessage')
         .mockImplementation(async () => await console.log('Message sent'));

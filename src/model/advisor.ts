@@ -15,7 +15,7 @@ export abstract class Advisor {
   abstract trade(price?: number, side?: Side): Promise<TradeResponse>;
   abstract end(closingPrice: any);
   abstract notifyTelegramBot(message: string): void;
-  abstract addProfitResults(lastSell: Candle, lastBuy: Candle);
+  abstract addProfitResults(lastSell: TradeResponse, lastBuy: TradeResponse);
   async doSetup(sendMessage: boolean, orderType: ordertypes): Promise<void> {
     const messageService = new TelegramBot(ChatGroups.mainAccount);
     const message = `${this.constructor.name} started: ${this.exchange.ticker.pair}`;

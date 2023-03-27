@@ -84,7 +84,7 @@ export class AstralPatternStrategy extends BaseStrategy {
       this.stop = this.candle.close === this.maxPrice ? stopPrice : this.stop;
 
       if (this.candle.close > this.takeProfit) {
-        this.sell(`Profit Target Hit ` + this.profit);
+        this.sell(`Profit Target Hit ` + this.tradeAdvisor.profit);
       }
       if (this.candle.close < this.stop) {
         this.sell(`Stop Hit ` + this.profit);

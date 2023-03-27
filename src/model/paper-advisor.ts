@@ -25,7 +25,8 @@ export class PaperAdvisor extends Advisor {
       price || candle.close,
       pair,
       Settings.usdAmount.toString(),
-      action
+      action,
+      candle
     );
     return Promise.resolve(trade);
   }

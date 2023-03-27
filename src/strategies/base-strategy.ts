@@ -13,8 +13,7 @@ import { TelegramBot } from '../model/telegram-bot';
 import { ChatGroups, Settings } from '../../settings';
 import { addIndicator } from '../indicators/base-indicator';
 import { Ticker } from '../model/ticker';
-import { Trade } from '../model/interfaces/mongoTrade';
-import { ActionType, AdvisorType } from '../model/enums';
+import { AdvisorType } from '../model/enums';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { AlternateTimeframe } from '../model/alternate-timeframe';
 import { printDate } from '../utilities/utility';
@@ -40,13 +39,12 @@ export abstract class BaseStrategy implements Strat {
   private history: number;
   private age = 0;
   protected candleStats: CandleStatistics;
+  protected canTrade: boolean = true;
   protected backtestMode: boolean;
   protected previousCandle: Candle;
-  protected canTrade: boolean = false;
   private hasTraded: boolean = false;
   protected delayStrat = new DelayStrategy();
   protected delayOn: boolean;
-  private _profit: number = 0;
   private indicatorWeight: number = 20;
   protected tradeAdvisor: TradeAdvisor;
   private profitMargins = [
@@ -57,22 +55,14 @@ export abstract class BaseStrategy implements Strat {
     { percent: 13, notified: false },
   ];
   protected intervalsInDay: number;
-  protected tradeStatus: Trade;
   protected dailyCandles: CandlesIndicatorResponse;
   protected hasDailyCandles: boolean = false;
   protected canBuy: boolean;
   protected canSell: boolean;
   protected trader = Trader.getInstance();
-  private _lastBuyprice = 0;
 
-  get lastBuyprice() {
-    return this._lastBuyprice;
-  }
   get profit() {
-    return +this._profit.toFixed(2);
-  }
-  set profit(value: number) {
-    this._profit = value;
+    return this.tradeAdvisor.profit;
   }
 
   constructor(public exchange: IExchangeService) {
@@ -181,8 +171,6 @@ export abstract class BaseStrategy implements Strat {
   private async backTest() {
     if (this.age > this.indicatorWeight) {
       try {
-        this.profit = this.returnPercentageIncrease(this.candle.close, this.tradeAdvisor.lastBuyClose);
-
         Settings.backTest && (await this.advice());
       } catch (error) {
         console.log(error);
@@ -193,19 +181,11 @@ export abstract class BaseStrategy implements Strat {
   private async check() {
     this.candleStats.calculateStatistics(this.candle); // 5 minute candle
     this.delayOn = this.delayStrat.checkDelay();
-    this.canBuy = this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade;
-    this.canSell = this.tradeAdvisor.actionType === ActionType.Short;
     this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
     if (this.age > this.history) {
-      this.tradeStatus = await this.tradeAdvisor.tradesDb.findTicker();
-      this._lastBuyprice = this.tradeStatus?.inTrade
-        ? this.tradeStatus.lastBuy
-        : this.tradeAdvisor.lastBuyClose;
-      this.profit = this._lastBuyprice && this.returnPercentageIncrease(this.candle.close, this.lastBuyprice);
-
       await this.trader.refreshTradeSettings();
       await this.advice();
-      this.logStatus(this.profit);
+      this.logStatus(this.tradeAdvisor.profit);
       this.profitNotifier();
     } else {
       await this.backTest();
@@ -214,16 +194,17 @@ export abstract class BaseStrategy implements Strat {
   }
 
   profitNotifier() {
-    if (this.profit > 0 && this.profit < 1) return;
-    if (this.profit < 0) {
+    const profit = +this.tradeAdvisor.profit;
+    if (profit > 0 && profit < 1) return;
+    if (profit < 0) {
       this.profitMargins.map((p) => (p.notified = false));
-      if (this.profit < -10) this.telegram.sendMessage('Profit now below 10%. consider Selling');
+      if (profit < -10) this.telegram.sendMessage('Profit now below 10%. consider Selling');
       return;
     }
 
     const pr = this.profitMargins
       .map((p) => p.percent)
-      .filter((p) => p <= this.profit)
+      .filter((p) => p <= profit)
       .reduce((p, c) => Math.max(p, c), 0);
     const percentToMessage = this.profitMargins.find((percent) => percent.percent == pr && !percent.notified);
 
@@ -247,25 +228,15 @@ export abstract class BaseStrategy implements Strat {
   }
 
   consoleColour(message: string, warning: boolean = false) {
-    if (!this.tradeStatus?.inTrade || warning) {
+    if (this.ticker.isLong || warning) {
       console.log('\u001b[' + 31 + 'm' + message + '\u001b[0m');
     } else {
       console.log('\u001b[' + 32 + 'm' + message + '\u001b[0m');
     }
   }
 
-  checkTradeStatus(cb) {
-    if (!this.hasTraded) {
-      if (cb()) {
-        this.canTrade = true;
-        this.hasTraded = true;
-        console.log(this.candle.pair + ' can now begin trading below buy threshold');
-      } else {
-        this.canTrade = false;
-      }
-    } else {
-      this.canTrade = Trader.getInstance().canTrade();
-    }
+  checkTradeStatus(cb: any) {
+    this.canTrade = cb() || this.backtestMode;
   }
 
   printDate = printDate;

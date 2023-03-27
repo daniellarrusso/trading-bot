@@ -55,8 +55,7 @@ export class Trader {
   async refreshTradeSettings() {
     const settings = await this.settingsDb.getSymbols();
     this.setTickers(settings.maxTickers);
-    settings.excludedSymbols.forEach((s) => this.removeSymbol(s));
-    settings.excludedTickers.forEach((t) => this.removeTicker(t));
+    settings.excludedPairs.map((pair) => this.removeTicker(pair));
   }
 
   setTickers(val: number) {
@@ -67,23 +66,20 @@ export class Trader {
     return this.tickers;
   }
 
-  public addTicker(ticker: Ticker): number {
+  addTicker(ticker: Ticker): number {
     if (this.canTrade()) return this.tickersTrading.push(ticker);
     return 0;
   }
 
-  public removeTicker(ticker: Ticker | string) {
+  removeTicker(ticker: Ticker | string) {
     if (typeof ticker !== 'string') ticker = ticker.pair;
     const tickerToRemove = this.tickersTrading.findIndex((t) => t.pair === ticker);
     if (tickerToRemove >= 0) this.tickersTrading.splice(tickerToRemove, 1);
-    this.strategies = this.strategies.filter((s) => s.exchange.ticker.pair !== ticker);
     return tickerToRemove;
   }
 
-  removeSymbol(symbol: string) {
-    const deleteIndex = this.tickersTrading.findIndex((t) => t.asset === symbol);
-    const res = deleteIndex ? this.tickersTrading.splice(deleteIndex, 1)[0] : null;
-    return res;
+  removeStrategy(pair: string) {
+    this.strategies = this.strategies.filter((s) => s.exchange.ticker.pair !== pair);
   }
 
   public canTrade(): boolean {

@@ -2,20 +2,39 @@ import { returnPercentageIncrease } from '../utilities/utility';
 import { TradeResponse } from './trade-response';
 
 export class Trades {
-  trades: TradeResponse[] = [];
+  tradeResponses: TradeResponse[] = [];
+
+  get lastBuy(): TradeResponse {
+    const filtered = this.tradeResponses.filter((tr) => tr.side === 'BUY');
+    return filtered[filtered.length - 1];
+  }
+
+  get lastSell(): TradeResponse {
+    const filtered = this.tradeResponses.filter((tr) => tr.side === 'SELL');
+    return filtered[filtered.length - 1];
+  }
 
   get numBought(): number {
-    return this.trades.filter((t) => t.side === 'BUY').length;
+    return this.tradeResponses.filter((t) => t.side === 'BUY').length;
   }
 
   get numSold(): number {
-    return this.trades.filter((t) => t.side === 'SELL').length;
+    return this.tradeResponses.filter((t) => t.side === 'SELL').length;
+  }
+
+  get lastTrade() {
+    return this.tradeResponses[this.tradeResponses.length - 1];
+  }
+
+  get lastTradeId(): number {
+    if (!this.tradeResponses.length) return -1;
+    return this.tradeResponses[this.tradeResponses.length - 1].tradeId;
   }
 
   get averageBuy() {
     if (this.numBought)
       return (
-        this.trades
+        this.tradeResponses
           .filter((b) => b.side === 'BUY')
           .map((t) => t.price)
           .reduce((p, c) => p + c) / this.numBought
@@ -25,7 +44,7 @@ export class Trades {
   get averageSold() {
     if (this.numSold)
       return (
-        this.trades
+        this.tradeResponses
           .filter((b) => b.side === 'SELL')
           .map((t) => t.price)
           .reduce((p, c) => p + c) / this.numSold
@@ -34,7 +53,11 @@ export class Trades {
 
   get profit() {
     let increase = returnPercentageIncrease(this.averageBuy, this.averageSold);
-    if (this.averageSold > this.averageBuy) return Math.abs(increase);
+    if (this.averageSold > this.averageBuy) return Math.abs(+increase);
     return increase;
+  }
+
+  deleteTradeResponses() {
+    this.tradeResponses = [];
   }
 }

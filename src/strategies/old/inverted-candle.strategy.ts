@@ -31,7 +31,7 @@ export class InvertedCandleStrategy extends BaseStrategy {
 
   async advice() {
     const candle = this.candle;
-    const lastBuy = this.tradeAdvisor?.lastBuy;
+    const lastBuy = this.tradeAdvisor?.longPrice;
     const rsi = this.rsi.result;
     const lowestPrice = this.candleStats.getHighLowForPeriod(21, false);
     const highestPrice = this.candleStats.getHighLowForPeriod(21, true);
@@ -54,14 +54,14 @@ export class InvertedCandleStrategy extends BaseStrategy {
     }
 
     if (this.tradeAdvisor.actionType === ActionType.Short) {
-      if (candle.close > lastBuy.close) {
+      if (candle.close > lastBuy) {
         if (candle.close < this.stopPrice) {
           this.tradeAdvisor.trade();
           this.stopPrice = 0;
         } else {
           this.stopPrice = this.previousCandle.open; // increase stop
         }
-      } else if (candle.close < lastBuy.close) {
+      } else if (candle.close < lastBuy) {
         this.tradeAdvisor.trade();
       }
     }

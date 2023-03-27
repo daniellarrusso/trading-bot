@@ -5,6 +5,7 @@ import { Trader } from './services/trader-service';
 import { Strat } from './model/interfaces/strat';
 import { NotifierStrategy } from './notifiers/notifier.strategy';
 import { BinanceService } from './services/binance-service';
+import { TemplateStrategy } from './strategies/template-strategy';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
@@ -13,7 +14,7 @@ async function loadStrategy() {
   await trader.startService();
 
   trader.addStrategy(
-    new NotifierStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '4h')))
+    new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')))
   );
 
   await setup();

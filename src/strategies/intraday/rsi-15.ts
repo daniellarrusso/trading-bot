@@ -37,7 +37,7 @@ export class RSI15trategy extends BaseStrategy {
     // Go Short
     if (this.tradeAdvisor.actionType === ActionType.Short) {
       this.sellIntervals--;
-      if (this.profit > 3.5) {
+      if (this.tradeAdvisor.profit > 3.5) {
         this.tradeAdvisor.trade();
       }
       if (this.sellIntervals < 1) {

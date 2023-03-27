@@ -231,7 +231,13 @@ export class BinanceService implements IExchangeService {
 
   fakeTradeResponse(quantity: number) {
     const { pair, close } = this.ticker.candle;
-    const res = new TradeResponse(close, pair, (close * quantity).toFixed(2), this.ticker.action);
+    const res = new TradeResponse(
+      close,
+      pair,
+      (close * quantity).toFixed(2),
+      this.ticker.action,
+      this.ticker.candle
+    );
     return res;
   }
 

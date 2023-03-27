@@ -127,7 +127,9 @@ export class FifteenHourStrategy extends BaseStrategy {
     const heikin = ` ${
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } `;
-    let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Next Action: ${this.tradeStatus.nextAction}. Profit: ${advice}`;
+    let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Next Action: ${
+      this.ticker.isLong ? 'Short' : 'Long'
+    }. Profit: ${advice}`;
     this.consoleColour(message);
   }
   setHeikinColour(isGreen: boolean): string {

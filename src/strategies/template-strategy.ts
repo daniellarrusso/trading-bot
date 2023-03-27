@@ -17,7 +17,7 @@ export class TemplateStrategy extends BaseStrategy {
   async advice() {
     // Get percentage increase
 
-    // Can Trade after certain criteria met (sometimes you don;t want to trade straight away)
+    // Can Trade after certain criteria met (sometimes you don't want to trade straight away)
     this.checkTradeStatus(() => {
       return true;
     });
@@ -29,12 +29,12 @@ export class TemplateStrategy extends BaseStrategy {
 
     /// Go Long
     if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
-      this.tradeAdvisor.trade();
+      await this.tradeAdvisor.trade();
     }
 
     // Go Short
     if (this.tradeAdvisor.actionType === ActionType.Short) {
-      this.tradeAdvisor.trade();
+      await this.tradeAdvisor.trade();
     }
     // run in backTest
     if (this.backtestMode && this.hasDailyCandles) {

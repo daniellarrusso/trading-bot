@@ -2,13 +2,14 @@ import { Schema, model } from 'mongoose';
 import { ActionType } from '../model/enums';
 import { Trade } from '../model/interfaces/mongoTrade';
 import { Ticker } from '../model/ticker';
+import { TradeResponse } from '../model/trade-response';
 
 const schema = new Schema<Trade>({
   ticker: { type: String },
   nextAction: { type: String },
   inTrade: { type: Boolean },
   lastBuy: { type: Number },
-  transactions: [{ action: String, amount: Number }],
+  transactions: [],
 });
 
 const TradeModel = model<Trade>('Trade', schema);
@@ -29,19 +30,20 @@ export class TradesDb {
   }
 
   convertAction(stratAction: ActionType) {
-    const inTrade = stratAction === ActionType.Long ? false : true;
+    const inTrade = stratAction === ActionType.Long ? true : false;
     return inTrade;
   }
 
-  async createNewPosition(lastBuy: number, action: ActionType) {
+  async createNewPosition(lastTrade: TradeResponse) {
     const result = await this.findTicker();
-    const inTrade = this.convertAction(action);
+    const inTrade = this.convertAction(this.ticker.action);
     if (!result) {
       const doc = new TradeModel({
         ticker: this.ticker.pair,
-        nextAction: ActionType[action],
+        nextAction: ActionType[this.ticker.action],
         inTrade: inTrade,
-        lastBuy: lastBuy,
+        lastBuy: inTrade ? lastTrade.price : 0,
+        transactions: [lastTrade],
       });
       await doc.save();
       console.log(`${doc.ticker} added to MongoDb Trades`);
@@ -52,14 +54,17 @@ export class TradesDb {
     }
   }
 
-  async trade(): Promise<void> {
+  async trade(lastTrade: TradeResponse): Promise<void> {
     const resToUpdate = await TradeModel.findOne({ ticker: this.ticker.pair });
-    const inTrade = this.convertAction(this.ticker.action);
-    resToUpdate.nextAction = ActionType[this.ticker.action];
-    resToUpdate.inTrade = inTrade;
-    resToUpdate.lastBuy = inTrade ? this.ticker.candle.close : 0;
-    const prevAction = this.ticker.action === ActionType.Long ? ActionType.Short : ActionType.Long;
-    resToUpdate.transactions.push({ action: ActionType[prevAction], amount: this.ticker.candle.close });
-    await resToUpdate.save();
+    if (resToUpdate) {
+      const inTrade = this.convertAction(this.ticker.action);
+      resToUpdate.nextAction = ActionType[this.ticker.action];
+      resToUpdate.inTrade = inTrade;
+      resToUpdate.lastBuy = inTrade ? lastTrade.price : 0;
+      resToUpdate.transactions.push(lastTrade);
+      await resToUpdate.save();
+    } else {
+      await this.createNewPosition(lastTrade);
+    }
   }
 }

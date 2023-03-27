@@ -46,7 +46,7 @@ export class EMAScalpStrategy extends BaseStrategy {
     const bullishHeikin = this.heikin.low >= this.heikin.open && this.heikin.green;
     const prevHeikin = this.heikin.candles[this.heikin.candles.length - 2];
     const volConfirmed = this.candle.volume > this.volume20.result;
-    this.tradeStatus.inTrade ? this.intervalsInTrade++ : (this.intervalsInTrade = 0);
+    this.ticker.isLong ? this.intervalsInTrade++ : (this.intervalsInTrade = 0);
 
     if (volConfirmed && this.heikin.green) {
       this.strongCandleCount++;
@@ -89,7 +89,7 @@ export class EMAScalpStrategy extends BaseStrategy {
       if (this.takeProfs && this.profit < 2) {
         this.takeProfs = false;
       }
-      if (this.candle.close < this.lastBuyprice && this.rsi14.result > 69) {
+      if (this.candle.close < this.tradeAdvisor.longPrice && this.rsi14.result > 69) {
         this.sell(`RSI: ${this.rsi14.result} and still not in profit`);
       }
 

@@ -42,7 +42,7 @@ export class DoubleBottomStrategy extends BaseStrategy {
     const bullishHeikin = this.heikin.low >= this.heikin.open && this.heikin.green;
     const prevHeikin = this.heikin.candles[this.heikin.candles.length - 2];
     const volConfirmed = this.candle.volume > this.volume20.result;
-    this.tradeStatus.inTrade ? this.intervalsInTrade++ : (this.intervalsInTrade = 0);
+    this.ticker.isLong ? this.intervalsInTrade++ : (this.intervalsInTrade = 0);
     const heikinWick = this.returnPercentageIncrease(this.heikin.close, prevHeikin.close);
 
     this.checkTradeStatus(() => {

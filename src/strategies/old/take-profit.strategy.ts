@@ -33,7 +33,7 @@ export class TakeProfitStrategy extends BaseStrategy {
   }
   async advice() {
     const candle = this.candle;
-    const lastBuy = this.tradeAdvisor?.lastBuy.close;
+    const lastBuy = this.tradeAdvisor?.longPrice;
     const ema = this.ema.result;
     const sma = this.sma.result;
     const smaLong = this.smaLong.result;

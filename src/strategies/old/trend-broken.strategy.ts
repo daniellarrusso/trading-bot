@@ -46,7 +46,7 @@ export class TrendBrokenStrategy extends BaseStrategy {
   }
   async advice() {
     const candle = this.candle;
-    const lastBuy = this.tradeAdvisor?.lastBuy;
+    const lastBuy = this.tradeAdvisor?.longPrice;
     const ema = this.ema.result;
     const sma = this.sma.result;
     const smaLong = this.smaLong.result;
