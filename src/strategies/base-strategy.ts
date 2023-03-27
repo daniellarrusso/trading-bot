@@ -14,15 +14,19 @@ import { ChatGroups, Settings } from '../../settings';
 import { addIndicator } from '../indicators/base-indicator';
 import { Ticker } from '../model/ticker';
 import { Trade } from '../model/interfaces/mongoTrade';
-import { Advisor } from '../model/advisor';
-import { ActionType } from '../model/enums';
+import { ActionType, AdvisorType } from '../model/enums';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { AlternateTimeframe } from '../model/alternate-timeframe';
 import { printDate } from '../utilities/utility';
 import { IExchangeService } from '../services/IExchange-service';
 import { Trader } from '../services/trader-service';
+import { PaperAdvisor } from '../model/paper-advisor';
+import { ordertypes } from '../model/literals';
 
 export abstract class BaseStrategy implements Strat {
+  telegram = new TelegramBot(ChatGroups.mainAccount);
+  protected indicatorStrategies = new IndicatorStrategies();
+  protected pair: string = '';
   protected ticker: Ticker;
   protected logger: Logger;
   protected ema20: Indicator;
@@ -30,23 +34,21 @@ export abstract class BaseStrategy implements Strat {
   protected sma200: Indicator;
   protected rsi14: Indicator;
   protected volume20: Indicator;
-  public strategyName: string;
-  public candle: Candle;
+  protected strategyName: string;
+  protected candle: Candle;
   protected heikin: Heikin;
   private history: number;
   private age = 0;
   protected candleStats: CandleStatistics;
   protected backtestMode: boolean;
-  protected tradeAdvisor: TradeAdvisor;
   protected previousCandle: Candle;
   protected canTrade: boolean = false;
-  private hasTraded: boolean;
+  private hasTraded: boolean = false;
   protected delayStrat = new DelayStrategy();
   protected delayOn: boolean;
   private _profit: number = 0;
   private indicatorWeight: number = 20;
-  public indicatorStrategies = new IndicatorStrategies();
-  protected telegram = new TelegramBot(ChatGroups.mainAccount);
+  protected tradeAdvisor: TradeAdvisor;
   private profitMargins = [
     { percent: 1, notified: false },
     { percent: 3, notified: false },
@@ -55,34 +57,17 @@ export abstract class BaseStrategy implements Strat {
     { percent: 13, notified: false },
   ];
   protected intervalsInDay: number;
-  public pair: string = '';
   protected tradeStatus: Trade;
   protected dailyCandles: CandlesIndicatorResponse;
   protected hasDailyCandles: boolean = false;
-
-  private _lastBuyprice = 0;
-  get lastBuyprice() {
-    return this._lastBuyprice;
-  }
   protected canBuy: boolean;
   protected canSell: boolean;
   protected trader = Trader.getInstance();
+  private _lastBuyprice = 0;
 
-  constructor(public exchange: IExchangeService) {
-    this.ticker = this.exchange.ticker;
-    this.pair = this.ticker.pair;
-    this.logger = new Logger(this.ticker);
-    this.candleStats = new CandleStatistics(this.ticker.interval);
-    this.tradeAdvisor = new TradeAdvisor(this.exchange);
-    this.loadDefaults();
-    this.calculateIndicatorWeight();
+  get lastBuyprice() {
+    return this._lastBuyprice;
   }
-
-  public setTradeAdvisor(advisor: Advisor) {
-    this.tradeAdvisor.advisor = advisor;
-    return advisor;
-  }
-
   get profit() {
     return +this._profit.toFixed(2);
   }
@@ -90,9 +75,30 @@ export abstract class BaseStrategy implements Strat {
     this._profit = value;
   }
 
+  constructor(public exchange: IExchangeService) {
+    this.ticker = this.exchange.ticker;
+    this.pair = this.ticker.pair;
+    this.logger = new Logger(this.ticker);
+    this.candleStats = new CandleStatistics(this.ticker.interval);
+    this.tradeAdvisor = new TradeAdvisor(this.exchange);
+    this.loadDefaultIndicators();
+  }
+
+  async setAdvisor(advisor: AdvisorType, ordertypes: ordertypes) {
+    switch (advisor) {
+      case (advisor = AdvisorType.paper):
+        this.tradeAdvisor.advisor = new PaperAdvisor(this.exchange);
+        break;
+      default:
+        this.tradeAdvisor.advisor = new PaperAdvisor(this.exchange);
+        break;
+    }
+    await this.tradeAdvisor.advisor.doSetup(false, ordertypes);
+  }
+
   abstract loadIndicators();
 
-  private async loadDefaults() {
+  private async loadDefaultIndicators() {
     this.ema20 = addIndicator('ema', { weight: 20, name: 'ema20' });
     this.sma50 = addIndicator('sma', { weight: 50, name: 'sma50' });
     this.sma200 = addIndicator('sma', { weight: 200, name: 'sma200' });
@@ -103,12 +109,6 @@ export abstract class BaseStrategy implements Strat {
       inputType: 'candle',
       name: 'Volume SMA20',
     });
-    await this.loadTradeDb();
-    this.loadIndicators();
-  }
-
-  private loadTradeDb() {
-    return this.tradeAdvisor.init();
   }
 
   private calculateIndicatorWeight() {
@@ -126,6 +126,8 @@ export abstract class BaseStrategy implements Strat {
   }
 
   async loadHistory(candleHistory: Candle[]) {
+    this.loadIndicators();
+    this.calculateIndicatorWeight();
     this.history = candleHistory.length;
     for (let i = 0; i < candleHistory.length; i++) {
       await this.update(candleHistory[i]);
@@ -134,7 +136,6 @@ export abstract class BaseStrategy implements Strat {
     console.log(`${this.strategyName} running on ${this.ticker.interval} intervals against ${this.pair}`);
     this.tradeAdvisor.endAdvisor(this.candle?.close);
     this.strategyName = this.strategyName;
-    this.hasTraded = false;
     this.resetParameters();
   }
 
@@ -212,10 +213,11 @@ export abstract class BaseStrategy implements Strat {
     this.previousCandle = this.candle;
   }
 
-  private profitNotifier() {
+  profitNotifier() {
     if (this.profit > 0 && this.profit < 1) return;
     if (this.profit < 0) {
       this.profitMargins.map((p) => (p.notified = false));
+      if (this.profit < -10) this.telegram.sendMessage('Profit now below 10%. consider Selling');
       return;
     }
 

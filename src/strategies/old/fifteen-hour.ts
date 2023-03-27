@@ -1,13 +1,11 @@
 import { addIndicator } from '../../indicators/base-indicator';
 import { IndicatorStrategies } from '../../indicators/indicator-strategies/indicator-strats';
-import { RSI } from '../../indicators/rsi';
 import { ActionType } from '../../model/enums';
 import { Heikin } from '../../model/heikin';
 import { Indicator } from '../../model/indicator';
 import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
-import { Strategy } from '../../model/strategy';
+
 import { IExchangeService } from '../../services/IExchange-service';
-import { Trader } from '../../services/trader-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class FifteenHourStrategy extends BaseStrategy {

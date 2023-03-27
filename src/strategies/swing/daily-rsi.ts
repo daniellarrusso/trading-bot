@@ -4,7 +4,6 @@ import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { AlternateTimeframe } from '../../model/alternate-timeframe';
 import { Interval } from '../../model/interval-converter';
-import { Strategy } from '../../model/strategy';
 import { BaseStrategy } from '../base-strategy';
 import { IExchangeService } from '../../services/IExchange-service';
 

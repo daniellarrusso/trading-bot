@@ -2,7 +2,6 @@ import { TradeResponse } from './trade-response';
 import { TelegramBot } from './telegram-bot';
 import { ChatGroups, Settings } from '../../settings';
 import { Advisor } from './advisor';
-import { Strategy } from './strategy';
 import { Side } from './literals';
 import { IExchangeService } from '../services/IExchange-service';
 

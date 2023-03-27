@@ -1,12 +1,11 @@
 import { ActionType } from './enums';
 import { Candle } from './candle';
-import { Strategy } from './strategy';
 import { Trader } from '../services/trader-service';
 import { Advisor } from './advisor';
 import { BacktestAdvisor } from './backtest-advisor';
 import { Ticker } from './ticker';
 import { TradeResponse } from './trade-response';
-import { ordertypes, Side } from './literals';
+import { Side } from './literals';
 import { Trades } from './trades';
 import { Settings } from '../../settings';
 import { IExchangeService } from '../services/IExchange-service';

@@ -1,6 +1,6 @@
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
-import { addIndicator } from './base-indicator';
+import { SMA } from './sma';
 
 export class ElliotWave extends Indicator {
   smaShort: Indicator;
@@ -8,8 +8,8 @@ export class ElliotWave extends Indicator {
   constructor(public settings) {
     super(settings);
     this.input = null;
-    this.smaShort = addIndicator('sma', { weight: settings.weights[0], name: 'short' });
-    this.smaLong = addIndicator('sma', { weight: settings.weights[1], name: 'long' });
+    this.smaShort = new SMA({ weight: settings.weights[0], name: 'short' });
+    this.smaLong = new SMA({ weight: settings.weights[1], name: 'long' });
   }
   update(candle: Candle) {
     this.previousResult = this.result ? this.result : 0;

@@ -1,5 +1,4 @@
 import { Indicator } from '../model/indicator';
-import { Strategy } from '../model/strategy';
 import { BaseStrategy } from '../strategies/base-strategy';
 import { Notification } from '../model/notification';
 import { Notifier } from '../model/notifier';

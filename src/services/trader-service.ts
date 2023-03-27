@@ -2,11 +2,11 @@ import { Candle } from '../model/candle';
 import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import { SettingsDb } from '../db/settingsDb';
-import { Strategy } from '../model/strategy';
 import { BinanceService } from './binance-service';
 import { KrakenService } from './kraken-service';
 import { MongoDbConnection } from '../db/database-connection';
 import { Exchange } from '../model/types';
+import { Strat } from '../model/interfaces/strat';
 
 export class Trader {
   private static instance: Trader;
@@ -17,7 +17,7 @@ export class Trader {
   public apiAccount: ApiAccount;
 
   tickersTrading: Ticker[] = [];
-  strategies: Strategy[] = [];
+  strategies: Strat[] = [];
   settingsDb: SettingsDb = new SettingsDb();
 
   orderPlaced: boolean;
@@ -37,9 +37,7 @@ export class Trader {
     await this.settingsDb.createSettings();
   }
 
-  addStrategy(name: string, exchange: Exchange, ticker: Ticker) {
-    const exchangeService = this.createExchange(exchange, ticker);
-    const strat = new Strategy(name, exchangeService);
+  addStrategy(strat: Strat) {
     this.strategies.push(strat);
   }
 

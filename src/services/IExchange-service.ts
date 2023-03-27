@@ -1,7 +1,7 @@
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
-import { IOrder, LimitOrder } from '../model/limit-order';
+import { LimitOrder } from '../model/limit-order';
 import { Side } from '../model/literals';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { Ticker } from '../model/ticker';

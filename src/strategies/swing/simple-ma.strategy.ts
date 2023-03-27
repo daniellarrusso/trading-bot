@@ -1,7 +1,6 @@
 import { addIndicator } from '../../indicators/base-indicator';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
-import { Strategy } from '../../model/strategy';
 import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 

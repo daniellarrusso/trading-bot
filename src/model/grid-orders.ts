@@ -1,8 +1,7 @@
 import { IExchangeService } from '../services/IExchange-service';
 import { Candle } from './candle';
 import { GridHistory, GridSettings } from './grid-settings';
-import { LimitOrder, MarketOrder } from './limit-order';
-import { Strategy } from './strategy';
+import { LimitOrder } from './limit-order';
 import { TradeResponse } from './trade-response';
 
 export class GridOrders {
@@ -136,7 +135,7 @@ export class GridOrders {
   }
 
   buyAsset(price: number, quantity: number) {
-    const order = new MarketOrder(price, true, quantity);
-    return order.executeOrder();
+    // const order = new MarketOrder(price, true, quantity);
+    // return order.executeOrder();
   }
 }

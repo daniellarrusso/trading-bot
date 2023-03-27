@@ -2,7 +2,6 @@ import { CallbackDelay } from '../../model/callback-delay';
 import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
-import { Strategy } from '../../model/strategy';
 import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 

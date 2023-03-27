@@ -1,14 +1,10 @@
 import { addIndicator } from '../../indicators/base-indicator';
-import { IndicatorStrategy } from '../../indicators/indicator-strategies/indicator-strategy';
-import { MaCrossover } from '../../indicators/indicator-strategies/ma-crossover';
-import { RSI } from '../../indicators/rsi';
 import { Candle } from '../../model/candle';
 import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
-import { CandlesIndicatorResponse } from '../../model/multi-timeframe';
-import { Strategy } from '../../model/strategy';
+
 import { IExchangeService } from '../../services/IExchange-service';
-import { Trader } from '../../services/trader-service';
+
 import { BaseStrategy } from '../base-strategy';
 
 export class HeikinLongStrategy extends BaseStrategy {

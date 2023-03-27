@@ -1,7 +1,6 @@
 import { Candle } from '../model/candle';
 import { GridHistory, GridSettings } from '../model/grid-settings';
 import { LimitOrder } from '../model/limit-order';
-import { Strategy } from '../model/strategy';
 import { Ticker } from '../model/ticker';
 import { BaseStrategy } from './base-strategy';
 import { GridOrders } from '../model/grid-orders';

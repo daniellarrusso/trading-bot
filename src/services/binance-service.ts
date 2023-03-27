@@ -3,7 +3,7 @@ import { Candle } from '../model/candle';
 import { apiKeys } from '../../keys';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
-import { IOrder, LimitOrder } from '../model/limit-order';
+import { LimitOrder } from '../model/limit-order';
 import { Indicator } from '../model/indicator';
 import { Heikin } from '../model/heikin';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
@@ -235,13 +235,13 @@ export class BinanceService implements IExchangeService {
     return res;
   }
 
-  marketOrderSpoof(order: IOrder): Promise<any> {
+  marketOrderSpoof(order: LimitOrder): Promise<any> {
     order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
     return new Promise((resolve, reject) => {
       console.log(
-        `${order.isLong ? 'Buying' : 'Selling'} using this.exchange[${order.type}](${this.ticker.pair},${
-          order.quantity
-        })`
+        `${order.side === 'buy' ? 'Buying' : 'Selling'} using this.exchange[${order.side}](${
+          this.ticker.pair
+        },${order.quantity})`
       );
       setTimeout(() => {
         const response = {} as TradeResponse;

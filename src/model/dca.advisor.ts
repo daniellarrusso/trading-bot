@@ -4,7 +4,6 @@ import { KrakenService } from '../services/kraken-service';
 import { Advisor } from './advisor';
 import { Candle } from './candle';
 import { ActionType } from './enums';
-import { Strategy } from './strategy';
 import { TelegramBot } from './telegram-bot';
 import { TradeResponse } from './trade-response';
 
