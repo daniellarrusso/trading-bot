@@ -118,7 +118,6 @@ export class TradeAdvisor {
     const { action, asset, currency, candle, tickSize } = this.ticker;
     const quantity = trade.origQty ?? this.formatQuantity(Settings.usdAmount / candle.close);
     const currencyAmount = trade.cummulativeQuoteQty ?? Settings.usdAmount;
-
     let message = `${candle.printTime}: ${currencyAmount} ${currency} ${
       ActionType[action]
     } on ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;

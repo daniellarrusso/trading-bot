@@ -11,6 +11,7 @@ import { IndicatorStrategies } from '../indicators/indicator-strategies/indicato
 import { IExchangeService } from './IExchange-service';
 import { Side } from '../model/literals';
 import moment from 'moment';
+import { printDate } from '../utilities/utility';
 
 // const FEE = Settings.fee;
 const history = 1000;
@@ -372,9 +373,7 @@ function handleError(err) {
   }
 }
 
-function printTime(dt: Date) {
-  return moment(dt).format('h:mma Do MMM YYYY');
-}
+const printTime = printDate;
 
 function round(amount: number, tickSize) {
   var precision = 100000000;
