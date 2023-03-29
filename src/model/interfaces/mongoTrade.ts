@@ -7,7 +7,7 @@ export interface Transaction {
 
 export interface Trade {
   ticker: string;
-  nextAction: string;
+  action: string;
   inTrade: boolean;
   lastBuy: number;
   transactions: TradeResponse[];

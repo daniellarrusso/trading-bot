@@ -2,6 +2,9 @@ import { Candle } from './candle';
 import { ActionType } from './enums';
 
 export class TradeResponse {
+  price: string;
+  private _quotePrice: number;
+  cummulativeQuoteQty: string;
   clientOrderId: string;
   tradeId: number;
   executedQty: string; // asset Amount
@@ -9,14 +12,20 @@ export class TradeResponse {
   origQty: string; // asset Amount (original)
   side: string; // BUY | SELL
   status: string; // FILLED | ??
-  constructor(
-    public price: number, // get from ticker
-    public symbol: string, // get from ticker
-    public cummulativeQuoteQty: string, // currency amount
-    public action: ActionType,
-    public candle: Candle
-  ) {
-    action === ActionType.Long ? (this.side = 'BUY') : (this.side = 'SELL');
-    this.tradeId = this.candle.time.getTime();
+  symbol: string;
+  type: string;
+  constructor(public candle: Candle, side: string, quotePrice?: number) {
+    this.tradeId = this.candle?.time.getTime() ?? 0;
+    this.quotePrice = quotePrice;
+    this.side = side.toUpperCase();
+    this.symbol = candle.pair;
+  }
+
+  get quotePrice() {
+    if (this.type === 'MARKET') return +this.cummulativeQuoteQty;
+    return this._quotePrice;
+  }
+  set quotePrice(val: number) {
+    this._quotePrice = val;
   }
 }

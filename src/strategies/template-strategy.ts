@@ -7,7 +7,7 @@ import { BaseStrategy } from './base-strategy';
 export class TemplateStrategy extends BaseStrategy {
   constructor(exchange: IExchangeService) {
     super(exchange);
-    this.strategyName = 'Template';
+    this.strategyName = 'Test';
   }
 
   loadIndicators() {}

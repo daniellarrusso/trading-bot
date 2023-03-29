@@ -4,6 +4,7 @@ import { ChatGroups, Settings } from '../../settings';
 import { Advisor } from './advisor';
 import { Side } from './literals';
 import { IExchangeService } from '../services/IExchange-service';
+import { ActionType } from './enums';
 
 export class PaperAdvisor extends Advisor {
   assetAmount = 0;
@@ -21,13 +22,8 @@ export class PaperAdvisor extends Advisor {
   }
   trade(price?: number, side?: Side): Promise<TradeResponse> {
     const { candle, pair, action } = this.exchange.ticker;
-    const trade: TradeResponse = new TradeResponse(
-      price || candle.close,
-      pair,
-      Settings.usdAmount.toString(),
-      action,
-      candle
-    );
+    if (!side) side = action === ActionType.Long ? 'buy' : 'sell';
+    const trade: TradeResponse = new TradeResponse(candle, side, price || candle.close);
     return Promise.resolve(trade);
   }
 
@@ -38,9 +34,9 @@ export class PaperAdvisor extends Advisor {
     });
   }
 
-  addProfitResults(lastSell, lastBuy) {
-    const amount = ((lastSell.close - lastBuy.close) / lastBuy.close) * 100;
-    this.profitResults.push(amount);
+  addProfitResults(lastSell: number, lastBuy: TradeResponse) {
+    const amount = ((lastSell - lastBuy.quotePrice) / lastBuy.quotePrice) * 100;
+    if (amount) this.profitResults.push(+amount.toFixed(2));
   }
 
   end(closingPrice: any) {

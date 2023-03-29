@@ -7,6 +7,7 @@ import { LimitOrder } from '../model/limit-order';
 import { Side } from '../model/literals';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { Ticker } from '../model/ticker';
+import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
 
 export class KrakenService implements IExchangeService {
@@ -14,7 +15,8 @@ export class KrakenService implements IExchangeService {
   constructor() {
     this.kraken = new KrakenClient(apiKeys.krakenAccount.key, apiKeys.krakenAccount.secret);
   }
-  createLimitOrder(order: LimitOrder) {
+
+  createOrder(order: LimitOrder, isMarket?: boolean): Promise<TradeResponse> {
     throw new Error('Method not implemented.');
   }
   getHistory(ticker: Ticker) {

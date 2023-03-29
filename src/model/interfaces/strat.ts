@@ -5,7 +5,7 @@ import { ordertypes } from '../literals';
 
 export interface Strat {
   exchange: IExchangeService;
-
+  strategyName: string;
   loadIndicators();
   advice();
   loadHistory(candleHistory: Candle[]);

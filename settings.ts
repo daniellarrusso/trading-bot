@@ -6,7 +6,6 @@ export const ChatGroups = {
 export const Settings = {
   debug: true,
   fee: 0.999,
-  tickers: 10,
   backTest: true,
   usdAmount: 20,
 };

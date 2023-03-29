@@ -2,32 +2,30 @@ import { Candle } from '../model/candle';
 import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import { SettingsDb } from '../db/settingsDb';
-import { BinanceService } from './binance-service';
-import { KrakenService } from './kraken-service';
 import { MongoDbConnection } from '../db/database-connection';
-import { Exchange } from '../model/types';
 import { Strat } from '../model/interfaces/strat';
 
 export class Trader {
   private static instance: Trader;
-  private tickers: number;
-
-  public isTrading: boolean;
-  public tradingWith: string;
-  public apiAccount: ApiAccount;
-
+  isTrading: boolean;
+  tradingWith: string;
+  apiAccount: ApiAccount;
   tickersTrading: Ticker[] = [];
-  strategies: Strat[] = [];
+  private _strategies: Strat[] = [];
   settingsDb: SettingsDb = new SettingsDb();
-
   orderPlaced: boolean;
+
+  get strategies() {
+    const template = this._strategies.find((s) => s.strategyName === 'Test');
+    if (template) return this._strategies.filter((s, i) => s === template);
+    return this._strategies;
+  }
 
   private constructor() {}
 
-  static getInstance(tickers: number = 150) {
+  static getInstance() {
     if (!Trader.instance) {
       Trader.instance = new Trader();
-      Trader.instance.tickers = tickers;
     }
     return Trader.instance;
   }
@@ -37,38 +35,17 @@ export class Trader {
     await this.settingsDb.createSettings();
   }
 
-  addStrategy(strat: Strat) {
-    this.strategies.push(strat);
-  }
-
-  createExchange(exchangeName: Exchange, ticker: Ticker) {
-    switch (exchangeName) {
-      case 'binance':
-        return new BinanceService(ticker);
-      case 'kraken':
-        return new KrakenService();
-      default:
-        throw Error('Error setting up exchange');
-    }
+  addStrategy(strats: Strat[]) {
+    strats.map((s) => this._strategies.push(s));
   }
 
   async refreshTradeSettings() {
-    const settings = await this.settingsDb.getSymbols();
-    this.setTickers(settings.maxTickers);
+    const settings = await this.settingsDb.createSettings();
     settings.excludedPairs.map((pair) => this.removeTicker(pair));
   }
 
-  setTickers(val: number) {
-    this.tickers = val;
-  }
-
-  getTickers(): number {
-    return this.tickers;
-  }
-
   addTicker(ticker: Ticker): number {
-    if (this.canTrade()) return this.tickersTrading.push(ticker);
-    return 0;
+    return this.tickersTrading.push(ticker);
   }
 
   removeTicker(ticker: Ticker | string) {
@@ -79,11 +56,7 @@ export class Trader {
   }
 
   removeStrategy(pair: string) {
-    this.strategies = this.strategies.filter((s) => s.exchange.ticker.pair !== pair);
-  }
-
-  public canTrade(): boolean {
-    return this.tickersTrading.length < this.tickers;
+    this._strategies = this._strategies.filter((s) => s.exchange.ticker.pair !== pair);
   }
 
   public acivateTrader(candle: Candle) {

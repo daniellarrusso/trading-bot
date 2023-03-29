@@ -6,7 +6,7 @@ import { TradeResponse } from '../model/trade-response';
 
 const schema = new Schema<Trade>({
   ticker: { type: String },
-  nextAction: { type: String },
+  action: { type: String },
   inTrade: { type: Boolean },
   lastBuy: { type: Number },
   transactions: [],
@@ -40,16 +40,16 @@ export class TradesDb {
     if (!result) {
       const doc = new TradeModel({
         ticker: this.ticker.pair,
-        nextAction: ActionType[this.ticker.action],
+        action: ActionType[this.ticker.action],
         inTrade: inTrade,
-        lastBuy: inTrade ? lastTrade.price : 0,
+        lastBuy: inTrade ? lastTrade.quotePrice : 0,
         transactions: [lastTrade],
       });
       await doc.save();
       console.log(`${doc.ticker} added to MongoDb Trades`);
     } else {
       console.log(
-        `MongoDb Trades Result: ${result.ticker} - Next Action: ${result.nextAction}. Last Buy: ${result.lastBuy}`
+        `MongoDb Trades Result: ${result.ticker} - Current Action: ${result.action}. Last Buy: ${result.lastBuy}`
       );
     }
   }
@@ -58,9 +58,9 @@ export class TradesDb {
     const resToUpdate = await TradeModel.findOne({ ticker: this.ticker.pair });
     if (resToUpdate) {
       const inTrade = this.convertAction(this.ticker.action);
-      resToUpdate.nextAction = ActionType[this.ticker.action];
+      resToUpdate.action = ActionType[this.ticker.action];
       resToUpdate.inTrade = inTrade;
-      resToUpdate.lastBuy = inTrade ? lastTrade.price : 0;
+      resToUpdate.lastBuy = inTrade ? +lastTrade.quotePrice : 0;
       resToUpdate.transactions.push(lastTrade);
       await resToUpdate.save();
     } else {

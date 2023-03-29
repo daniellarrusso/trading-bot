@@ -5,6 +5,7 @@ import { LimitOrder } from '../model/limit-order';
 import { Side } from '../model/literals';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { Ticker } from '../model/ticker';
+import { TradeResponse } from '../model/trade-response';
 
 export interface IExchangeService {
   ticker: Ticker;
@@ -25,10 +26,7 @@ export interface IExchangeService {
   // orders
   getOrders(pair: string): Promise<any[]>;
   checkOrderStatus(orderId: any);
-  createLimitOrder(order: LimitOrder);
-  placeLimitOrder(side: Side, quantity: number, price: number);
-  placeStopLimitOrder(side: Side, quantity: number, price: number, stopPrice: number);
-  placeMarketOrder(side: Side, quantity: number);
+  createOrder(order: LimitOrder, isMarket?: boolean): Promise<TradeResponse>;
   getPrice();
 
   cancelOrder(orderId: any);

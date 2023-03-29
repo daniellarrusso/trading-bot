@@ -2,6 +2,7 @@ import { TradeResponse } from './trade-response';
 import { Advisor } from './advisor';
 import { Settings } from '../../settings';
 import { Side } from './literals';
+import { ActionType } from './enums';
 
 export class BacktestAdvisor extends Advisor {
   assetAmount = 0;
@@ -10,24 +11,19 @@ export class BacktestAdvisor extends Advisor {
 
   trade(price?: number, side?: Side) {
     const { candle, pair, action } = this.exchange.ticker;
-    const trade: TradeResponse = new TradeResponse(
-      price || candle.close,
-      pair,
-      Settings.usdAmount.toString(),
-      action,
-      candle
-    );
+    if (!side) side = action === ActionType.Long ? 'buy' : 'sell';
+    const trade: TradeResponse = new TradeResponse(candle, side, price || candle.close);
     return Promise.resolve(trade);
   }
 
-  addProfitResults(lastSell, lastBuy) {
-    const amount = ((lastSell.price - lastBuy.price) / lastBuy.price) * 100;
+  addProfitResults(closingPrice: number, lastBuy: TradeResponse) {
+    const amount = ((closingPrice - lastBuy.quotePrice) / lastBuy.quotePrice) * 100;
     if (amount) this.profitResults.push(+amount.toFixed(2));
   }
 
   end(prices) {
     if (prices.lastBuyPrice) {
-      this.addProfitResults({ close: prices?.closingPrice }, prices.lastBuyPrice);
+      this.addProfitResults(prices.closingPrice, prices.lastBuyPrice);
     }
     if (this.profitResults.length > 0) {
       const finalResult = this.profitResults.reduce((p, c) => p + c, 0);

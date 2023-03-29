@@ -9,7 +9,7 @@ import { Heikin } from '../model/heikin';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { IExchangeService } from './IExchange-service';
-import { Side } from '../model/literals';
+import { ordertypes, Side } from '../model/literals';
 import moment from 'moment';
 import { printDate } from '../utilities/utility';
 
@@ -192,17 +192,21 @@ export class BinanceService implements IExchangeService {
     return this.exchange.prices('BTCUSDT');
   }
 
-  async createLimitOrder(order: LimitOrder): Promise<TradeResponse> {
+  async createOrder(order: LimitOrder, isMarket = false): Promise<TradeResponse> {
+    const side = isMarket ? order.marketSide : order.side;
     order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
     const priceString = this.normalisePrice(order.price);
+
     try {
-      const limitOrder = await this.exchange[order.side](this.ticker.pair, order.quantity, priceString);
+      const res = await this.exchange[side](this.ticker.pair, order.quantity, priceString);
       await this.getTradingBalance();
-      return limitOrder;
+      return res;
     } catch (error) {
       console.log(error);
     }
   }
+
+  private convertServerTradeResponse(res: TradeResponse) {}
 
   placeStopLimitOrder(side: Side, quantity: number, price: number, stopPrice: number) {
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
@@ -214,48 +218,21 @@ export class BinanceService implements IExchangeService {
     });
   }
 
-  placeLimitOrder(side: Side, quantity: number, price: number) {
-    quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
-    return this.exchange[side](
-      this.ticker.pair,
-      quantity,
-      this.normalisePrice(price || this.ticker.candle.close)
-    );
-  }
-
-  placeMarketOrder(side: Side, quantity: number) {
+  createMarketOrder(side: Side, quantity: number) {
     // return Promise.resolve(this.fakeTradeResponse(quantity));
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
     if (side === 'buy') return this.exchange.marketBuy(this.ticker.pair, quantity);
     return this.exchange.marketSell(this.ticker.pair, quantity);
   }
 
-  fakeTradeResponse(quantity: number) {
+  fakeTradeResponse(quantity: number, side: string, price: number) {
     const { pair, close } = this.ticker.candle;
-    const res = new TradeResponse(
-      close,
-      pair,
-      (close * quantity).toFixed(2),
-      this.ticker.action,
-      this.ticker.candle
-    );
+    const res = new TradeResponse(this.ticker.candle, side, price || this.ticker.candle.close);
     return res;
   }
 
-  marketOrderSpoof(order: LimitOrder): Promise<any> {
-    order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
-    return new Promise((resolve, reject) => {
-      console.log(
-        `${order.side === 'buy' ? 'Buying' : 'Selling'} using this.exchange[${order.side}](${
-          this.ticker.pair
-        },${order.quantity})`
-      );
-      setTimeout(() => {
-        const response = {} as TradeResponse;
-        response.cummulativeQuoteQty = String(order.quantity);
-        resolve(response);
-      }, 1000);
-    });
+  serverResponse(): any {
+    return fetch('responses/binance-limit-buy').then((res) => res.json());
   }
 
   normalisePrice(price: number): string {

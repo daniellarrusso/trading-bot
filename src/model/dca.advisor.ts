@@ -35,7 +35,7 @@ export class DCAAdvisor extends Advisor {
   notifyTelegramBot(): void {
     this.telegramBot.sendMessage(this.message);
   }
-  addProfitResults(lastSell: TradeResponse, lastBuy: TradeResponse) {
+  addProfitResults(lastSell: number, lastBuy: TradeResponse) {
     console.log('Method not implemented.');
   }
   async doSetup(sendMessage: boolean) {

@@ -36,7 +36,7 @@ export class Trades {
       return (
         this.tradeResponses
           .filter((b) => b.side === 'BUY')
-          .map((t) => t.price)
+          .map((t) => +t.quotePrice)
           .reduce((p, c) => p + c) / this.numBought
       );
   }
@@ -46,7 +46,7 @@ export class Trades {
       return (
         this.tradeResponses
           .filter((b) => b.side === 'SELL')
-          .map((t) => t.price)
+          .map((t) => +t.quotePrice)
           .reduce((p, c) => p + c) / this.numSold
       );
   }

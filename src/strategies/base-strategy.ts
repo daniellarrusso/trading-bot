@@ -24,6 +24,7 @@ import { ordertypes } from '../model/literals';
 
 export abstract class BaseStrategy implements Strat {
   telegram = new TelegramBot(ChatGroups.mainAccount);
+  strategyName: string;
   protected indicatorStrategies = new IndicatorStrategies();
   protected pair: string = '';
   protected ticker: Ticker;
@@ -33,7 +34,6 @@ export abstract class BaseStrategy implements Strat {
   protected sma200: Indicator;
   protected rsi14: Indicator;
   protected volume20: Indicator;
-  protected strategyName: string;
   protected candle: Candle;
   protected heikin: Heikin;
   private history: number;

@@ -25,11 +25,11 @@ export class TradeAdvisor {
   tradesDb: TradesDb;
 
   get longPrice() {
-    return this.trades.lastBuy.price ?? 0;
+    return this.trades.lastBuy?.quotePrice ?? 0;
   }
 
   get shortPrice() {
-    return this.trades.lastSell.price ?? 0;
+    return this.trades.lastSell?.quotePrice ?? 0;
   }
   get isBacktest() {
     return this.advisor instanceof BacktestAdvisor;
@@ -43,10 +43,6 @@ export class TradeAdvisor {
     this.tradesDb = new TradesDb(this.ticker);
     if (this.isBacktest && this.initialAction === ActionType.Short)
       this.actionType = this.ticker.setActionType();
-  }
-
-  async init() {
-    // await this.tradesDb.createNewPosition(0, this.initialAction);
   }
 
   get isLong() {
@@ -73,8 +69,9 @@ export class TradeAdvisor {
     }
   }
 
+  /** Returns whether  */
   get canTrade() {
-    return this.trader.canTrade() && this.candle.time.getTime() !== this.trades.lastTradeId;
+    return this.candle.time.getTime() !== this.trades.lastTradeId;
   }
 
   getTotalProfit() {
@@ -85,7 +82,7 @@ export class TradeAdvisor {
     if (!this.longPrice) return; // no profit to calculate
     this.roundtripProfit = ((this.shortPrice - this.longPrice) / this.longPrice) * 100;
     console.log(`'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${this.ticker.pair})`);
-    this.advisor.addProfitResults(this.trades.lastSell, this.trades.lastBuy);
+    this.advisor.addProfitResults(this.shortPrice, this.trades.lastBuy);
     // this._lastBuy = null; // have sold so reset buy price
   }
 
