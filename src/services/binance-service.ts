@@ -43,6 +43,7 @@ export class BinanceService implements IExchangeService {
     this.ticker.tickSize = filters.find((price) => price.filterType === 'PRICE_FILTER').tickSize;
     this.ticker.minQty = filters.find((price) => price.filterType === 'LOT_SIZE').minQty;
     this.ticker.stepSize = filters.find((price) => price.filterType === 'LOT_SIZE').stepSize;
+    this.ticker.roundStep = this.exchange.roundStep;
   }
 
   async getPrice() {
@@ -200,7 +201,7 @@ export class BinanceService implements IExchangeService {
     try {
       const res = await this.exchange[side](this.ticker.pair, order.quantity, priceString);
       await this.getTradingBalance();
-      return res;
+      return new TradeResponse(res, this.ticker.candle);
     } catch (error) {
       console.log(error);
     }
@@ -223,12 +224,6 @@ export class BinanceService implements IExchangeService {
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);
     if (side === 'buy') return this.exchange.marketBuy(this.ticker.pair, quantity);
     return this.exchange.marketSell(this.ticker.pair, quantity);
-  }
-
-  fakeTradeResponse(quantity: number, side: string, price: number) {
-    const { pair, close } = this.ticker.candle;
-    const res = new TradeResponse(this.ticker.candle, side, price || this.ticker.candle.close);
-    return res;
   }
 
   serverResponse(): any {

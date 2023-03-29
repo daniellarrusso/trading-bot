@@ -9,6 +9,7 @@ export class Ticker {
   tickSize: string;
   stepSize: string;
   candle: Candle;
+  roundStep: (quantity, stepSize) => string;
   private _action: ActionType;
 
   constructor(public asset: string, public currency: string, action: ActionType, public interval: string) {
@@ -18,6 +19,17 @@ export class Ticker {
 
   get action() {
     return this._action;
+  }
+
+  normalisePrice(price: number): string {
+    if (typeof price === 'string') {
+      return price;
+    }
+    return price.toFixed(this.tickSize.indexOf('1') - 1);
+  }
+
+  formatQuantity(quantity: number) {
+    return this.roundStep(quantity, this.stepSize);
   }
   /**
    * If actiontype is Short then most likely in a 'long' position

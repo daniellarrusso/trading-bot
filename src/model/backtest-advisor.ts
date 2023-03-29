@@ -3,17 +3,42 @@ import { Advisor } from './advisor';
 import { Settings } from '../../settings';
 import { Side } from './literals';
 import { ActionType } from './enums';
+import { MockExchangeService } from '../services/mock-exchange.service';
+import { Ticker } from './ticker';
+import { IExchangeService } from '../services/IExchange-service';
+import { LimitOrder } from './limit-order';
+import { BinanceService } from '../services/binance-service';
 
 export class BacktestAdvisor extends Advisor {
   assetAmount = 0;
   currencyAmount = 1000;
   profitResults = [];
+  ticker: Ticker;
 
-  trade(price?: number, side?: Side) {
-    const { candle, pair, action } = this.exchange.ticker;
-    if (!side) side = action === ActionType.Long ? 'buy' : 'sell';
-    const trade: TradeResponse = new TradeResponse(candle, side, price || candle.close);
-    return Promise.resolve(trade);
+  get currencyQuantity() {
+    return Settings.usdAmount;
+  }
+
+  constructor(public exchange: IExchangeService) {
+    super(new MockExchangeService(exchange.ticker));
+    this.ticker = exchange.ticker;
+    if (!(this.exchange instanceof MockExchangeService))
+      this.exchange = new MockExchangeService(exchange.ticker);
+  }
+
+  async trade(price?: number, side?: Side): Promise<TradeResponse> {
+    if (!price) price = this.ticker.candle.close;
+    if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
+    const quantity = this.currencyQuantity / price;
+    try {
+      const response: TradeResponse = await this.exchange.createOrder(
+        new LimitOrder(price, quantity, side),
+        this.isMarketOrders
+      );
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   addProfitResults(closingPrice: number, lastBuy: TradeResponse) {

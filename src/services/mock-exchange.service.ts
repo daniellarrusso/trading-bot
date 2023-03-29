@@ -11,11 +11,13 @@ import { printDate } from '../utilities/utility';
 import marketData from './responses/binance-market-buy.json';
 import limitData from './responses/binance-limit-buy.json';
 import { TradeResponse } from '../model/trade-response';
+import { MockOrders } from './mock-orders';
 
 const history = 1000;
 
 export class MockExchangeService implements IExchangeService {
   exchange: any;
+  mockOrders = new MockOrders();
 
   constructor(public ticker: Ticker) {
     this.exchange = new Binance().options({
@@ -34,24 +36,24 @@ export class MockExchangeService implements IExchangeService {
   ): Promise<CandlesIndicatorResponse> {
     throw new Error('Method not implemented.');
   }
+
   async createOrder(order: LimitOrder, isMarket = false): Promise<TradeResponse> {
     const side = isMarket ? order.marketSide : order.side;
-    const price = isMarket ? 0 : order.price;
-    const serverResponse = await this.createServerResponse(isMarket);
-    const newResponse = new TradeResponse(this.ticker.candle, order.side, price);
-    const response = Object.assign(newResponse, serverResponse);
-    return response;
+    order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
+    const priceString = this.normalisePrice(order.price);
+    try {
+      const res = await this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
+      return new TradeResponse(res, this.ticker.candle);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  private async createServerResponse(isMarket: boolean) {
-    if (isMarket) {
-      return new Promise((resolve, reject) => {
-        resolve(marketData);
-      });
+  normalisePrice(price: number): string {
+    if (typeof price === 'string') {
+      return price;
     }
-    return new Promise((resolve, reject) => {
-      resolve(limitData);
-    });
+    return price.toFixed(this.ticker.tickSize.indexOf('1') - 1);
   }
 
   getOHLCHistory(): Promise<Candle[]> {
@@ -306,7 +308,4 @@ function handleError(err: any) {
   } else {
     return err;
   }
-}
-function readFile(arg0: string, arg1: string): string | PromiseLike<string> {
-  throw new Error('Function not implemented.');
 }

@@ -1,14 +1,16 @@
 import { Candle } from './candle';
 import { TelegramBot } from './telegram-bot';
-import { ChatGroups } from '../../settings';
+import { ChatGroups, Settings } from '../../settings';
 import { IExchangeService } from '../services/IExchange-service';
 import { TradeResponse } from './trade-response';
 import { ordertypes, Side } from './literals';
+import { MockExchangeService } from '../services/mock-exchange.service';
 
 export abstract class Advisor {
   profitResults: number[];
   longQuantity = 0;
   message: string = '';
+  isMarketOrders = Settings.marketOrders;
 
   constructor(public exchange: IExchangeService) {}
 

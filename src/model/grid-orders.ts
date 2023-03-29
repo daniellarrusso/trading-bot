@@ -29,14 +29,14 @@ export class GridOrders {
     if (!existingBuyOrder) {
       await this.createLimitOrder(midPrice, 'buy');
     } else {
-      const limitOrder = new LimitOrder(existingBuyOrder.price, +existingBuyOrder.origQty, 'buy');
+      const limitOrder = new LimitOrder(+existingBuyOrder.price, +existingBuyOrder.origQty, 'buy');
       limitOrder.orderId = existingBuyOrder.orderId;
       this.orderList.push(limitOrder);
     }
     if (!existingSellOrder) {
       await this.createLimitOrder(midPrice, 'sell');
     } else {
-      const limitOrder = new LimitOrder(existingSellOrder.price, +existingSellOrder.origQty, 'sell');
+      const limitOrder = new LimitOrder(+existingSellOrder.price, +existingSellOrder.origQty, 'sell');
       limitOrder.orderId = existingSellOrder.orderId;
       this.orderList.push(limitOrder);
     }

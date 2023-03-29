@@ -8,12 +8,12 @@ import { ActionType } from './enums';
 import { ordertypes, Side } from './literals';
 import { Portfolio } from './portfolio';
 import { IExchangeService } from '../services/IExchange-service';
+import { LimitOrder } from './limit-order';
 
 export class LiveAdvisor extends Advisor {
   exchange: BinanceService;
   profitResults = [];
   telegram: TelegramBot;
-  portfolio: Portfolio;
   ticker: Ticker;
   orderType: ordertypes;
 
@@ -24,10 +24,6 @@ export class LiveAdvisor extends Advisor {
   constructor(exchange: IExchangeService) {
     super(exchange);
     this.telegram = new TelegramBot(ChatGroups.mainAccount);
-
-    if (!this.portfolio) {
-      throw new Error('Portfolio not set');
-    }
   }
   async setup(orderType: ordertypes): Promise<void> {
     this.orderType = orderType;
@@ -46,9 +42,8 @@ export class LiveAdvisor extends Advisor {
     if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
     const quantity = this.currencyQuantity / price;
     try {
-      const response: TradeResponse = await this.exchange[this.orderType](side, quantity);
+      const response: TradeResponse = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
       await this.logBalance();
-      console.log(response);
       return response;
     } catch (error) {
       console.log(error);

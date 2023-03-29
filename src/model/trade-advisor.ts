@@ -8,9 +8,9 @@ import { TradeResponse } from './trade-response';
 import { Side } from './literals';
 import { Trades } from './trades';
 import { Settings } from '../../settings';
-import { IExchangeService } from '../services/IExchange-service';
 import { TradesDb } from '../db/tradesDb';
 import { returnPercentageIncrease } from '../utilities/utility';
+import { MockExchangeService } from '../services/mock-exchange.service';
 
 export class TradeAdvisor {
   advisor: Advisor;
@@ -35,9 +35,9 @@ export class TradeAdvisor {
     return this.advisor instanceof BacktestAdvisor;
   }
 
-  constructor(public exchange: IExchangeService) {
-    this.advisor = new BacktestAdvisor(exchange);
-    this.ticker = exchange.ticker;
+  constructor(ticker: Ticker) {
+    this.advisor = new BacktestAdvisor(new MockExchangeService(ticker));
+    this.ticker = ticker;
     this.initialAction = this.ticker.action;
     this.actionType = this.ticker.action;
     this.tradesDb = new TradesDb(this.ticker);
@@ -50,11 +50,8 @@ export class TradeAdvisor {
   }
 
   get profit() {
+    if (!this.longPrice) return 0;
     return returnPercentageIncrease(this.candle.close, this.longPrice);
-  }
-
-  formatQuantity(qty: number) {
-    return this.exchange.exchange.roundStep(+qty, this.ticker.stepSize);
   }
 
   async trade(price?: number, side?: Side) {
@@ -113,11 +110,11 @@ export class TradeAdvisor {
 
   logMessage(trade: TradeResponse) {
     const { action, asset, currency, candle, tickSize } = this.ticker;
-    const quantity = trade.origQty ?? this.formatQuantity(Settings.usdAmount / candle.close);
-    const currencyAmount = trade.cummulativeQuoteQty ?? Settings.usdAmount;
+    const quantity = trade.origQty;
+    const currencyAmount = this.ticker.normalisePrice(+trade.cummulativeQuoteQty) ?? Settings.usdAmount;
     let message = `${candle.printTime}: ${currencyAmount} ${currency} ${
       ActionType[action]
-    } on ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
+    } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
 
     console.log(message);
     this.advisor.notifyTelegramBot(message);

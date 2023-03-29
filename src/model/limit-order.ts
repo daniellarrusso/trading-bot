@@ -3,7 +3,7 @@ export class LimitOrder {
   triggered: boolean;
   complete: boolean = false;
   marketSide: string;
-  constructor(public price: any, public quantity: number, public side: string) {
+  constructor(public price: number, public quantity: number, public side: string) {
     this.marketSide = this.side === 'buy' ? 'marketBuy' : 'marketSell';
   }
 }

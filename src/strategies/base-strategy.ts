@@ -21,6 +21,8 @@ import { IExchangeService } from '../services/IExchange-service';
 import { Trader } from '../services/trader-service';
 import { PaperAdvisor } from '../model/paper-advisor';
 import { ordertypes } from '../model/literals';
+import { LiveAdvisor } from '../model/live-advisor';
+import { MockExchangeService } from '../services/mock-exchange.service';
 
 export abstract class BaseStrategy implements Strat {
   telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -70,17 +72,20 @@ export abstract class BaseStrategy implements Strat {
     this.pair = this.ticker.pair;
     this.logger = new Logger(this.ticker);
     this.candleStats = new CandleStatistics(this.ticker.interval);
-    this.tradeAdvisor = new TradeAdvisor(this.exchange);
+    this.tradeAdvisor = new TradeAdvisor(this.ticker);
     this.loadDefaultIndicators();
   }
 
   async setAdvisor(advisor: AdvisorType, ordertypes: ordertypes) {
     switch (advisor) {
       case (advisor = AdvisorType.paper):
-        this.tradeAdvisor.advisor = new PaperAdvisor(this.exchange);
+        this.tradeAdvisor.advisor = new PaperAdvisor(new MockExchangeService(this.ticker));
+        break;
+      case (advisor = AdvisorType.live):
+        this.tradeAdvisor.advisor = new LiveAdvisor(this.exchange);
         break;
       default:
-        this.tradeAdvisor.advisor = new PaperAdvisor(this.exchange);
+        this.tradeAdvisor.advisor = new PaperAdvisor(new MockExchangeService(this.ticker));
         break;
     }
     await this.tradeAdvisor.advisor.doSetup(false, ordertypes);
@@ -185,8 +190,8 @@ export abstract class BaseStrategy implements Strat {
     if (this.age > this.history) {
       await this.trader.refreshTradeSettings();
       await this.advice();
-      this.logStatus(this.tradeAdvisor.profit);
       this.profitNotifier();
+      this.logStatus(this.tradeAdvisor.profit);
     } else {
       await this.backTest();
     }
@@ -228,7 +233,7 @@ export abstract class BaseStrategy implements Strat {
   }
 
   consoleColour(message: string, warning: boolean = false) {
-    if (this.ticker.isLong || warning) {
+    if (!this.ticker.isLong || warning) {
       console.log('\u001b[' + 31 + 'm' + message + '\u001b[0m');
     } else {
       console.log('\u001b[' + 32 + 'm' + message + '\u001b[0m');

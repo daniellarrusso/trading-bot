@@ -1,4 +1,5 @@
 import { addIndicator } from '../indicators/base-indicator';
+import { CallbackDelay } from '../model/callback-delay';
 import { Candle } from '../model/candle';
 import { ActionType } from '../model/enums';
 import { IExchangeService } from '../services/IExchange-service';
@@ -35,6 +36,7 @@ export class TemplateStrategy extends BaseStrategy {
     // Go Short
     if (this.tradeAdvisor.actionType === ActionType.Short) {
       await this.tradeAdvisor.trade();
+      this.delayStrat.start(new CallbackDelay(2));
     }
     // run in backTest
     if (this.backtestMode && this.hasDailyCandles) {
@@ -45,7 +47,7 @@ export class TemplateStrategy extends BaseStrategy {
   logStatus(advice: any): void {
     let enabled = this.canTrade ? 'YES' : 'NO';
     const usedIndicators = this.logger.displayIndicators();
-    let message = `${this.ticker.pair} PRICE: ${this.candle.price}. Enabled: ${enabled}. Strategy: ${usedIndicators} Profit: ${advice}`;
+    let message = `${this.ticker.pair} PRICE: ${this.candle.price}. Enabled: ${enabled}. Indicators: ${usedIndicators} Profit: ${advice}`;
     this.consoleColour(message);
   }
 }

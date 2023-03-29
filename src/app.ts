@@ -6,16 +6,10 @@ import { Strat } from './model/interfaces/strat';
 import { NotifierStrategy } from './notifiers/notifier.strategy';
 import { BinanceService } from './services/binance-service';
 import { TemplateStrategy } from './strategies/template-strategy';
-import { MockExchangeService } from './services/mock-exchange.service';
-import { LimitOrder } from './model/limit-order';
 
 const trader = Trader.getInstance();
-const testStrat = new TemplateStrategy(
-  new MockExchangeService(new Ticker('BTC', 'USDT', ActionType.Long, '1m'))
-);
+const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')));
 const advisorType: AdvisorType = AdvisorType.paper;
-
-const test = new MockExchangeService(new Ticker('BTC', 'USDT', ActionType.Long, '1m'));
 
 async function loadStrategy() {
   await trader.startService();
