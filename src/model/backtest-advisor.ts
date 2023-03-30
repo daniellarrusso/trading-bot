@@ -22,6 +22,7 @@ export class BacktestAdvisor extends Advisor {
   constructor(public exchange: IExchangeService) {
     super(new MockExchangeService(exchange.ticker));
     this.ticker = exchange.ticker;
+    this.ticker.setActionType(ActionType.Long);
     if (!(this.exchange instanceof MockExchangeService))
       this.exchange = new MockExchangeService(exchange.ticker);
   }

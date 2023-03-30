@@ -36,7 +36,7 @@ export class TemplateStrategy extends BaseStrategy {
     // Go Short
     if (this.tradeAdvisor.inTrade) {
       await this.tradeAdvisor.trade();
-      this.delayStrat.start(new CallbackDelay(10));
+      this.delayStrat.start(new CallbackDelay(0));
     }
     // run in backTest
     if (this.backtestMode && this.hasDailyCandles) {

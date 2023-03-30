@@ -1,13 +1,25 @@
 import { TradesDb } from '../db/tradesDb';
+import { Trader } from '../services/trader-service';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { Ticker } from './ticker';
 import { TradeResponse } from './trade-response';
 
 export class Trades {
-  tradeResponses: TradeResponse[] = [];
+  private tradeResponses: TradeResponse[] = [];
   tradesDb: TradesDb;
+  trader = Trader.getInstance();
+
   constructor(ticker: Ticker) {
     this.tradesDb = new TradesDb(ticker);
+  }
+
+  async addTrade(trade: TradeResponse, backTest: boolean) {
+    try {
+      !backTest && (await this.tradesDb.trade(trade));
+      this.tradeResponses.push(trade);
+    } catch (error) {
+      throw new Error('Error Adding Trade to MongoDb');
+    }
   }
 
   checkTrades(isBacktest: boolean) {

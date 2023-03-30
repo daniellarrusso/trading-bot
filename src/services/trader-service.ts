@@ -1,4 +1,3 @@
-import { Candle } from '../model/candle';
 import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import { SettingsDb } from '../db/settingsDb';
@@ -7,8 +6,7 @@ import { Strat } from '../model/interfaces/strat';
 
 export class Trader {
   private static instance: Trader;
-  isTrading: boolean;
-  tradingWith: string;
+
   apiAccount: ApiAccount;
   tickersTrading: Ticker[] = [];
   private _strategies: Strat[] = [];
@@ -44,6 +42,10 @@ export class Trader {
     settings.excludedPairs.map((pair) => this.removeTicker(pair));
   }
 
+  updateTicker(ticker: Ticker) {
+    ticker.isLong ? this.removeTicker(ticker) : this.addTicker(ticker);
+  }
+
   addTicker(ticker: Ticker): number {
     return this.tickersTrading.push(ticker);
   }
@@ -59,20 +61,7 @@ export class Trader {
     this._strategies = this._strategies.filter((s) => s.exchange.ticker.pair !== pair);
   }
 
-  public acivateTrader(candle: Candle) {
-    if (!this.isTrading) {
-      this.isTrading = true;
-      this.tradingWith = candle.pair;
-    }
-  }
   public resetTrader() {
-    this.tradingWith = null;
-    this.isTrading = false;
     this.tickersTrading.length = 0;
-  }
-
-  public inTrade(symbol): boolean {
-    const isTrading = (this.isTrading === true && this.tradingWith === symbol) || !this.tradingWith;
-    return isTrading;
   }
 }

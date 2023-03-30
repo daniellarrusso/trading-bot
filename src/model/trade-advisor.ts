@@ -40,7 +40,6 @@ export class TradeAdvisor {
     this.ticker = ticker;
     this.initialAction = this.ticker.action;
     this.trades = new Trades(ticker);
-    if (this.isBacktest && this.initialAction === ActionType.Short) this.ticker.setActionType();
   }
 
   get inTrade() {
@@ -53,13 +52,12 @@ export class TradeAdvisor {
   }
 
   async trade(price?: number, side?: Side) {
-    this.trades.checkTrades(this.isBacktest);
+    // this.trades.checkTrades(this.isBacktest);
     if (!this.canTrade) return;
     try {
       if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
       const res = await this.advisor.trade(price, side);
-      this.trades.tradeResponses.push(res);
-      await this.logTrade(res);
+      await this.setTraderAction(res);
     } catch (error) {
       console.log(error);
     }
@@ -79,31 +77,13 @@ export class TradeAdvisor {
     this.roundtripProfit = ((this.shortPrice - this.longPrice) / this.longPrice) * 100;
     console.log(`'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${this.ticker.pair})`);
     this.advisor.addProfitResults(this.shortPrice, this.trades.lastBuy);
-    // this._lastBuy = null; // have sold so reset buy price
   }
 
-  async logTrade(trade: TradeResponse) {
-    try {
-      await this.logTradeDb(this.isBacktest);
-      this.logMessage(trade);
-      this.setTraderAction();
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async logTradeDb(isBackTest: boolean) {
-    if (!isBackTest) await this.tradesDb.trade(this.trades.lastTrade);
-  }
-
-  setTraderAction() {
-    if (!this.inTrade) {
-      // will buy {
-      this.trader.addTicker(this.ticker);
-    } else {
-      this.trader.removeTicker(this.ticker);
-      this.calculateProfit();
-    }
+  async setTraderAction(trade: TradeResponse) {
+    await this.trades.addTrade(trade, this.isBacktest);
+    this.logMessage(trade);
+    this.trader.updateTicker(this.ticker);
+    this.ticker.isLong && this.calculateProfit();
     this.ticker.setActionType();
   }
 
@@ -128,7 +108,7 @@ export class TradeAdvisor {
     this.advisor.end(prices);
     this.trades.deleteTradeResponses();
     // const action = await this.tradesDb.checkIfAlreadyExists();
-    // this.actionType = this.ticker.setActionType(action || this.initialAction);
+    this.ticker.setActionType(this.initialAction);
     this.trader.resetTrader();
   }
 }
