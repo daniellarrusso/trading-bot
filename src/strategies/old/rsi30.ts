@@ -62,14 +62,14 @@ export class IntradayRSIStrategy extends BaseStrategy {
       return this.ewo.result < 0;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.rsi.previousResult < 30 && volumeConfirmedGreen && this.ewo.previousResult < -1) {
         this.newUpTrend = false;
         this.tradeAdvisor.trade();
         this.shortLimit = this.candle.open;
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.ewo.result > 0 && this.ewo.previousResult < 0) {
         this.newUpTrend = true;
       }
@@ -95,7 +95,7 @@ export class IntradayRSIStrategy extends BaseStrategy {
     let canTrade = `EWO: ${this.ewo.result}. RSI: ${this.rsi.result}  - READY? ${
       this.canTrade ? 'OK' : 'NO'
     }`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

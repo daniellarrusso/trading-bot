@@ -27,7 +27,7 @@ export class RSI15trategy extends BaseStrategy {
     });
 
     /// Go Long
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.rsi14.result < 30) {
         this.tradeAdvisor.trade();
         this.sellIntervals = this.intervalsInDay;
@@ -35,7 +35,7 @@ export class RSI15trategy extends BaseStrategy {
     }
 
     // Go Short
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       this.sellIntervals--;
       if (this.tradeAdvisor.profit > 3.5) {
         this.tradeAdvisor.trade();

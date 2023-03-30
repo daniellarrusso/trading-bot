@@ -79,12 +79,12 @@ export class SniperEwoStrategy extends BaseStrategy {
       return this.ewo.result < 0 && this.sniperCCI < 0;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.ewo.result > 0 && sniperCCIBuy && volumeConfirmed) {
         this.tradeAdvisor.trade();
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.ewo.result < 0 && this.sniperCCI < 0 && !buyCandle.green) {
         this.tradeAdvisor.trade();
       }
@@ -103,7 +103,7 @@ export class SniperEwoStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `EWO: ${this.ewo.result}. CCI: ${this.sniperCCI} - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

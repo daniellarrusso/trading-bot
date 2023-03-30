@@ -35,7 +35,7 @@ export class CountdownPatternStrategy extends BaseStrategy {
     });
 
     // BUY
-    if (this.tradeAdvisor.isLong && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (!this.buyTrigger && this.countdown.result < countdownBuy) {
         // buyTriggerSet
         this.buyTrigger = true;
@@ -48,7 +48,7 @@ export class CountdownPatternStrategy extends BaseStrategy {
     }
 
     // SELL
-    if (!this.tradeAdvisor.isLong) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.countdown.result > countdownSell) {
         this.sell();
       }

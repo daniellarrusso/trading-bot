@@ -29,14 +29,14 @@ export class TemplateStrategy extends BaseStrategy {
     }
 
     /// Go Long
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       await this.tradeAdvisor.trade();
     }
 
     // Go Short
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       await this.tradeAdvisor.trade();
-      this.delayStrat.start(new CallbackDelay(2));
+      this.delayStrat.start(new CallbackDelay(10));
     }
     // run in backTest
     if (this.backtestMode && this.hasDailyCandles) {

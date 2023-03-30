@@ -65,7 +65,7 @@ export class AstralPatternStrategy extends BaseStrategy {
       return this.astralArray.length > 4;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.astralCountMet && this.heikin.green) {
         // Count reset or met 13
         this.astralCountMet = false;
@@ -78,7 +78,7 @@ export class AstralPatternStrategy extends BaseStrategy {
         this.astralCountMet = true;
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       const stopPrice = this.candle.low - this.atr.result * 2;
       this.maxPrice = Math.max(this.candle.close, this.maxPrice);
       this.stop = this.candle.close === this.maxPrice ? stopPrice : this.stop;
@@ -135,7 +135,7 @@ export class AstralPatternStrategy extends BaseStrategy {
     let canTrade = `Met: ${this.astralCountMet}, Buy Count: - ${this.buyCloseCount}. SellCount: ${
       this.sellCloseCount
     }  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

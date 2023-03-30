@@ -19,9 +19,9 @@ export class TradeAdvisor {
   startingPrice: number;
   roundtripProfit: number;
   initialAction: ActionType;
-  actionType: ActionType;
+
   private ticker: Ticker;
-  trades: Trades = new Trades();
+  trades: Trades;
   tradesDb: TradesDb;
 
   get longPrice() {
@@ -39,14 +39,12 @@ export class TradeAdvisor {
     this.advisor = new BacktestAdvisor(new MockExchangeService(ticker));
     this.ticker = ticker;
     this.initialAction = this.ticker.action;
-    this.actionType = this.ticker.action;
-    this.tradesDb = new TradesDb(this.ticker);
-    if (this.isBacktest && this.initialAction === ActionType.Short)
-      this.actionType = this.ticker.setActionType();
+    this.trades = new Trades(ticker);
+    if (this.isBacktest && this.initialAction === ActionType.Short) this.ticker.setActionType();
   }
 
-  get isLong() {
-    return this.actionType === ActionType.Short ? true : false;
+  get inTrade() {
+    return this.ticker.action === ActionType.Short ? true : false;
   }
 
   get profit() {
@@ -55,9 +53,10 @@ export class TradeAdvisor {
   }
 
   async trade(price?: number, side?: Side) {
+    this.trades.checkTrades(this.isBacktest);
     if (!this.canTrade) return;
     try {
-      if (!this.startingPrice && this.isLong) this.startingPrice = this.candle.close;
+      if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
       const res = await this.advisor.trade(price, side);
       this.trades.tradeResponses.push(res);
       await this.logTrade(res);
@@ -98,14 +97,14 @@ export class TradeAdvisor {
   }
 
   setTraderAction() {
-    if (!this.isLong) {
+    if (!this.inTrade) {
       // will buy {
       this.trader.addTicker(this.ticker);
     } else {
       this.trader.removeTicker(this.ticker);
       this.calculateProfit();
     }
-    this.actionType = this.ticker.setActionType();
+    this.ticker.setActionType();
   }
 
   logMessage(trade: TradeResponse) {
@@ -128,8 +127,8 @@ export class TradeAdvisor {
     };
     this.advisor.end(prices);
     this.trades.deleteTradeResponses();
-    const action = await this.tradesDb.checkIfAlreadyExists();
-    this.actionType = this.ticker.setActionType(action || this.initialAction);
+    // const action = await this.tradesDb.checkIfAlreadyExists();
+    // this.actionType = this.ticker.setActionType(action || this.initialAction);
     this.trader.resetTrader();
   }
 }

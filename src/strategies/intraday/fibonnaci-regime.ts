@@ -43,12 +43,12 @@ export class FibonnaciRegimeStrategy extends BaseStrategy {
     }
 
     /// Go Long
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.candle.high > high && this.candle.low > low) this.tradeAdvisor.trade();
     }
 
     // Go Short
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.candle.low < low && this.candle.high < high) this.tradeAdvisor.trade();
     }
     // run in backTest

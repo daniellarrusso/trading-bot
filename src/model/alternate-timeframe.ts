@@ -1,5 +1,4 @@
 import { addIndicator, IndicatorName } from '../indicators/base-indicator';
-import { BinanceService } from '../services/binance-service';
 import { Candle } from './candle';
 import { Indicator, IndicatorSettings } from './indicator';
 import { Interval, IntervalType } from './interval-converter';

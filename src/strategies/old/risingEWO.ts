@@ -59,7 +59,7 @@ export class RisingEwoStrategy extends BaseStrategy {
       return this.ewo.result < 0;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (
         this.ewo.result > -0.5 &&
         volumeConfirmedGreen &&
@@ -72,7 +72,7 @@ export class RisingEwoStrategy extends BaseStrategy {
         this.shortLimit = this.candle.low; // this.pricesinRed.reduce((a, b) => Math.min(a, b));
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       // if (!this.heikin.green) {
       //     this.sell()
       // }
@@ -115,7 +115,7 @@ export class RisingEwoStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `EWO: ${this.ewo.result}. CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

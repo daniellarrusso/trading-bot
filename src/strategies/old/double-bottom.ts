@@ -49,7 +49,7 @@ export class DoubleBottomStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (!prevHeikin.green && prevHeikin.duration > 3) {
         // possible reversal
         this.redHeikinTouched = true;
@@ -61,7 +61,7 @@ export class DoubleBottomStrategy extends BaseStrategy {
       }
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       const pair = this.candle.pair;
       const stopPrice = this.candle.open - this.atr.result * 2;
       this.maxPrice = Math.max(this.candle.close, this.maxPrice);

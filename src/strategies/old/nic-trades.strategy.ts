@@ -56,14 +56,14 @@ export class NicTradesStrategy extends BaseStrategy {
       return this.cci.result < 0;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (cci > 0) {
         /// buy
         this.buyTrigger = true;
         this.tradeAdvisor.trade();
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       // if (cci < 150 && prevCci > 150) {
       //   this.tradeAdvisor.trade();
       //   this.delayStrat.start(new CCIDelay(6, this.cci));
@@ -81,7 +81,7 @@ export class NicTradesStrategy extends BaseStrategy {
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;
     this.consoleColour(message);
   }

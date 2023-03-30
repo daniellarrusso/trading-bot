@@ -95,7 +95,7 @@ export class FifteenHourStrategy extends BaseStrategy {
       }
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.heikin.green && entrySize > 1) {
         this.tradeAdvisor.trade();
         this.majorCandle = null;
@@ -107,7 +107,7 @@ export class FifteenHourStrategy extends BaseStrategy {
         .sort((a, b) => (a.close > b.close ? 1 : -1))
         .pop();
 
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       // this.tradeAdvisor.trade();
       if (this.heikin.close < Math.min(this.majorCandle?.close, this.majorCandle?.open)) {
         this.tradeAdvisor.trade();

@@ -197,17 +197,14 @@ export class BinanceService implements IExchangeService {
     const side = isMarket ? order.marketSide : order.side;
     order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
     const priceString = this.normalisePrice(order.price);
-
     try {
-      const res = await this.exchange[side](this.ticker.pair, order.quantity, priceString);
+      const res = await this.exchange[side](this.ticker.pair, order.quantity, isMarket ? {} : priceString);
       await this.getTradingBalance();
       return new TradeResponse(res, this.ticker.candle);
     } catch (error) {
       console.log(error);
     }
   }
-
-  private convertServerTradeResponse(res: TradeResponse) {}
 
   placeStopLimitOrder(side: Side, quantity: number, price: number, stopPrice: number) {
     quantity = this.exchange.roundStep(quantity, this.ticker.stepSize);

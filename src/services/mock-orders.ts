@@ -37,7 +37,7 @@ const mockLimit = (pair: string, quantity: string, price: string, side: string) 
     price: price,
     origQty: quantity,
     executedQty: quantity,
-    cummulativeQuoteQty: +quantity * +price,
+    cummulativeQuoteQty: '0.00000000',
     status: 'NEW',
     timeInForce: 'GTC',
     type: 'LIMIT',

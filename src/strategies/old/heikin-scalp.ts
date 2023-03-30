@@ -67,7 +67,7 @@ export class HeikinScalpStrategy extends BaseStrategy {
     // const mas = this.alternateTimeframe.indicator.movingAverages;
     // const hourlyCandle = this.alternateTimeframe.candlesticks[this.alternateTimeframe.candlesticks.length - 1];
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (
         this.ema20.result > this.ema20.previousResult &&
         this.ema20.result < this.sma50.result &&
@@ -76,7 +76,7 @@ export class HeikinScalpStrategy extends BaseStrategy {
         this.tradeAdvisor.trade();
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       this.sellTrigger.set(() => {
         return this.ema20.previousResult < this.sma50.previousResult && this.ema20.result > this.sma50.result;
       });
@@ -100,7 +100,7 @@ export class HeikinScalpStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI: - ${this.rsi.result}. CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

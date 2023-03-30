@@ -32,20 +32,18 @@ export class ShortSellStrategy extends BaseStrategy {
     // this.sellPrice -= this.atr.result;
     // this.sellPrice = this.sellPrice.normalise(this.strat.exchange.ticker.tickSize);
 
-    this.tradeAdvisor.actionType = ActionType.Short;
-
     this.checkTradeStatus(() => {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Short && !this.backtestMode) {
+    if (this.tradeAdvisor.inTrade && !this.backtestMode) {
       if (this.candle.close < this.sellPrice) this.tradeAdvisor.trade();
       if (this.rsi14.result < 69 && this.rsi14.previousResult > 69) this.tradeAdvisor.trade();
     }
   }
 
   logStatus(advice: any): void {
-    const action = this.tradeAdvisor.actionType === 1 ? 'buy' : 'sell';
+    const action = !this.tradeAdvisor.inTrade ? 'buy' : 'sell';
     let message = `${this.ticker.pair} will ${action} below: ${this.sellPrice}. Current Price: ${this.candle.price}. RSI: ${this.rsi14.result}`;
     this.consoleColour(message);
   }

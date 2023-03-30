@@ -59,7 +59,7 @@ export class TrendBrokenStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.candleStats.higherHigh && !this.wave) {
         // create Wave
         this.wave = new Wave(low, high, candle);
@@ -70,7 +70,7 @@ export class TrendBrokenStrategy extends BaseStrategy {
         this.resetStops();
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       this.wave.decrement();
       if (candle.high > this.wave.short) {
         this.tradeAdvisor.trade();
@@ -95,7 +95,7 @@ export class TrendBrokenStrategy extends BaseStrategy {
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;
     this.consoleColour(message);
   }

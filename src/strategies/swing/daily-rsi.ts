@@ -61,7 +61,7 @@ export class DailyRSIStrategy extends BaseStrategy {
     }
 
     /// Go Long
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (
         this.candle.close > this.high &&
         this.rsi.movingAverage > 50 &&
@@ -72,7 +72,7 @@ export class DailyRSIStrategy extends BaseStrategy {
     }
 
     // Go Short
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.candle.close < this.low && this.ema20.result < this.sma50.result) {
         this.tradeAdvisor.trade();
       }

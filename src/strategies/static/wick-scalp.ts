@@ -40,10 +40,10 @@ export class WickScalpStrategy extends BaseStrategy {
       return this.candle.close > this.ema20.result;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
     }
   }
 
@@ -54,7 +54,7 @@ export class WickScalpStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI:  ${this.rsi14.result}. READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin} Dailyh = ${dailyH}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

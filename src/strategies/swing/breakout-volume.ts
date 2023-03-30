@@ -43,7 +43,7 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
     }
 
     /// Go Long
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (
         volumeIncreasePercentage > 130 &&
         this.candle.close > this.dailyCandles.lastCandle.high &&
@@ -55,7 +55,7 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
     }
 
     // Go Short
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.candle.close < this.dailyCandles.lastCandle.low) {
         // console.log('Volume breakout Downside');
         this.tradeAdvisor.trade();

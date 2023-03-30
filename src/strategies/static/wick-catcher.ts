@@ -97,7 +97,7 @@ export class WickCatcherStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI: - . CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

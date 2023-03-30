@@ -41,7 +41,7 @@ export class InvertedCandleStrategy extends BaseStrategy {
       return true;
     });
     // const tradingHours = candle.time.getHours() > 6;
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (rsi < 80 && this.ema.result > this.sma.result && !candle.green && this.previousCandle.green) {
         if (choppines > 2) {
           this.tradeAdvisor.trade();
@@ -53,7 +53,7 @@ export class InvertedCandleStrategy extends BaseStrategy {
       }
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (candle.close > lastBuy) {
         if (candle.close < this.stopPrice) {
           this.tradeAdvisor.trade();
@@ -73,7 +73,7 @@ export class InvertedCandleStrategy extends BaseStrategy {
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;
     this.consoleColour(message);
   }

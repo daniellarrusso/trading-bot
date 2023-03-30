@@ -148,7 +148,7 @@ export abstract class BaseStrategy implements Strat {
 
   async update(candle: Candle) {
     this.ticker.candle = candle;
-    this.previousCandle ? null : (this.previousCandle = this.candle);
+    // this.previousCandle ? null : (this.previousCandle = this.candle);
     if (!candle.isFinal) {
       await this.realtimeAdvice(candle);
     } else {

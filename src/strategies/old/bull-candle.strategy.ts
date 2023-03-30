@@ -53,11 +53,13 @@ export class BullCandleStrategy extends BaseStrategy {
     if (this.profitTake) {
       this.stopPrice = this.previousCandle.low;
     }
-    this.profitTake && candle.close < this.stopPrice ? reasonsToSell.push(SellReason.Profit) : SellReason.noop;
+    this.profitTake && candle.close < this.stopPrice
+      ? reasonsToSell.push(SellReason.Profit)
+      : SellReason.noop;
     candle.close < this.stopPrice ? reasonsToSell.push(SellReason.StopLoss) : SellReason.noop;
     // end of refactor
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (candle.close > candle.open && candle.low > sma && rsiBuy && emaRise) {
         if (smaLong > sma) {
           // place a stop Limit on previous candle low
@@ -66,7 +68,7 @@ export class BullCandleStrategy extends BaseStrategy {
         this.tradeAdvisor.trade();
       }
     } else {
-      if (this.tradeAdvisor.actionType === ActionType.Short) {
+      if (this.tradeAdvisor.inTrade) {
         const sellReason = reasonsToSell[0];
         switch (sellReason) {
           case SellReason.Profit:
@@ -98,7 +100,7 @@ export class BullCandleStrategy extends BaseStrategy {
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice?.profit}`;
     this.consoleColour(message);
   }

@@ -56,7 +56,7 @@ export class HeikinLongStrategy extends BaseStrategy {
       this.longTriggered = false;
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (
         this.longTriggered &&
         this.candle.close > this.buyTrigger &&
@@ -65,7 +65,7 @@ export class HeikinLongStrategy extends BaseStrategy {
         this.tradeAdvisor.trade();
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.dailyCandles.indicator.result < 45) {
         this.tradeAdvisor.trade();
       }

@@ -38,7 +38,7 @@ export class QuickScalpStrategy extends BaseStrategy {
 
   async realtimeAdvice(candle: Candle) {
     // add a real time check to take profit on a 5%?
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       const candleIncrease = this.returnPercentageIncrease(candle.close, this.candle.open);
       if (candleIncrease > 6) {
         console.log('Sold as price increased over 6%');
@@ -58,7 +58,7 @@ export class QuickScalpStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       this.buyTrigger.set(() => {
         return (
           !prevHeikin.green &&
@@ -81,7 +81,7 @@ export class QuickScalpStrategy extends BaseStrategy {
       }
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       const pair = this.candle.pair;
       const stopPrice = this.candle.open - this.atr.result * 2;
       this.maxPrice = Math.max(this.candle.close, this.maxPrice);

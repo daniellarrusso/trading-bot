@@ -45,7 +45,7 @@ export class TakeProfitStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (trendBroken) {
         this.buyTrigger = true;
         this.tradeAdvisor.trade();
@@ -53,7 +53,7 @@ export class TakeProfitStrategy extends BaseStrategy {
           candle.high - (candle.high - this.candleStats.getHighLowForPeriod(21, false)) * 0.786;
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (candle.close > lastBuy) {
         if (candle.close < this.stopPrice) {
           this.tradeAdvisor.trade();
@@ -77,7 +77,7 @@ export class TakeProfitStrategy extends BaseStrategy {
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close.toFixed(
       size
     )} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;

@@ -46,14 +46,14 @@ export class RsiMomentumStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (rsiDiff < -10 && !cleanRsiBuy) {
         this.tradeAdvisor.trade();
         this.stopLimit = this.candle.close - this.atr.result * 1;
         this.profitTake = this.candle.close + this.atr.result * 2;
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (rsiDiff > 10 && cleanRsiSell) {
         this.tradeAdvisor.trade();
       }
@@ -72,7 +72,7 @@ export class RsiMomentumStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI: - . CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

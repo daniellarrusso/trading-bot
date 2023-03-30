@@ -25,13 +25,13 @@ export class SimpleMAStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       // this.tradeAdvisor.trade();
       if (this.ema20.result > this.sma50.result) {
         await this.tradeAdvisor.trade();
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.ema20.result < this.sma50.result) {
         await this.tradeAdvisor.trade();
       }

@@ -42,7 +42,10 @@ export class LiveAdvisor extends Advisor {
     if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
     const quantity = this.currencyQuantity / price;
     try {
-      const response: TradeResponse = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+      const response: TradeResponse = await this.exchange.createOrder(
+        new LimitOrder(price * 0.95, quantity, side),
+        this.isMarketOrders
+      );
       await this.logBalance();
       return response;
     } catch (error) {

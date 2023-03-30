@@ -15,9 +15,18 @@ export class TradeResponse {
   fills: [];
   tradeId = -1;
   constructor(res: TradeResponse, public candle: Candle) {
-    if (res.type === 'MARKET') this.quotePrice = +res.cummulativeQuoteQty / +res.origQty;
-    else this.quotePrice = +res.price;
-    this.tradeId = this.candle.time.getTime();
     Object.assign(this, res);
+    this.tradeId = this.candle.time.getTime();
+    this.assignQuoteQtyAndPrice();
+  }
+  /**
+   * Binance Market orders do not have a price and limit orders do not have a cummulative quantity bought
+   */
+  private assignQuoteQtyAndPrice() {
+    if (this.type === 'MARKET') this.quotePrice = +this.cummulativeQuoteQty / +this.origQty;
+    else {
+      this.quotePrice = +this.price;
+      this.cummulativeQuoteQty = (+this.origQty * +this.price).toString();
+    }
   }
 }

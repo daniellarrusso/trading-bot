@@ -68,24 +68,24 @@ export class DailyHeikinNotifier extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (this.heikin.green) {
         if (!(this.tradeAdvisor.advisor instanceof BacktestAdvisor)) {
           this.notifyTelegramBot(
             `${this.strategyName}: Going Long on ${this.ticker.pair}. Current Price: ${this.candle.close}`
           );
-          this.tradeAdvisor.actionType = ActionType.Short;
+
           this.tradeAdvisor.trade();
         }
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (!this.heikin.green) {
         if (!(this.tradeAdvisor.advisor instanceof BacktestAdvisor)) {
           this.notifyTelegramBot(
             `${this.strategyName}: Going Short on ${this.ticker.pair}. Current Price: ${this.candle.close}`
           );
-          this.tradeAdvisor.actionType = ActionType.Long;
+
           this.tradeAdvisor.trade();
         }
       }
@@ -98,7 +98,7 @@ export class DailyHeikinNotifier extends BaseStrategy {
       this.heikin['green'] ? `GREEN (${this.heikin.duration})` : `RED (${this.heikin.duration})`
     } Heikin: ${this.heikin.close} `;
     let nextAction = 'looking to: ';
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.close} ${heikin}. Advisor ${nextAction}. Profit: ${advice}`;
     this.consoleColour(message);
   }

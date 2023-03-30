@@ -44,14 +44,14 @@ export class TrendFollowStrategy extends BaseStrategy {
     const trendIntensity =
       (this.marketAbove.length / (this.marketAbove.length + this.marketBelow.length)) * 100;
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (trendIntensity < 20) {
         this.tradeAdvisor.trade();
         this.stopLimit = this.candle.close - this.atr.result * 2;
         this.profitTake = this.candle.close + this.atr.result * 4;
       }
     }
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.candle.close > this.profitTake) {
         this.tradeAdvisor.trade();
       }
@@ -71,7 +71,7 @@ export class TrendFollowStrategy extends BaseStrategy {
     } `;
     let nextAction = 'looking to: ';
     let canTrade = `RSI: - . CCI:  - READY? ${this.canTrade ? 'OK' : 'NO'}`;
-    nextAction += this.tradeAdvisor.actionType === ActionType.Long ? 'BUY' : 'SELL';
+    nextAction += !this.tradeAdvisor.inTrade ? 'BUY' : 'SELL';
     let message = `${this.ticker.pair} PRICE: ${this.candle.price} ${heikin}. Advisor ${canTrade}. Profit: ${advice}`;
     this.consoleColour(message);
   }

@@ -36,14 +36,14 @@ export class VolumeCatcherStrategy extends BaseStrategy {
       return true;
     });
 
-    if (this.tradeAdvisor.actionType === ActionType.Long && !this.delayOn && this.canTrade) {
+    if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
       if (volDifference > 350 && priceIncrease) {
         this.tradeAdvisor.trade();
         this.stop = this.candle.low > this.sma200.result ? this.sma200.result : this.previousCandle.low;
       }
     }
 
-    if (this.tradeAdvisor.actionType === ActionType.Short) {
+    if (this.tradeAdvisor.inTrade) {
       if (this.profit > 3) {
         this.stop = this.ema20.result;
       }

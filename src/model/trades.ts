@@ -1,8 +1,19 @@
+import { TradesDb } from '../db/tradesDb';
 import { returnPercentageIncrease } from '../utilities/utility';
+import { Ticker } from './ticker';
 import { TradeResponse } from './trade-response';
 
 export class Trades {
   tradeResponses: TradeResponse[] = [];
+  tradesDb: TradesDb;
+  constructor(ticker: Ticker) {
+    this.tradesDb = new TradesDb(ticker);
+  }
+
+  checkTrades(isBacktest: boolean) {
+    if (isBacktest) return;
+    console.log(this.lastTrade);
+  }
 
   get lastBuy(): TradeResponse {
     const filtered = this.tradeResponses.filter((tr) => tr.side === 'BUY');
