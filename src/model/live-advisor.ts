@@ -43,7 +43,7 @@ export class LiveAdvisor extends Advisor {
     const quantity = this.currencyQuantity / price;
     try {
       const response: TradeResponse = await this.exchange.createOrder(
-        new LimitOrder(price * 0.95, quantity, side),
+        new LimitOrder(price, quantity, side),
         this.isMarketOrders
       );
       await this.logBalance();

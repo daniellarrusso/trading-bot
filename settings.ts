@@ -7,6 +7,6 @@ export const Settings = {
   debug: true,
   fee: 0.999,
   backTest: true,
-  marketOrders: false,
+  marketOrders: true,
   usdAmount: 20,
 };

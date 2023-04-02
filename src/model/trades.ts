@@ -49,11 +49,6 @@ export class Trades {
     return this.tradeResponses[this.tradeResponses.length - 1];
   }
 
-  get lastTradeId(): number {
-    if (!this.tradeResponses.length) return -1;
-    return this.tradeResponses[this.tradeResponses.length - 1].tradeId;
-  }
-
   get averageBuy() {
     if (this.numBought)
       return (

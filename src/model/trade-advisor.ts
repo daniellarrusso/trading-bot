@@ -11,6 +11,7 @@ import { Settings } from '../../settings';
 import { TradesDb } from '../db/tradesDb';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { MockExchangeService } from '../services/mock-exchange.service';
+import { PaperAdvisor } from './paper-advisor';
 
 export class TradeAdvisor {
   advisor: Advisor;
@@ -19,6 +20,7 @@ export class TradeAdvisor {
   startingPrice: number;
   roundtripProfit: number;
   initialAction: ActionType;
+  lastTradeId: number = -1;
 
   private ticker: Ticker;
   trades: Trades;
@@ -52,8 +54,8 @@ export class TradeAdvisor {
   }
 
   async trade(price?: number, side?: Side) {
-    // this.trades.checkTrades(this.isBacktest);
     if (!this.canTrade) return;
+    this.lastTradeId = this.ticker.candle.time.getTime();
     try {
       if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
       const res = await this.advisor.trade(price, side);
@@ -65,7 +67,7 @@ export class TradeAdvisor {
 
   /** Returns whether  */
   get canTrade() {
-    return this.candle.time.getTime() !== this.trades.lastTradeId;
+    return this.ticker.candle.time.getTime() !== this.lastTradeId;
   }
 
   getTotalProfit() {

@@ -13,10 +13,8 @@ export class TradeResponse {
   type: string;
   side: string;
   fills: [];
-  tradeId = -1;
   constructor(res: TradeResponse, public candle: Candle) {
     Object.assign(this, res);
-    this.tradeId = this.candle.time.getTime();
     this.assignQuoteQtyAndPrice();
   }
   /**

@@ -9,7 +9,7 @@ import { TemplateStrategy } from './strategies/template-strategy';
 
 const trader = Trader.getInstance();
 const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')));
-const advisorType: AdvisorType = AdvisorType.paper;
+const advisorType: AdvisorType = AdvisorType.live;
 
 async function loadStrategy() {
   await trader.startService();

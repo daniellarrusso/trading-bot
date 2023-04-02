@@ -30,7 +30,7 @@ export class PaperAdvisor extends Advisor {
       this.exchange = new MockExchangeService(exchange.ticker);
   }
   notifyTelegramBot(message: string): void {
-    this.telegram.sendMessage(message);
+    // this.telegram.sendMessage(message);
   }
 
   async trade(price?: number, side?: Side): Promise<TradeResponse> {
