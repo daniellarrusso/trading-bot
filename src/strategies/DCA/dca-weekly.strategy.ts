@@ -1,19 +1,34 @@
+import { AlternateTimeframe } from '../../model/alternate-timeframe';
 import { Candle } from '../../model/candle';
+import { Indicator } from '../../model/indicator';
+import { Interval } from '../../model/interval-converter';
 import { IExchangeService } from '../../services/IExchange-service';
+import { BinanceService } from '../../services/binance-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class DCAWeeklytrategy extends BaseStrategy {
+  af: AlternateTimeframe;
+  afSma: Indicator;
+  afEma: Indicator;
   constructor(public strat: IExchangeService) {
     super(strat);
     this.strategyName = 'Template';
   }
 
-  loadIndicators() {}
+  loadIndicators() {
+    this.af = new AlternateTimeframe(new Interval('4h'), new BinanceService(this.strat.ticker));
+    this.af.createIndicator('sma', { weight: 50 });
+    this.af.createIndicator('ema', { weight: 20 });
+    this.af = this.createAlternateTimeframe(new Interval('4h', 60 * 4), (tf: AlternateTimeframe) => {
+      this.afSma = tf.createIndicator('sma', { weight: 50 });
+      this.afEma = tf.createIndicator('ema', { weight: 20 });
+    });
+  }
 
   async realtimeAdvice(candle: Candle) {}
 
   async advice() {
-    // Get percentage increase
+    await this.af.processHigherTimeframe(this.candle, this.backtestMode);
 
     // Can Trade after certain criteria met (sometimes you don;t want to trade straight away)
     this.checkTradeStatus(() => {

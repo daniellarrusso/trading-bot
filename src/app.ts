@@ -6,17 +6,18 @@ import { Strat } from './model/interfaces/strat';
 import { NotifierStrategy } from './notifiers/notifier.strategy';
 import { BinanceService } from './services/binance-service';
 import { TemplateStrategy } from './strategies/template-strategy';
+import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
 
 const trader = Trader.getInstance();
 const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')));
-const advisorType: AdvisorType = AdvisorType.live;
+const advisorType: AdvisorType = AdvisorType.paper;
 
 async function loadStrategy() {
   await trader.startService();
 
   trader.addStrategy([
-    testStrat,
-    new NotifierStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '4h'))),
+    // testStrat,
+    new DCAWeeklytrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1w'))),
   ]);
 
   await setup();

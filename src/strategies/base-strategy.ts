@@ -135,7 +135,7 @@ export abstract class BaseStrategy implements Strat {
   }
 
   createAlternateTimeframe(interval: Interval, cb: any) {
-    const tf = new AlternateTimeframe(interval, this.exchange);
+    const tf: AlternateTimeframe = new AlternateTimeframe(interval, this.exchange);
     cb(tf);
     return tf;
   }

@@ -62,8 +62,17 @@ export class AlternateTimeframe implements Observer {
     const canProcess = !this.nextInterval || this.nextInterval === conditional;
     if (canProcess) {
       await this.getHistory(candle);
-      this.updateInterval(this.lastCandle.closeTime);
+      this.updateInterval(this.lastCandle?.closeTime);
     }
+  }
+
+  async processHigherTimeframe(candle: Candle, isBacktest: boolean) {
+    const monthsago = moment().subtract(4, 'months');
+
+    this.daylightSavings.update(moment(candle.time).isDST());
+    if (moment(candle.time) < monthsago) return;
+    await this.getHistory(candle);
+    this.updateInterval(this.lastCandle?.closeTime);
   }
 
   async getHistory(candle: Candle) {
@@ -82,7 +91,7 @@ export class AlternateTimeframe implements Observer {
     return this.indicators.find((i) => i.name.toLowerCase() === name.toLowerCase());
   }
 
-  updateIndicator() {
+  private updateIndicator() {
     if (this.nextInterval) {
       this.indicators.map((i) => {
         i.update(this.lastCandle.close);
