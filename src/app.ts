@@ -7,6 +7,7 @@ import { NotifierStrategy } from './notifiers/notifier.strategy';
 import { BinanceService } from './services/binance-service';
 import { TemplateStrategy } from './strategies/template-strategy';
 import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
+import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
 
 const trader = Trader.getInstance();
 const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')));
@@ -17,7 +18,7 @@ async function loadStrategy() {
 
   trader.addStrategy([
     // testStrat,
-    new DCAWeeklytrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1w'))),
+    new SimpleMAStrategy(new BinanceService(new Ticker('ARB', 'USDT', ActionType.Short, '4h'))),
   ]);
 
   await setup();

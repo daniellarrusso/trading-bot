@@ -30,7 +30,7 @@ export class LiveAdvisor extends Advisor {
     try {
       this.ticker = await this.exchange.getTradingBalance();
       console.log(
-        `Starting Percentage Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
+        `Starting Live Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
       );
     } catch (error) {
       console.log(error);

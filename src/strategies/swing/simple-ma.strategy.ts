@@ -1,5 +1,4 @@
 import { addIndicator } from '../../indicators/base-indicator';
-import { ActionType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
@@ -26,7 +25,6 @@ export class SimpleMAStrategy extends BaseStrategy {
     });
 
     if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
-      // this.tradeAdvisor.trade();
       if (this.ema20.result > this.sma50.result) {
         await this.tradeAdvisor.trade();
       }
