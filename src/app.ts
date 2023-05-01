@@ -18,7 +18,7 @@ async function loadStrategy() {
 
   trader.addStrategy([
     // testStrat,
-    new SimpleMAStrategy(new BinanceService(new Ticker('ARB', 'USDT', ActionType.Short, '4h'))),
+    new DCAWeeklytrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1w'))),
   ]);
 
   await setup();

@@ -29,7 +29,7 @@ export class DCAWeeklytrategy extends BaseStrategy {
 
   async advice() {
     await this.af.processHigherTimeframe(this.candle, this.backtestMode);
-
+    await this.tradeAdvisor.tradesDb.updateCurrencyQuantity(350);
     // Can Trade after certain criteria met (sometimes you don;t want to trade straight away)
     this.checkTradeStatus(() => {
       return true;

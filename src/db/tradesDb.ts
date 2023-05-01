@@ -1,25 +1,42 @@
 import { Schema, model } from 'mongoose';
 import { ActionType } from '../model/enums';
-import { Trade } from '../model/interfaces/mongoTrade';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
+
+export interface Trade {
+  ticker: string;
+  action: string;
+  inTrade: boolean;
+  lastBuy: number;
+  currencyQuantity: number;
+  transactions: TradeResponse[];
+}
 
 const schema = new Schema<Trade>({
   ticker: { type: String },
   action: { type: String },
   inTrade: { type: Boolean },
   lastBuy: { type: Number },
+  currencyQuantity: { type: Number },
   transactions: [],
 });
 
 const TradeModel = model<Trade>('Trade', schema);
 
 export class TradesDb {
+  private createdAt!: number;
   constructor(public ticker: Ticker) {}
 
   async findTicker(): Promise<Trade> {
     const result = await TradeModel.findOne({ ticker: this.ticker.pair });
     return result;
+  }
+
+  public async updateCurrencyQuantity(amount: number) {
+    if (!this.createdAt) await this.createNewPosition();
+    const doc = await TradeModel.findOne({ ticker: this.ticker.pair });
+    doc.currencyQuantity = amount;
+    await doc.save();
   }
 
   async checkIfAlreadyExists() {
@@ -34,7 +51,7 @@ export class TradesDb {
     return inTrade;
   }
 
-  async createNewPosition(lastTrade: TradeResponse) {
+  async createNewPosition(lastTrade?: TradeResponse) {
     const result = await this.findTicker();
     const inTrade = this.convertAction(this.ticker.action);
     if (!result) {
@@ -42,10 +59,12 @@ export class TradesDb {
         ticker: this.ticker.pair,
         action: ActionType[this.ticker.action],
         inTrade: inTrade,
-        lastBuy: inTrade ? lastTrade.quotePrice : 0,
-        transactions: [lastTrade],
+        lastBuy: inTrade ? lastTrade?.quotePrice || 0 : 0,
+        currencyQuantity: 0,
+        transactions: lastTrade ? [lastTrade] : [],
       });
       await doc.save();
+      this.createdAt = new Date().getTime();
       console.log(`${doc.ticker} added to MongoDb Trades`);
     } else {
       console.log(

@@ -42,6 +42,7 @@ export class TradeAdvisor {
     this.initialAction = this.ticker.action;
     this.advisor = new BacktestAdvisor(new MockExchangeService(ticker));
     this.trades = new Trades(ticker);
+    if (!this.tradesDb) this.tradesDb = new TradesDb(ticker);
   }
 
   get inTrade() {
