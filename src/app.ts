@@ -14,11 +14,9 @@ const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USD
 const advisorType: AdvisorType = AdvisorType.paper;
 
 async function loadStrategy() {
-  await trader.startService();
-
   trader.addStrategy([
-    // testStrat,
-    new DCAWeeklytrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1w'))),
+    testStrat,
+    new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1m'))),
   ]);
 
   await setup();

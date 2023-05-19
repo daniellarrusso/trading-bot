@@ -17,10 +17,6 @@ export class LiveAdvisor extends Advisor {
   ticker: Ticker;
   orderType: ordertypes;
 
-  get currencyQuantity() {
-    return Settings.usdAmount;
-  }
-
   constructor(exchange: IExchangeService) {
     super(exchange);
     this.telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -40,7 +36,7 @@ export class LiveAdvisor extends Advisor {
   async trade(price?: number, side?: Side) {
     if (!price) price = this.ticker.candle.close;
     if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-    const quantity = this.currencyQuantity / price;
+    const quantity = this.ticker.currencyAmount / price;
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),

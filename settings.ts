@@ -8,5 +8,4 @@ export const Settings = {
   fee: 0.999,
   backTest: true,
   marketOrders: true,
-  usdAmount: 350,
 };

@@ -1,6 +1,3 @@
-import { Settings } from '../../settings';
-
-const currencyAmount = Settings.usdAmount;
 export class MockOrders {
   marketBuy(pair: string, quantity: string, price: string) {
     return new Promise((resolve, reject) => {

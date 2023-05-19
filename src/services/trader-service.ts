@@ -1,16 +1,16 @@
 import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
-import { SettingsDb } from '../db/settingsDb';
-import { MongoDbConnection } from '../db/database-connection';
+import connect from '../db/database-connection';
 import { Strat } from '../model/interfaces/strat';
+import { TradeModel } from '../db/tradesDb';
+import { TradeResponse } from '../model/trade-response';
 
 export class Trader {
   private static instance: Trader;
-
+  instances: number = 0;
   apiAccount: ApiAccount;
   tickersTrading: Ticker[] = [];
   private _strategies: Strat[] = [];
-  settingsDb: SettingsDb = new SettingsDb();
   orderPlaced: boolean;
 
   get strategies() {
@@ -24,22 +24,41 @@ export class Trader {
   static getInstance() {
     if (!Trader.instance) {
       Trader.instance = new Trader();
+      connect(); // connect to database
     }
+    Trader.instance.instances++;
+    console.log(Trader.instance.instances);
     return Trader.instance;
   }
-  async startService() {
-    const db = new MongoDbConnection();
-    await db.connect(); // connect to database
-    await this.settingsDb.createSettings();
+
+  async trade(trade: TradeResponse) {
+    const doc = await TradeModel.findOne({ ticker: trade.symbol });
+    if (doc) {
+      doc.transactions.push(trade);
+      await doc.save();
+    }
   }
 
-  addStrategy(strats: Strat[]) {
+  async updateCurrencyAmount(ticker: Ticker) {
+    const doc = await TradeModel.findOne({ ticker: ticker.pair });
+    if (doc) ticker.currencyAmount = doc.currencyQuantity;
+  }
+
+  async addTradeModel(ticker: Ticker) {
+    const res = await TradeModel.findOne({ ticker: ticker.pair });
+    if (res) return;
+    const doc = new TradeModel({
+      currencyQuantity: ticker.currencyAmount,
+      ticker: ticker.pair,
+      transactions: [],
+    });
+    await doc.save();
+  }
+
+  async addStrategy(strats: Strat[]) {
     strats.map((s) => this._strategies.push(s));
-  }
-
-  async refreshTradeSettings() {
-    const settings = await this.settingsDb.createSettings();
-    settings.excludedPairs.map((pair) => this.removeTicker(pair));
+    for (let i = 0; i < this._strategies.length; i++)
+      await this.addTradeModel(this._strategies[i].exchange.ticker);
   }
 
   updateTicker(ticker: Ticker) {

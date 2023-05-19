@@ -18,10 +18,6 @@ export class PaperAdvisor extends Advisor {
   ticker: Ticker;
   orderType: ordertypes;
 
-  get currencyQuantity() {
-    return Settings.usdAmount;
-  }
-
   constructor(public exchange: IExchangeService) {
     super(new MockExchangeService(exchange.ticker));
     this.telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -36,7 +32,7 @@ export class PaperAdvisor extends Advisor {
   async trade(price?: number, side?: Side): Promise<TradeResponse> {
     if (!price) price = this.ticker.candle.close;
     if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-    const quantity = this.currencyQuantity / price;
+    const quantity = this.ticker.currencyAmount / price;
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),

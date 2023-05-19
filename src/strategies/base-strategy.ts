@@ -61,7 +61,6 @@ export abstract class BaseStrategy implements Strat {
   protected hasDailyCandles: boolean = false;
   protected canBuy: boolean;
   protected canSell: boolean;
-  protected trader = Trader.getInstance();
 
   get profit() {
     return this.tradeAdvisor.profit;
@@ -188,7 +187,6 @@ export abstract class BaseStrategy implements Strat {
     this.delayOn = this.delayStrat.checkDelay();
     this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
     if (this.age > this.history) {
-      await this.trader.refreshTradeSettings();
       await this.advice();
       this.profitNotifier();
       this.logStatus(this.tradeAdvisor.profit);

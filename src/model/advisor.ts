@@ -4,7 +4,6 @@ import { ChatGroups, Settings } from '../../settings';
 import { IExchangeService } from '../services/IExchange-service';
 import { TradeResponse } from './trade-response';
 import { ordertypes, Side } from './literals';
-import { MockExchangeService } from '../services/mock-exchange.service';
 
 export abstract class Advisor {
   profitResults: number[];

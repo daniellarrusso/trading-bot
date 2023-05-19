@@ -15,10 +15,6 @@ export class BacktestAdvisor extends Advisor {
   profitResults = [];
   ticker: Ticker;
 
-  get currencyQuantity() {
-    return Settings.usdAmount;
-  }
-
   constructor(public exchange: IExchangeService) {
     super(new MockExchangeService(exchange.ticker));
     this.ticker = exchange.ticker;
@@ -30,7 +26,7 @@ export class BacktestAdvisor extends Advisor {
   async trade(price?: number, side?: Side): Promise<TradeResponse> {
     if (!price) price = this.ticker.candle.close;
     if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-    const quantity = this.currencyQuantity / price;
+    const quantity = this.ticker.currencyAmount / price;
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),

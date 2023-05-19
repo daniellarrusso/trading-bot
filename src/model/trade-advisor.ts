@@ -8,10 +8,8 @@ import { TradeResponse } from './trade-response';
 import { Side } from './literals';
 import { Trades } from './trades';
 import { Settings } from '../../settings';
-import { TradesDb } from '../db/tradesDb';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { MockExchangeService } from '../services/mock-exchange.service';
-import { PaperAdvisor } from './paper-advisor';
 
 export class TradeAdvisor {
   advisor: Advisor;
@@ -24,7 +22,6 @@ export class TradeAdvisor {
 
   private ticker: Ticker;
   trades: Trades;
-  tradesDb: TradesDb;
 
   get longPrice() {
     return this.trades.lastBuy?.quotePrice ?? 0;
@@ -41,8 +38,7 @@ export class TradeAdvisor {
     this.ticker = ticker;
     this.initialAction = this.ticker.action;
     this.advisor = new BacktestAdvisor(new MockExchangeService(ticker));
-    this.trades = new Trades(ticker);
-    if (!this.tradesDb) this.tradesDb = new TradesDb(ticker);
+    this.trades = new Trades(this.trader);
   }
 
   get inTrade() {
@@ -56,6 +52,7 @@ export class TradeAdvisor {
 
   async trade(price?: number, side?: Side) {
     if (!this.canTrade) return;
+    if (!this.isBacktest) await this.trader.updateCurrencyAmount(this.ticker);
     this.lastTradeId = this.ticker.candle.time.getTime();
     try {
       if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
@@ -93,7 +90,8 @@ export class TradeAdvisor {
   logMessage(trade: TradeResponse) {
     const { action, asset, currency, candle, tickSize } = this.ticker;
     const quantity = trade.origQty;
-    const currencyAmount = this.ticker.normalisePrice(+trade.cummulativeQuoteQty) ?? Settings.usdAmount;
+    const currencyAmount =
+      this.ticker.normalisePrice(+trade.cummulativeQuoteQty) ?? this.ticker.currencyAmount;
     let message = `${candle.printTime}: ${currencyAmount} ${currency} ${
       ActionType[action]
     } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
@@ -110,7 +108,6 @@ export class TradeAdvisor {
     };
     this.advisor.end(prices);
     this.trades.deleteTradeResponses();
-    // const action = await this.tradesDb.checkIfAlreadyExists();
     this.ticker.setActionType(this.initialAction);
     this.trader.resetTrader();
   }

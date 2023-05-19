@@ -12,7 +12,13 @@ export class Ticker {
   roundStep: (quantity, stepSize) => string;
   private _action: ActionType;
 
-  constructor(public asset: string, public currency: string, action: ActionType, public interval: string) {
+  constructor(
+    public asset: string,
+    public currency: string,
+    action: ActionType,
+    public interval: string,
+    public currencyAmount = 350
+  ) {
     this.pair = asset + currency;
     this._action = action;
   }
