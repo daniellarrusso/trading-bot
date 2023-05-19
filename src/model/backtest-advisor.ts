@@ -30,7 +30,7 @@ export class BacktestAdvisor extends Advisor {
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),
-        this.isMarketOrders
+        this.ticker.isMarketOrders
       );
       return response;
     } catch (error) {

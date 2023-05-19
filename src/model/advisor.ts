@@ -9,7 +9,6 @@ export abstract class Advisor {
   profitResults: number[];
   longQuantity = 0;
   message: string = '';
-  isMarketOrders = Settings.marketOrders;
 
   constructor(public exchange: IExchangeService) {}
 

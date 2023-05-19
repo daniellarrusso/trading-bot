@@ -40,7 +40,7 @@ export class LiveAdvisor extends Advisor {
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),
-        this.isMarketOrders
+        this.ticker.isMarketOrders
       );
       await this.logBalance();
       return response;

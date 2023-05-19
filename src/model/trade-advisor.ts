@@ -51,9 +51,9 @@ export class TradeAdvisor {
   }
 
   async trade(price?: number, side?: Side) {
-    if (!this.canTrade) return;
+    if (this.candleAlreadyTraded) return;
     if (!this.isBacktest) await this.trader.updateCurrencyAmount(this.ticker);
-    this.lastTradeId = this.ticker.candle.time.getTime();
+
     try {
       if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
       const res = await this.advisor.trade(price, side);
@@ -63,9 +63,11 @@ export class TradeAdvisor {
     }
   }
 
-  /** Returns whether  */
-  get canTrade() {
-    return this.ticker.candle.time.getTime() !== this.lastTradeId;
+  /** Bolle  */
+  get candleAlreadyTraded() {
+    const alreadyTraded = this.ticker.candle.time.getTime() === this.lastTradeId;
+    this.lastTradeId = this.ticker.candle.time.getTime();
+    return alreadyTraded;
   }
 
   getTotalProfit() {

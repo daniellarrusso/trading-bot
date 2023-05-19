@@ -4,6 +4,7 @@ import connect from '../db/database-connection';
 import { Strat } from '../model/interfaces/strat';
 import { TradeModel } from '../db/tradesDb';
 import { TradeResponse } from '../model/trade-response';
+import { Settings } from '../../settings';
 
 export class Trader {
   private static instance: Trader;
@@ -25,9 +26,9 @@ export class Trader {
     if (!Trader.instance) {
       Trader.instance = new Trader();
       connect(); // connect to database
+      Trader.instance.instances++;
+      console.log(Trader.instance.instances + ' Trader Instance running');
     }
-    Trader.instance.instances++;
-    console.log(Trader.instance.instances);
     return Trader.instance;
   }
 
@@ -40,19 +41,27 @@ export class Trader {
   }
 
   async updateCurrencyAmount(ticker: Ticker) {
-    const doc = await TradeModel.findOne({ ticker: ticker.pair });
-    if (doc) ticker.currencyAmount = doc.currencyQuantity;
+    const doc = await this.tradeModelExists(ticker.pair);
+    if (doc) {
+      ticker.currencyAmount = doc.currencyAmount;
+      ticker.isMarketOrders = doc.marketOrders;
+    }
   }
 
   async addTradeModel(ticker: Ticker) {
-    const res = await TradeModel.findOne({ ticker: ticker.pair });
-    if (res) return;
+    const exists = await this.tradeModelExists(ticker.pair);
+    if (exists) return;
     const doc = new TradeModel({
-      currencyQuantity: ticker.currencyAmount,
+      currencyAmount: ticker.currencyAmount,
       ticker: ticker.pair,
+      marketOrders: false,
       transactions: [],
     });
     await doc.save();
+  }
+
+  private async tradeModelExists(pair: string) {
+    return await TradeModel.findOne({ ticker: pair });
   }
 
   async addStrategy(strats: Strat[]) {

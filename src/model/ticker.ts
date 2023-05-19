@@ -9,6 +9,7 @@ export class Ticker {
   tickSize: string;
   stepSize: string;
   candle: Candle;
+  isMarketOrders: boolean;
   roundStep: (quantity, stepSize) => string;
   private _action: ActionType;
 

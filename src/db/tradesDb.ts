@@ -3,13 +3,15 @@ import { TradeResponse } from '../model/trade-response';
 
 export interface Trade {
   ticker: string;
-  currencyQuantity: number;
+  currencyAmount: number;
+  marketOrders: boolean;
   transactions: TradeResponse[];
 }
 
 const schema = new Schema<Trade>({
   ticker: { type: String },
-  currencyQuantity: { type: Number },
+  currencyAmount: { type: Number },
+  marketOrders: { type: Boolean },
   transactions: [],
 });
 

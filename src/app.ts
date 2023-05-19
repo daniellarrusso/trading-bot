@@ -16,7 +16,8 @@ const advisorType: AdvisorType = AdvisorType.paper;
 async function loadStrategy() {
   trader.addStrategy([
     testStrat,
-    new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1m'))),
+    // new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '4h'))),
+    // new SimpleMAStrategy(new BinanceService(new Ticker('ETH', 'USDT', ActionType.Short, '4h'))),
   ]);
 
   await setup();
