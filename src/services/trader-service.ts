@@ -1,8 +1,8 @@
 import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
-import connect from '../db/database-connection';
+import connect from '../db/connection';
 import { Strat } from '../model/interfaces/strat';
-import { TradeModel } from '../db/tradesDb';
+import { TradeModel } from '../db/trades';
 import { TradeResponse } from '../model/trade-response';
 import { Settings } from '../../settings';
 

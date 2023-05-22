@@ -8,6 +8,8 @@ import { BinanceService } from './services/binance-service';
 import { TemplateStrategy } from './strategies/template-strategy';
 import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
 import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
+import { DailyRSIStrategy } from './strategies/swing/daily-rsi';
+import connectApi from './api';
 
 const trader = Trader.getInstance();
 const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')));
@@ -15,8 +17,8 @@ const advisorType: AdvisorType = AdvisorType.paper;
 
 async function loadStrategy() {
   trader.addStrategy([
-    testStrat,
-    // new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '4h'))),
+    // testStrat,
+    new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1d'))),
     // new SimpleMAStrategy(new BinanceService(new Ticker('ETH', 'USDT', ActionType.Short, '4h'))),
   ]);
 
@@ -45,6 +47,8 @@ function getLatest(tickers: any) {
 }
 
 loadStrategy();
+
+connectApi();
 
 // async function readBinancePairs() {
 //   let tickerStrategies = [];
