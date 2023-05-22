@@ -16,7 +16,7 @@ export class KrakenService implements IExchangeService {
     this.kraken = new KrakenClient(apiKeys.krakenAccount.key, apiKeys.krakenAccount.secret);
   }
 
-  createOrder(order: LimitOrder, isMarket?: boolean): Promise<TradeResponse> {
+  createOrder(order: LimitOrder, advisorType?: string, isMarket?: boolean): Promise<TradeResponse> {
     throw new Error('Method not implemented.');
   }
   getHistory(ticker: Ticker) {

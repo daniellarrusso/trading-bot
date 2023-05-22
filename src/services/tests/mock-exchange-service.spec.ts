@@ -11,12 +11,12 @@ describe('Mock Exchange', () => {
   });
   describe('createOrder', () => {
     it('should return a mocked JSON response mapped to a concrete TradeResponse class', async () => {
-      const res = await exchange.createOrder(new LimitOrder(100, 1, 'buy'));
+      const res = await exchange.createOrder(new LimitOrder(100, 1, 'buy'), 'Mock');
       expect(res.quotePrice).toBe('100');
       // expect(marketRes.quotePrice).toBe('50000.00000000');
     });
     it('should return a Market Order mocked JSON response mapped to a concrete TradeResponse class', async () => {
-      const res = await exchange.createOrder(new LimitOrder(100, 1, 'buy'), true);
+      const res = await exchange.createOrder(new LimitOrder(100, 1, 'buy'), 'Mock', true);
       expect(res.quotePrice).toBe('50000.00000000');
     });
   });

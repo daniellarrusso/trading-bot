@@ -1,18 +1,25 @@
 import { Schema, model } from 'mongoose';
-import { TradeResponse } from '../model/trade-response';
 
 export interface Trade {
-  ticker: string;
-  currencyAmount: number;
-  marketOrders: boolean;
-  transactions: TradeResponse[];
+  date: Date;
+  side: string;
+  quantity: number;
+  price: number;
+  cost: number;
+  currency: string;
+  closeTime: string;
+  advisorType: string;
 }
 
 const schema = new Schema<Trade>({
-  ticker: { type: String },
-  currencyAmount: { type: Number },
-  marketOrders: { type: Boolean },
-  transactions: [],
+  date: { type: Date, default: new Date() },
+  side: { type: String },
+  quantity: { type: Number },
+  price: { type: Number },
+  cost: { type: Number },
+  currency: { type: String },
+  closeTime: { type: String },
+  advisorType: { type: String, required: true },
 });
 
 export const TradeModel = model<Trade>('Trade', schema);

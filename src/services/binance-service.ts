@@ -11,7 +11,7 @@ import { IndicatorStrategies } from '../indicators/indicator-strategies/indicato
 import { IExchangeService } from './IExchange-service';
 import { ordertypes, Side } from '../model/literals';
 import moment from 'moment';
-import { printDate } from '../utilities/utility';
+import { generateTradeResponse, printDate } from '../utilities/utility';
 
 // const FEE = Settings.fee;
 const history = 1000;
@@ -193,14 +193,14 @@ export class BinanceService implements IExchangeService {
     return this.exchange.prices('BTCUSDT');
   }
 
-  async createOrder(order: LimitOrder, isMarket = false): Promise<TradeResponse> {
+  async createOrder(order: LimitOrder, advisorType: string, isMarket = false): Promise<TradeResponse> {
     const side = isMarket ? order.marketSide : order.side;
     order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
     const priceString = this.normalisePrice(order.price);
     try {
       const res = await this.exchange[side](this.ticker.pair, order.quantity, isMarket ? {} : priceString);
       await this.getTradingBalance();
-      return new TradeResponse(res, this.ticker.candle);
+      return generateTradeResponse({ ...res, advisorType }, this.ticker);
     } catch (error) {
       console.log(error);
     }

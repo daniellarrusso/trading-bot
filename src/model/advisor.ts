@@ -9,9 +9,9 @@ export abstract class Advisor {
   profitResults: number[];
   longQuantity = 0;
   message: string = '';
+  abstract type: string;
 
   constructor(public exchange: IExchangeService) {}
-
   abstract trade(price?: number, side?: Side): Promise<TradeResponse>;
   abstract end(closingPrice: any);
   abstract notifyTelegramBot(message: string): void;
@@ -20,6 +20,7 @@ export abstract class Advisor {
     const messageService = new TelegramBot(ChatGroups.mainAccount);
     const message = `${this.constructor.name} started: ${this.exchange.ticker.pair}`;
     if (sendMessage) messageService.sendMessage(message);
+    if (!this.type) throw new Error('Advisor Type not defined');
     await this.setup(orderType);
   }
   protected abstract setup(orderType: ordertypes);

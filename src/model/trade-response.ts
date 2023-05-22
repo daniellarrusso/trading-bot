@@ -1,5 +1,3 @@
-import { Candle } from './candle';
-
 export class TradeResponse {
   quotePrice: number;
   symbol: string;
@@ -13,7 +11,10 @@ export class TradeResponse {
   type: string;
   side: string;
   fills: [];
-  constructor(res: TradeResponse, public candle: Candle) {
+  currency: string;
+  closeTime: Date;
+  advisorType: string;
+  constructor(res: TradeResponse) {
     Object.assign(this, res);
     this.assignQuoteQtyAndPrice();
   }

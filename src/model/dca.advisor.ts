@@ -16,6 +16,7 @@ export class DCAAdvisor extends Advisor {
   actionType: ActionType;
   profitResults: number[];
   longQuantity: number;
+  type: 'DCA';
 
   dcaDb: any; // get dca amounts per coin and CRUD trades
   telegramBot = new TelegramBot(ChatGroups.mainAccount);

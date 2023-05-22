@@ -4,7 +4,6 @@ import connect from '../db/connection';
 import { Strat } from '../model/interfaces/strat';
 import { TradeModel } from '../db/trades';
 import { TradeResponse } from '../model/trade-response';
-import { Settings } from '../../settings';
 import { SymbolModel } from '../db/symbols';
 
 export class Trader {
@@ -55,11 +54,17 @@ export class Trader {
   }
 
   async trade(trade: TradeResponse) {
-    const doc = await TradeModel.findOne({ ticker: trade.symbol });
-    if (doc) {
-      doc.transactions.push(trade);
-      await doc.save();
-    }
+    const doc = new TradeModel({
+      date: new Date(),
+      quantity: trade.origQty,
+      currency: trade.currency,
+      closeTime: trade.closeTime,
+      cost: trade.cummulativeQuoteQty,
+      price: trade.quotePrice,
+      side: trade.side,
+      advisorType: trade.advisorType,
+    });
+    await doc.save();
   }
 
   updateTicker(ticker: Ticker) {

@@ -26,7 +26,7 @@ export interface IExchangeService {
   // orders
   getOrders(pair: string): Promise<any[]>;
   checkOrderStatus(orderId: any);
-  createOrder(order: LimitOrder, isMarket?: boolean): Promise<TradeResponse>;
+  createOrder(order: LimitOrder, advisorType?: string, isMarket?: boolean): Promise<TradeResponse>;
   getPrice();
 
   cancelOrder(orderId: any);

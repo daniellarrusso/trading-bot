@@ -43,7 +43,7 @@ async function sellToBase(ticker: Ticker) {
     const order = new LimitOrder(price, quantity, 'sell');
     // const order = new MarketOrder(price, false, quantity)
     // const response = await service.marketOrderSpoof(order)
-    const response = await service.createOrder(order);
+    const response = await service.createOrder(order, 'SellOff');
     console.log(response);
   } catch (error) {
     console.log(error.body);

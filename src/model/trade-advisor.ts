@@ -90,11 +90,12 @@ export class TradeAdvisor {
   }
 
   logMessage(trade: TradeResponse) {
-    const { action, asset, currency, candle, tickSize } = this.ticker;
+    const { action, asset, currency, candle, tickSize, isMarketOrders: market } = this.ticker;
     const quantity = trade.origQty;
+    const orderType = market ? 'Market' : 'Limit';
     const currencyAmount =
       this.ticker.normalisePrice(+trade.cummulativeQuoteQty) ?? this.ticker.currencyAmount;
-    let message = `${candle.printTime}: ${currencyAmount} ${currency} ${
+    let message = `${candle.printTime}: ${currencyAmount} ${currency} ${orderType} ${
       ActionType[action]
     } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
 

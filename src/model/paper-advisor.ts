@@ -16,7 +16,7 @@ export class PaperAdvisor extends Advisor {
   telegram: TelegramBot;
   longQuantity: number;
   ticker: Ticker;
-  orderType: ordertypes;
+  type = 'Paper';
 
   constructor(public exchange: IExchangeService) {
     super(new MockExchangeService(exchange.ticker));
@@ -25,6 +25,7 @@ export class PaperAdvisor extends Advisor {
     if (!(this.exchange instanceof MockExchangeService))
       this.exchange = new MockExchangeService(exchange.ticker);
   }
+
   notifyTelegramBot(message: string): void {
     // this.telegram.sendMessage(message);
   }
@@ -36,6 +37,7 @@ export class PaperAdvisor extends Advisor {
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),
+        this.type,
         this.ticker.isMarketOrders
       );
       return response;

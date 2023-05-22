@@ -7,7 +7,7 @@ import { IndicatorStrategies } from '../indicators/indicator-strategies/indicato
 import { Indicator } from '../model/indicator';
 import { LimitOrder } from '../model/limit-order';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
-import { printDate } from '../utilities/utility';
+import { generateTradeResponse, printDate } from '../utilities/utility';
 import marketData from './responses/binance-market-buy.json';
 import limitData from './responses/binance-limit-buy.json';
 import { TradeResponse } from '../model/trade-response';
@@ -37,13 +37,13 @@ export class MockExchangeService implements IExchangeService {
     throw new Error('Method not implemented.');
   }
 
-  async createOrder(order: LimitOrder, isMarket = false): Promise<TradeResponse> {
+  async createOrder(order: LimitOrder, advisorType: string, isMarket = false): Promise<TradeResponse> {
     const side = isMarket ? order.marketSide : order.side;
     order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
     const priceString = this.normalisePrice(order.price);
     try {
       const res = await this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
-      return new TradeResponse(res, this.ticker.candle);
+      return generateTradeResponse({ ...res, advisorType }, this.ticker);
     } catch (error) {
       console.log(error);
     }

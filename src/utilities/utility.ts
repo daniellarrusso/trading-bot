@@ -1,5 +1,7 @@
 import moment from 'moment';
 import { Exchange } from '../model/types';
+import { TradeResponse } from '../model/trade-response';
+import { Ticker } from '../model/ticker';
 
 /**
  *
@@ -23,4 +25,12 @@ export function createStrategy(name: string, exchange: Exchange) {
     default:
       break;
   }
+}
+
+export function generateTradeResponse(res: any, ticker: Ticker) {
+  return new TradeResponse({
+    ...res,
+    closeTime: ticker.candle.closeTime,
+    currency: ticker.currency,
+  });
 }

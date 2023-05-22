@@ -14,6 +14,7 @@ export class BacktestAdvisor extends Advisor {
   currencyAmount = 1000;
   profitResults = [];
   ticker: Ticker;
+  type = 'Backtest';
 
   constructor(public exchange: IExchangeService) {
     super(new MockExchangeService(exchange.ticker));
@@ -30,6 +31,7 @@ export class BacktestAdvisor extends Advisor {
     try {
       const response: TradeResponse = await this.exchange.createOrder(
         new LimitOrder(price, quantity, side),
+        this.type,
         this.ticker.isMarketOrders
       );
       return response;
