@@ -5,6 +5,7 @@ import { Strat } from '../model/interfaces/strat';
 import { TradeModel } from '../db/trades';
 import { TradeResponse } from '../model/trade-response';
 import { Settings } from '../../settings';
+import { SymbolModel } from '../db/symbols';
 
 export class Trader {
   private static instance: Trader;
@@ -32,42 +33,33 @@ export class Trader {
     return Trader.instance;
   }
 
+  async addStrategy(strats: Strat[]) {
+    strats.map((s) => this._strategies.push(s));
+    for (let i = 0; i < this._strategies.length; i++)
+      await this.addSymbolModel(this._strategies[i].exchange.ticker);
+  }
+
+  async updateCurrencyAmount(ticker: Ticker) {
+    const doc = await SymbolModel.findOne({ symbol: ticker.asset });
+    ticker.currencyAmount = doc.amount;
+    ticker.isMarketOrders = doc.marketOrders;
+  }
+
+  async addSymbolModel(ticker: Ticker) {
+    await SymbolModel.deleteMany();
+    const doc = new SymbolModel({
+      symbol: ticker.asset,
+      amount: ticker.currencyAmount,
+    });
+    await doc.save();
+  }
+
   async trade(trade: TradeResponse) {
     const doc = await TradeModel.findOne({ ticker: trade.symbol });
     if (doc) {
       doc.transactions.push(trade);
       await doc.save();
     }
-  }
-
-  async updateCurrencyAmount(ticker: Ticker) {
-    const doc = await this.tradeModelExists(ticker.pair);
-    if (doc) {
-      ticker.currencyAmount = doc.currencyAmount;
-      ticker.isMarketOrders = doc.marketOrders;
-    }
-  }
-
-  async addTradeModel(ticker: Ticker) {
-    const exists = await this.tradeModelExists(ticker.pair);
-    if (exists) return;
-    const doc = new TradeModel({
-      currencyAmount: ticker.currencyAmount,
-      ticker: ticker.pair,
-      marketOrders: false,
-      transactions: [],
-    });
-    await doc.save();
-  }
-
-  private async tradeModelExists(pair: string) {
-    return await TradeModel.findOne({ ticker: pair });
-  }
-
-  async addStrategy(strats: Strat[]) {
-    strats.map((s) => this._strategies.push(s));
-    for (let i = 0; i < this._strategies.length; i++)
-      await this.addTradeModel(this._strategies[i].exchange.ticker);
   }
 
   updateTicker(ticker: Ticker) {
