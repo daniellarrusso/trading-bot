@@ -7,7 +7,6 @@ import { MockExchangeService } from '../services/mock-exchange.service';
 import { Ticker } from './ticker';
 import { IExchangeService } from '../services/IExchange-service';
 import { LimitOrder } from './limit-order';
-import { BinanceService } from '../services/binance-service';
 
 export class BacktestAdvisor extends Advisor {
     assetAmount = 0;
@@ -18,7 +17,7 @@ export class BacktestAdvisor extends Advisor {
 
     constructor(public exchange: IExchangeService) {
         super(new MockExchangeService(exchange.ticker));
-        this.ticker = exchange.ticker;
+
         this.ticker.setActionType(ActionType.Long);
         if (!(this.exchange instanceof MockExchangeService))
             this.exchange = new MockExchangeService(exchange.ticker);

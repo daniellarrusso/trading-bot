@@ -178,13 +178,14 @@ export class MockExchangeService implements IExchangeService {
         return this.exchange.balance();
     }
 
-    getTradingBalance(): Promise<void> {
+    getTradingBalance(): Promise<Ticker> {
         return new Promise(async (resolve, reject) => {
             try {
                 const aq = await this.exchange.balance();
                 const cq = await this.exchange.balance();
                 this.ticker.assetQuantity = aq[this.ticker.asset].available;
                 this.ticker.currencyQuantity = cq[this.ticker.currency].available;
+                return this.ticker;
             } catch (err) {
                 reject(handleError(err));
             }

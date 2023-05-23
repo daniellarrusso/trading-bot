@@ -11,15 +11,11 @@ import { IExchangeService } from '../services/IExchange-service';
 import { LimitOrder } from './limit-order';
 
 export class LiveAdvisor extends Advisor {
-    exchange: BinanceService;
     profitResults = [];
-    telegram: TelegramBot;
-    ticker: Ticker;
     type = 'Live';
 
     constructor(exchange: IExchangeService) {
         super(exchange);
-        this.telegram = new TelegramBot(ChatGroups.mainAccount);
     }
     async setup(): Promise<void> {
         try {

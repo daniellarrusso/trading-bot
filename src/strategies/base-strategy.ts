@@ -22,6 +22,7 @@ import { PaperAdvisor } from '../model/paper-advisor';
 import { ordertypes } from '../model/literals';
 import { LiveAdvisor } from '../model/live-advisor';
 import { MockExchangeService } from '../services/mock-exchange.service';
+import { OrderAdvisor } from '../model/order-advisor';
 
 export abstract class BaseStrategy implements Strat {
     telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -81,6 +82,9 @@ export abstract class BaseStrategy implements Strat {
                 break;
             case (this.advisorType = AdvisorType.live):
                 this.tradeAdvisor.advisor = new LiveAdvisor(this.exchange);
+                break;
+            case (this.advisorType = AdvisorType.order):
+                this.tradeAdvisor.advisor = new OrderAdvisor(this.exchange);
                 break;
             default:
                 this.tradeAdvisor.advisor = new PaperAdvisor(new MockExchangeService(this.ticker));

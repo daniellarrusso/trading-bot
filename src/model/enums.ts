@@ -1,19 +1,20 @@
 export enum ActionType {
-  Short,
-  Long,
-  NoAction,
+    Short,
+    Long,
+    NoAction,
 }
 
 export enum SellReason {
-  'StopLoss',
-  'Profit',
-  'Downside',
-  'noop',
+    'StopLoss',
+    'Profit',
+    'Downside',
+    'noop',
 }
 
 export enum AdvisorType {
-  'paper',
-  'live',
-  'backtest',
-  'DCA',
+    'paper',
+    'live',
+    'backtest',
+    'DCA',
+    'order',
 }
