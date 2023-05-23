@@ -65,7 +65,7 @@ export abstract class BaseStrategy implements Strat {
         return this.tradeAdvisor.profit;
     }
 
-    constructor(public exchange: IExchangeService) {
+    constructor(public exchange: IExchangeService, public advisorType: AdvisorType) {
         this.ticker = this.exchange.ticker;
         this.pair = this.ticker.pair;
         this.logger = new Logger(this.ticker);
@@ -74,19 +74,19 @@ export abstract class BaseStrategy implements Strat {
         this.loadDefaultIndicators();
     }
 
-    async setAdvisor(advisor: AdvisorType, ordertypes: ordertypes) {
-        switch (advisor) {
-            case (advisor = AdvisorType.paper):
+    async setAdvisor() {
+        switch (this.advisorType) {
+            case (this.advisorType = AdvisorType.paper):
                 this.tradeAdvisor.advisor = new PaperAdvisor(new MockExchangeService(this.ticker));
                 break;
-            case (advisor = AdvisorType.live):
+            case (this.advisorType = AdvisorType.live):
                 this.tradeAdvisor.advisor = new LiveAdvisor(this.exchange);
                 break;
             default:
                 this.tradeAdvisor.advisor = new PaperAdvisor(new MockExchangeService(this.ticker));
                 break;
         }
-        await this.tradeAdvisor.advisor.doSetup(false, ordertypes);
+        await this.tradeAdvisor.advisor.doSetup(false);
     }
 
     abstract loadIndicators();

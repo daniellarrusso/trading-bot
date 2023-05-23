@@ -16,7 +16,7 @@ export class OrderAdvisor extends Advisor {
     addProfitResults(close: number, lastBuy: TradeResponse) {
         throw new Error('Method not implemented.');
     }
-    protected setup(orderType: ordertypes) {
+    protected setup() {
         throw new Error('Method not implemented.');
     }
 }

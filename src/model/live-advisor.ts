@@ -15,15 +15,13 @@ export class LiveAdvisor extends Advisor {
     profitResults = [];
     telegram: TelegramBot;
     ticker: Ticker;
-    orderType: ordertypes;
     type = 'Live';
 
     constructor(exchange: IExchangeService) {
         super(exchange);
         this.telegram = new TelegramBot(ChatGroups.mainAccount);
     }
-    async setup(orderType: ordertypes): Promise<void> {
-        this.orderType = orderType;
+    async setup(): Promise<void> {
         try {
             this.ticker = await this.exchange.getTradingBalance();
             console.log(

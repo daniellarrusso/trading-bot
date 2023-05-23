@@ -12,38 +12,41 @@ import { DailyRSIStrategy } from './strategies/swing/daily-rsi';
 import connectApi from './api';
 
 const trader = Trader.getInstance();
-const testStrat = new TemplateStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')));
 const advisorType: AdvisorType = AdvisorType.paper;
+const testStrat = new TemplateStrategy(
+    new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
+    advisorType
+);
 
 async function loadStrategy() {
-  trader.addStrategy([
-    testStrat,
-    // new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1d'))),
-    // new SimpleMAStrategy(new BinanceService(new Ticker('ETH', 'USDT', ActionType.Short, '4h'))),
-  ]);
+    trader.addStrategy([
+        testStrat,
+        // new SimpleMAStrategy(new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1d'))),
+        // new SimpleMAStrategy(new BinanceService(new Ticker('ETH', 'USDT', ActionType.Short, '4h'))),
+    ]);
 
-  await setup();
+    await setup();
 }
 
 async function setup() {
-  const tickers = trader.strategies.length;
-  for (let i = 0; i < tickers; i++) {
-    const strategy: Strat = trader.strategies[i];
-    await strategy.exchange.getExchangeInfo(); // assigns filters etc to Ticker
-    const history = await strategy.exchange.getHistory(strategy.exchange.ticker);
-    await strategy.loadHistory(history); // backtesting takes place inside strat
-    await strategy.setAdvisor(advisorType, 'placeLimitOrder');
-  }
-  getLatest(tickers);
+    const tickers = trader.strategies.length;
+    for (let i = 0; i < tickers; i++) {
+        const strategy: Strat = trader.strategies[i];
+        await strategy.exchange.getExchangeInfo(); // assigns filters etc to Ticker
+        const history = await strategy.exchange.getHistory(strategy.exchange.ticker);
+        await strategy.loadHistory(history); // backtesting takes place inside strat
+        await strategy.setAdvisor();
+    }
+    getLatest(tickers);
 }
 
 function getLatest(tickers: any) {
-  for (let i = 0; i < tickers; i++) {
-    const strategy: Strat = trader.strategies[i];
-    strategy.exchange.getOHLCLatest(strategy.exchange.ticker, async (c) => {
-      await strategy.update(c);
-    });
-  }
+    for (let i = 0; i < tickers; i++) {
+        const strategy: Strat = trader.strategies[i];
+        strategy.exchange.getOHLCLatest(strategy.exchange.ticker, async (c) => {
+            await strategy.update(c);
+        });
+    }
 }
 
 loadStrategy();
