@@ -8,26 +8,26 @@ import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 
 export interface IExchangeService {
-  ticker: Ticker;
-  exchange: any;
+    ticker: Ticker;
+    exchange: any;
 
-  getExchangeInfo();
-  // Candle
-  getOHLCLatest(ticker: Ticker, cb: any): void;
-  getHistory(ticker: Ticker);
-  getOHLCHistoryByPair(pair: string, interval: string): Promise<Candle[]>;
-  getHistoryWithIndicator(
-    pair,
-    interval,
-    indicator?: Indicator,
-    indicators?: IndicatorStrategies,
-    firstLiveLoad?: boolean
-  ): Promise<CandlesIndicatorResponse>;
-  // orders
-  getOrders(pair: string): Promise<any[]>;
-  checkOrderStatus(orderId: any);
-  createOrder(order: LimitOrder, advisorType?: string, isMarket?: boolean): Promise<TradeResponse>;
-  getPrice();
+    getExchangeInfo();
+    // Candle
+    getOHLCLatest(ticker: Ticker, cb: any): void;
+    getHistory(ticker: Ticker);
+    getOHLCHistoryByPair(pair: string, interval: string): Promise<Candle[]>;
+    getHistoryWithIndicator(
+        pair,
+        interval,
+        indicator?: Indicator,
+        indicators?: IndicatorStrategies,
+        firstLiveLoad?: boolean
+    ): Promise<CandlesIndicatorResponse>;
+    // orders
+    getOrders(pair: string): Promise<any[]>;
+    checkOrderStatus(orderId: any);
+    createOrder(order: LimitOrder): Promise<TradeResponse>;
+    getPrice();
 
-  cancelOrder(orderId: any);
+    cancelOrder(orderId: any);
 }

@@ -10,69 +10,67 @@ import { Ticker } from './ticker';
 import { LimitOrder } from './limit-order';
 
 export class PaperAdvisor extends Advisor {
-  assetAmount = 0;
-  currencyAmount = 10000;
-  profitResults = [];
-  telegram: TelegramBot;
-  longQuantity: number;
-  ticker: Ticker;
-  type = 'Paper';
+    assetAmount = 0;
+    currencyAmount = 10000;
+    profitResults = [];
+    telegram: TelegramBot;
+    longQuantity: number;
+    ticker: Ticker;
+    type = 'Paper';
 
-  constructor(public exchange: IExchangeService) {
-    super(new MockExchangeService(exchange.ticker));
-    this.telegram = new TelegramBot(ChatGroups.mainAccount);
-    this.ticker = exchange.ticker;
-    if (!(this.exchange instanceof MockExchangeService))
-      this.exchange = new MockExchangeService(exchange.ticker);
-  }
-
-  notifyTelegramBot(message: string): void {
-    // this.telegram.sendMessage(message);
-  }
-
-  async trade(price?: number, side?: Side): Promise<TradeResponse> {
-    if (!price) price = this.ticker.candle.close;
-    if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-    const quantity = this.ticker.currencyAmount / price;
-    try {
-      const response: TradeResponse = await this.exchange.createOrder(
-        new LimitOrder(price, quantity, side),
-        this.type,
-        this.ticker.isMarketOrders
-      );
-      return response;
-    } catch (error) {
-      console.log(error);
+    constructor(public exchange: IExchangeService) {
+        super(new MockExchangeService(exchange.ticker));
+        this.telegram = new TelegramBot(ChatGroups.mainAccount);
+        this.ticker = exchange.ticker;
+        if (!(this.exchange instanceof MockExchangeService))
+            this.exchange = new MockExchangeService(exchange.ticker);
     }
-  }
 
-  setup() {
-    return new Promise((resolve, reject) => {
-      console.log('Paper Trading Setup');
-      resolve(1);
-    });
-  }
-
-  async logBalance() {
-    try {
-      // await this.exchange.getTradingBalance();
-      const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
-      console.log(
-        `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
-      );
-    } catch (error) {
-      let errorMessage = error?.message;
-      errorMessage += '. Could not get trading balance';
-      console.log(errorMessage);
+    notifyTelegramBot(message: string): void {
+        // this.telegram.sendMessage(message);
     }
-  }
 
-  addProfitResults(lastSell: number, lastBuy: TradeResponse) {
-    const amount = ((lastSell - lastBuy.quotePrice) / lastBuy.quotePrice) * 100;
-    if (amount) this.profitResults.push(+amount.toFixed(2));
-  }
+    async trade(price?: number, side?: Side): Promise<TradeResponse> {
+        if (!price) price = this.ticker.candle.close;
+        if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
+        const quantity = this.ticker.currencyAmount / price;
+        try {
+            const response: TradeResponse = await this.exchange.createOrder(
+                new LimitOrder(price, quantity, side)
+            );
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
-  end(closingPrice: any) {
-    throw new Error('Method not implemented.');
-  }
+    setup() {
+        return new Promise((resolve, reject) => {
+            console.log('Paper Trading Setup');
+            resolve(1);
+        });
+    }
+
+    async logBalance() {
+        try {
+            // await this.exchange.getTradingBalance();
+            const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+            console.log(
+                `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+            );
+        } catch (error) {
+            let errorMessage = error?.message;
+            errorMessage += '. Could not get trading balance';
+            console.log(errorMessage);
+        }
+    }
+
+    addProfitResults(lastSell: number, lastBuy: TradeResponse) {
+        const amount = ((lastSell - lastBuy.quotePrice) / lastBuy.quotePrice) * 100;
+        if (amount) this.profitResults.push(+amount.toFixed(2));
+    }
+
+    end(closingPrice: any) {
+        throw new Error('Method not implemented.');
+    }
 }

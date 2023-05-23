@@ -11,70 +11,68 @@ import { IExchangeService } from '../services/IExchange-service';
 import { LimitOrder } from './limit-order';
 
 export class LiveAdvisor extends Advisor {
-  exchange: BinanceService;
-  profitResults = [];
-  telegram: TelegramBot;
-  ticker: Ticker;
-  orderType: ordertypes;
-  type = 'Live';
+    exchange: BinanceService;
+    profitResults = [];
+    telegram: TelegramBot;
+    ticker: Ticker;
+    orderType: ordertypes;
+    type = 'Live';
 
-  constructor(exchange: IExchangeService) {
-    super(exchange);
-    this.telegram = new TelegramBot(ChatGroups.mainAccount);
-  }
-  async setup(orderType: ordertypes): Promise<void> {
-    this.orderType = orderType;
-    try {
-      this.ticker = await this.exchange.getTradingBalance();
-      console.log(
-        `Starting Live Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
-      );
-    } catch (error) {
-      console.log(error);
+    constructor(exchange: IExchangeService) {
+        super(exchange);
+        this.telegram = new TelegramBot(ChatGroups.mainAccount);
     }
-  }
-
-  async trade(price?: number, side?: Side) {
-    if (!price) price = this.ticker.candle.close;
-    if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-    const quantity = this.ticker.currencyAmount / price;
-    try {
-      const response: TradeResponse = await this.exchange.createOrder(
-        new LimitOrder(price, quantity, side),
-        this.type,
-        this.ticker.isMarketOrders
-      );
-      await this.logBalance();
-      return response;
-    } catch (error) {
-      console.log(error);
+    async setup(orderType: ordertypes): Promise<void> {
+        this.orderType = orderType;
+        try {
+            this.ticker = await this.exchange.getTradingBalance();
+            console.log(
+                `Starting Live Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
+            );
+        } catch (error) {
+            console.log(error);
+        }
     }
-  }
 
-  async logBalance() {
-    try {
-      await this.exchange.getTradingBalance();
-      const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
-      console.log(
-        `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
-      );
-    } catch (error) {
-      let errorMessage = error?.message;
-      errorMessage += '. Could not get trading balance';
-      console.log(errorMessage);
+    async trade(price?: number, side?: Side) {
+        if (!price) price = this.ticker.candle.close;
+        if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
+        const quantity = this.ticker.currencyAmount / price;
+        try {
+            const response: TradeResponse = await this.exchange.createOrder(
+                new LimitOrder(price, quantity, side)
+            );
+            await this.logBalance();
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
     }
-  }
 
-  addProfitResults(lastSell, lastBuy) {
-    const amount = ((lastSell.close - lastBuy.close) / lastBuy.close) * 100;
-    this.profitResults.push(amount);
-  }
+    async logBalance() {
+        try {
+            await this.exchange.getTradingBalance();
+            const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+            console.log(
+                `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+            );
+        } catch (error) {
+            let errorMessage = error?.message;
+            errorMessage += '. Could not get trading balance';
+            console.log(errorMessage);
+        }
+    }
 
-  end(closingPrice: number) {
-    throw new Error('Method not implemented.');
-  }
+    addProfitResults(lastSell, lastBuy) {
+        const amount = ((lastSell.close - lastBuy.close) / lastBuy.close) * 100;
+        this.profitResults.push(amount);
+    }
 
-  async notifyTelegramBot(message: string): Promise<void> {
-    await this.telegram.sendMessage(message);
-  }
+    end(closingPrice: number) {
+        throw new Error('Method not implemented.');
+    }
+
+    async notifyTelegramBot(message: string): Promise<void> {
+        await this.telegram.sendMessage(message);
+    }
 }
