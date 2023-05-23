@@ -1,3 +1,4 @@
+import { TradeModel } from '../db/trades';
 import { Trader } from '../services/trader-service';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { TradeResponse } from './trade-response';
@@ -5,12 +6,23 @@ import { TradeResponse } from './trade-response';
 export class Trades {
     private tradeResponses: TradeResponse[] = [];
 
-    constructor(public trader: Trader) {}
+    constructor() {}
 
-    async addTrade(trade: TradeResponse, backTest: boolean) {
+    async addTrade(trade: TradeResponse, advisorType: string) {
         this.tradeResponses.push(trade);
+        if (advisorType === 'Backtest') return;
         try {
-            !backTest && (await this.trader.trade(trade));
+            const doc = new TradeModel({
+                date: new Date(),
+                quantity: trade.origQty,
+                currency: trade.currency,
+                closeTime: trade.closeTime,
+                cost: trade.cummulativeQuoteQty,
+                price: trade.quotePrice,
+                side: trade.side,
+                advisorType: advisorType,
+            });
+            await doc.save();
         } catch (error) {
             this.tradeResponses.pop();
             throw new Error('Error Adding Trade to MongoDb');

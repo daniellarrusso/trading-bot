@@ -39,7 +39,7 @@ export class TradeAdvisor {
         this.ticker = ticker;
         this.initialAction = this.ticker.action;
         this.advisor = new BacktestAdvisor(new MockExchangeService(ticker));
-        this.trades = new Trades(this.trader);
+        this.trades = new Trades();
     }
 
     get inTrade() {
@@ -58,8 +58,7 @@ export class TradeAdvisor {
         try {
             if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
             const res = await this.advisor.trade(price, side);
-            const tradeResponse = { ...res, advisorType: this.advisor.type } as TradeResponse;
-            await this.setTraderAction(tradeResponse);
+            await this.setTraderAction(res);
         } catch (error) {
             console.log(error);
         }
@@ -84,7 +83,7 @@ export class TradeAdvisor {
     }
 
     async setTraderAction(trade: TradeResponse) {
-        await this.trades.addTrade(trade, this.isBacktest);
+        await this.trades.addTrade(trade, this.advisor.type);
         this.logMessage(trade);
         this.trader.updateTicker(this.ticker);
         this.ticker.isLong && this.calculateProfit();

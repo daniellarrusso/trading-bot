@@ -7,86 +7,72 @@ import { TradeResponse } from '../model/trade-response';
 import { SymbolModel } from '../db/symbols';
 
 export class Trader {
-  private static instance: Trader;
-  instances: number = 0;
-  apiAccount: ApiAccount;
-  tickersTrading: Ticker[] = [];
-  private _strategies: Strat[] = [];
-  orderPlaced: boolean;
+    private static instance: Trader;
+    instances: number = 0;
+    apiAccount: ApiAccount;
+    tickersTrading: Ticker[] = [];
+    private _strategies: Strat[] = [];
+    orderPlaced: boolean;
 
-  get strategies() {
-    const template = this._strategies.find((s) => s.strategyName === 'Test');
-    if (template) return this._strategies.filter((s, i) => s === template);
-    return this._strategies;
-  }
-
-  private constructor() {}
-
-  static getInstance() {
-    if (!Trader.instance) {
-      Trader.instance = new Trader();
-      connect(); // connect to database
-      Trader.instance.instances++;
-      console.log(Trader.instance.instances + ' Trader Instance running');
+    get strategies() {
+        const template = this._strategies.find((s) => s.strategyName === 'Test');
+        if (template) return this._strategies.filter((s, i) => s === template);
+        return this._strategies;
     }
-    return Trader.instance;
-  }
 
-  async addStrategy(strats: Strat[]) {
-    strats.map((s) => this._strategies.push(s));
-    for (let i = 0; i < this._strategies.length; i++)
-      await this.addSymbolModel(this._strategies[i].exchange.ticker);
-  }
+    private constructor() {}
 
-  async updateCurrencyAmount(ticker: Ticker) {
-    const doc = await SymbolModel.findOne({ symbol: ticker.asset });
-    ticker.currencyAmount = doc.amount;
-    ticker.isMarketOrders = doc.marketOrders;
-  }
+    static getInstance() {
+        if (!Trader.instance) {
+            Trader.instance = new Trader();
+            connect(); // connect to database
+            Trader.instance.instances++;
+            console.log(Trader.instance.instances + ' Trader Instance running');
+        }
+        return Trader.instance;
+    }
 
-  async addSymbolModel(ticker: Ticker) {
-    await SymbolModel.deleteMany();
-    const doc = new SymbolModel({
-      symbol: ticker.asset,
-      amount: ticker.currencyAmount,
-    });
-    await doc.save();
-  }
+    async addStrategy(strats: Strat[]) {
+        strats.map((s) => this._strategies.push(s));
+        for (let i = 0; i < this._strategies.length; i++)
+            await this.addSymbolModel(this._strategies[i].exchange.ticker);
+    }
 
-  async trade(trade: TradeResponse) {
-    const doc = new TradeModel({
-      date: new Date(),
-      quantity: trade.origQty,
-      currency: trade.currency,
-      closeTime: trade.closeTime,
-      cost: trade.cummulativeQuoteQty,
-      price: trade.quotePrice,
-      side: trade.side,
-      advisorType: trade.advisorType,
-    });
-    await doc.save();
-  }
+    async updateCurrencyAmount(ticker: Ticker) {
+        const doc = await SymbolModel.findOne({ symbol: ticker.asset });
+        ticker.currencyAmount = doc.amount;
+        ticker.isMarketOrders = doc.marketOrders;
+    }
 
-  updateTicker(ticker: Ticker) {
-    ticker.isLong ? this.removeTicker(ticker) : this.addTicker(ticker);
-  }
+    async addSymbolModel(ticker: Ticker) {
+        await SymbolModel.deleteMany();
+        const doc = new SymbolModel({
+            symbol: ticker.asset,
+            amount: ticker.currencyAmount,
+        });
+        await doc.save();
+    }
 
-  addTicker(ticker: Ticker): number {
-    return this.tickersTrading.push(ticker);
-  }
+    updateTicker(ticker: Ticker) {
+        ticker.isLong ? this.removeTicker(ticker) : this.addTicker(ticker);
+    }
 
-  removeTicker(ticker: Ticker | string) {
-    if (typeof ticker !== 'string') ticker = ticker.pair;
-    const tickerToRemove = this.tickersTrading.findIndex((t) => t.pair === ticker);
-    if (tickerToRemove >= 0) this.tickersTrading.splice(tickerToRemove, 1);
-    return tickerToRemove;
-  }
+    addTicker(ticker: Ticker): number {
+        return this.tickersTrading.push(ticker);
+    }
 
-  removeStrategy(pair: string) {
-    this._strategies = this._strategies.filter((s) => s.exchange.ticker.pair !== pair);
-  }
+    removeTicker(ticker: Ticker | string) {
+        if (typeof ticker !== 'string') ticker = ticker.pair;
+        const tickerToRemove = this.tickersTrading.findIndex((t) => t.pair === ticker);
+        if (tickerToRemove >= 0) this.tickersTrading.splice(tickerToRemove, 1);
+        return tickerToRemove;
+    }
 
-  public resetTrader() {
-    this.tickersTrading.length = 0;
-  }
+    removeStrategy(pair: string) {
+        this._strategies = this._strategies.filter((s) => s.exchange.ticker.pair !== pair);
+    }
+
+    public resetTrader() {
+        this.tickersTrading.length = 0;
+    }
 }
