@@ -10,6 +10,7 @@ import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
 import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
 import { DailyRSIStrategy } from './strategies/swing/daily-rsi';
 import connectApi from './api';
+import { DailySpikeStrategy } from './strategies/static/daily-spike';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
