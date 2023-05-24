@@ -11,6 +11,7 @@ import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
 import { DailyRSIStrategy } from './strategies/swing/daily-rsi';
 import connectApi from './api';
 import { DailySpikeStrategy } from './strategies/static/daily-spike';
+import { KrakenService } from './services/kraken-service';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
@@ -23,7 +24,7 @@ async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new DailySpikeStrategy(
-            new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1m')),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '1d', 820)),
             AdvisorType.order
         ),
         // new SimpleMAStrategy(new BinanceService(new Ticker('ETH', 'USDT', ActionType.Short, '4h'))),

@@ -13,13 +13,15 @@ export class Ticker {
     roundStep: (quantity, stepSize) => string;
     private _action: ActionType;
     ticks: number = 0;
+    pairDecimals: any;
+    lotDecimals: any;
 
     constructor(
         public asset: string,
         public currency: string,
         action: ActionType,
         public interval: string,
-        public currencyAmount = 350
+        public currencyAmount = 100
     ) {
         this.pair = asset + currency;
         this._action = action;

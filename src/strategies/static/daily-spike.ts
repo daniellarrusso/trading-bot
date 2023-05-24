@@ -8,7 +8,7 @@ import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
 export class DailySpikeStrategy extends BaseStrategy {
-    order = { day: -1, orderId: 0 };
+    order = { day: -1, orderId: '' };
     constructor(exchange: IExchangeService, advisor: AdvisorType) {
         super(exchange, advisor);
         this.strategyName = 'Daily Spike';
@@ -33,12 +33,11 @@ export class DailySpikeStrategy extends BaseStrategy {
 
         if (this.tradeAdvisor.advisor instanceof OrderAdvisor) {
             if (new Date().getDay() !== this.order.day) {
-                this.cancelExistingOrder();
+                await this.cancelExistingOrder();
                 const price = this.candle.close * 0.9;
                 const res = await this.tradeAdvisor.advisor.createOrder(price, 'buy');
-                this.order.orderId = res.orderId;
+                this.order.orderId = res.txid[0];
                 this.order.day = new Date().getDay();
-                /// 21227754643
             }
         }
 
@@ -49,9 +48,10 @@ export class DailySpikeStrategy extends BaseStrategy {
     }
     async cancelExistingOrder() {
         try {
-            const res = await this.exchange.cancelOrder(this.order.orderId);
-            this.order.orderId = 0;
-        } catch (error) {}
+            await this.exchange.cancelOrder(this.order.orderId);
+        } catch (error) {
+            this.order.orderId = '';
+        }
     }
 
     logStatus(advice: any): void {

@@ -13,6 +13,7 @@ export class TradeResponse {
     fills: [];
     currency: string;
     closeTime: Date;
+    txid: string[];
     constructor(res: TradeResponse) {
         Object.assign(this, res);
         this.assignQuoteQtyAndPrice();
