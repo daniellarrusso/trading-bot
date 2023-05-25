@@ -24,6 +24,7 @@ export class Interval {
                 this.type = IntervalType.hour;
                 this.distance = +interval.substring(0, interval.length - 1);
                 this.day = minutesPerDay / divider;
+                this.minutes = divider;
                 break;
             case 'd':
                 this.type = IntervalType.day;

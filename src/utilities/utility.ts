@@ -10,27 +10,19 @@ import { Ticker } from '../model/ticker';
  * @returns string - percentage by 2 decimal places
  */
 export function returnPercentageIncrease(newNumber: number, originalNumber: number): number {
-  const increase = ((newNumber - originalNumber) / originalNumber) * 100;
-  return +increase.toFixed(2);
+    const increase = ((newNumber - originalNumber) / originalNumber) * 100;
+    return +increase.toFixed(2);
 }
 
 export function printDate(date: Date) {
-  return moment(date).format('DD/MM/YYYY H:mm A');
+    return moment(date).format('DD/MM/YYYY H:mm A');
 }
 
 export function createStrategy(name: string, exchange: Exchange) {
-  switch (name) {
-    case 'notifier':
-      return;
-    default:
-      break;
-  }
-}
-
-export function generateTradeResponse(res: any, ticker: Ticker) {
-  return new TradeResponse({
-    ...res,
-    closeTime: ticker.candle.closeTime,
-    currency: ticker.currency,
-  });
+    switch (name) {
+        case 'notifier':
+            return;
+        default:
+            break;
+    }
 }

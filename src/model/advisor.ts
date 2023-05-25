@@ -23,12 +23,15 @@ export abstract class Advisor {
     abstract end(closingPrice: any);
     abstract notifyTelegramBot(message: string): void;
     abstract addProfitResults(close: number, lastBuy: TradeResponse);
+    abstract logBalance(): Promise<void>;
     async doSetup(sendMessage: boolean): Promise<void> {
         const messageService = new TelegramBot(ChatGroups.mainAccount);
         const message = `${this.constructor.name} started: ${this.exchange.ticker.pair}`;
         if (sendMessage) messageService.sendMessage(message);
         if (!this.type) throw new Error('Advisor Type not defined');
-        await this.setup();
+        await this.exchange.getExchangeInfo();
+        this.ticker = await this.exchange.getTradingBalance();
+        this.setup();
     }
     async createOrder(price: number, side: Side, quantity?: number): Promise<TradeResponse> {
         quantity = quantity ? quantity : this.ticker.currencyAmount / price;

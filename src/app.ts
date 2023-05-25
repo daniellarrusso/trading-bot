@@ -15,19 +15,18 @@ import { KrakenService } from './services/kraken-service';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
-const testStrat = new TemplateStrategy(
-    new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
-    advisorType
-);
+// const testStrat = new TemplateStrategy(
+//     new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
+//     advisorType
+// );
 
 async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new DailySpikeStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '1d', 820)),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m', 20)),
             AdvisorType.order
         ),
-        // new SimpleMAStrategy(new BinanceService(new Ticker('ETH', 'USDT', ActionType.Short, '4h'))),
     ]);
 
     await setup();
@@ -37,10 +36,10 @@ async function setup() {
     const tickers = trader.strategies.length;
     for (let i = 0; i < tickers; i++) {
         const strategy: Strat = trader.strategies[i];
-        await strategy.exchange.getExchangeInfo(); // assigns filters etc to Ticker
+        // await strategy.loadMockExchangeInfo(); // assigns filters etc to Ticker
+        // await strategy.exchange.getExchangeInfo(); // run injected exchangeInfo
         const history = await strategy.exchange.getHistory(strategy.exchange.ticker);
         await strategy.loadHistory(history); // backtesting takes place inside strat
-        await strategy.setAdvisor();
     }
     getLatest(tickers);
 }

@@ -10,7 +10,7 @@ import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { IExchangeService } from './IExchange-service';
 import { Side } from '../model/literals';
-import { generateTradeResponse, printDate } from '../utilities/utility';
+import { printDate } from '../utilities/utility';
 
 // const FEE = Settings.fee;
 const history = 1000;
@@ -36,6 +36,7 @@ export class BinanceService implements IExchangeService {
     }
 
     async getExchangeInfo(): Promise<void> {
+        console.log('Loading Binance Exchange config');
         const x = await this.exchange.exchangeInfo();
         let { pair } = this.ticker;
         const filters = x['symbols'].find((s) => s.symbol === pair).filters;
@@ -196,17 +197,11 @@ export class BinanceService implements IExchangeService {
         const side = this.ticker.isMarketOrders ? order.marketSide : order.side;
         order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
         const priceString = this.normalisePrice(order.price);
-        try {
-            const res = await this.exchange[side](
-                this.ticker.pair,
-                order.quantity,
-                this.ticker.isMarketOrders ? {} : priceString
-            );
-            await this.getTradingBalance();
-            return generateTradeResponse(res, this.ticker);
-        } catch (error) {
-            console.log(error);
-        }
+        return this.exchange[side](
+            this.ticker.pair,
+            order.quantity,
+            this.ticker.isMarketOrders ? {} : priceString
+        );
     }
 
     placeStopLimitOrder(side: Side, quantity: number, price: number, stopPrice: number) {

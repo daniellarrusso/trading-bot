@@ -7,7 +7,7 @@ import { IndicatorStrategies } from '../indicators/indicator-strategies/indicato
 import { Indicator } from '../model/indicator';
 import { LimitOrder } from '../model/limit-order';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
-import { generateTradeResponse, printDate } from '../utilities/utility';
+import { printDate } from '../utilities/utility';
 import marketData from './responses/binance-market-buy.json';
 import limitData from './responses/binance-limit-buy.json';
 import { TradeResponse } from '../model/trade-response';
@@ -41,12 +41,7 @@ export class MockExchangeService implements IExchangeService {
         const side = this.ticker.isMarketOrders ? order.marketSide : order.side;
         order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
         const priceString = this.normalisePrice(order.price);
-        try {
-            const res = await this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
-            return generateTradeResponse(res, this.ticker);
-        } catch (error) {
-            console.log(error);
-        }
+        return this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
     }
 
     normalisePrice(price: number): string {
@@ -83,13 +78,15 @@ export class MockExchangeService implements IExchangeService {
         });
     }
 
-    async getExchangeInfo(): Promise<void> {
+    async getExchangeInfo(): Promise<Ticker> {
+        console.log('Loading Binance (Mock) Exchange config');
         const x = await this.exchange.exchangeInfo();
         let { pair } = this.ticker;
         const filters = x['symbols'].find((s) => s.symbol === pair).filters;
         this.ticker.tickSize = filters.find((price) => price.filterType === 'PRICE_FILTER').tickSize;
         this.ticker.minQty = filters.find((price) => price.filterType === 'LOT_SIZE').minQty;
         this.ticker.stepSize = filters.find((price) => price.filterType === 'LOT_SIZE').stepSize;
+        return this.ticker;
     }
 
     async getPrice() {

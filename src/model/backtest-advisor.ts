@@ -16,7 +16,7 @@ export class BacktestAdvisor extends Advisor {
     type = 'Backtest';
 
     constructor(public exchange: IExchangeService) {
-        super(new MockExchangeService(exchange.ticker));
+        super(exchange);
 
         this.ticker.setActionType(ActionType.Long);
         if (!(this.exchange instanceof MockExchangeService))
@@ -27,14 +27,21 @@ export class BacktestAdvisor extends Advisor {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        try {
-            const response: TradeResponse = await this.exchange.createOrder(
-                new LimitOrder(price, quantity, side)
-            );
-            return response;
-        } catch (error) {
-            console.log(error);
-        }
+        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
+    }
+
+    async logBalance() {
+        // try {
+        //     // await this.exchange.getTradingBalance();
+        //     const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+        //     console.log(
+        //         `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+        //     );
+        // } catch (error) {
+        //     let errorMessage = error?.message;
+        //     errorMessage += '. Could not get trading balance';
+        //     console.log(errorMessage);
+        // }
     }
 
     addProfitResults(closingPrice: number, lastBuy: TradeResponse) {

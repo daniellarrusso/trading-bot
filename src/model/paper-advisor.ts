@@ -34,21 +34,11 @@ export class PaperAdvisor extends Advisor {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        try {
-            const response: TradeResponse = await this.exchange.createOrder(
-                new LimitOrder(price, quantity, side)
-            );
-            return response;
-        } catch (error) {
-            console.log(error);
-        }
+        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
     }
 
-    setup() {
-        return new Promise((resolve, reject) => {
-            console.log('Paper Trading Setup');
-            resolve(1);
-        });
+    async setup(): Promise<void> {
+        await console.log('Paper Trader set up', this.ticker);
     }
 
     async logBalance() {

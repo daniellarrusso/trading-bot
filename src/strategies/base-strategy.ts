@@ -66,13 +66,22 @@ export abstract class BaseStrategy implements Strat {
         return this.tradeAdvisor.profit;
     }
 
-    constructor(public exchange: IExchangeService, public advisorType: AdvisorType) {
+    constructor(public exchange: IExchangeService, public advisorType: AdvisorType = AdvisorType.paper) {
         this.ticker = this.exchange.ticker;
         this.pair = this.ticker.pair;
         this.logger = new Logger(this.ticker);
         this.candleStats = new CandleStatistics(this.ticker.interval);
         this.tradeAdvisor = new TradeAdvisor(this.ticker);
         this.loadDefaultIndicators();
+    }
+
+    async loadMockExchangeInfo() {
+        const ex = new MockExchangeService(this.ticker);
+        try {
+            this.ticker = await ex.getExchangeInfo();
+        } catch (error) {
+            throw Error('MockExchange: LoadInfo');
+        }
     }
 
     async setAdvisor() {
@@ -91,6 +100,7 @@ export abstract class BaseStrategy implements Strat {
                 break;
         }
         await this.tradeAdvisor.advisor.doSetup(false);
+        await this.tradeAdvisor.trader.addSymbolMongoDb(this.ticker);
     }
 
     abstract loadIndicators();
@@ -129,14 +139,22 @@ export abstract class BaseStrategy implements Strat {
         this.loadIndicators();
         this.calculateIndicatorWeight();
         this.history = candleHistory.length;
-        for (let i = 0; i < candleHistory.length; i++) {
-            await this.update(candleHistory[i]);
+        try {
+            await this.tradeAdvisor.advisor.exchange.getExchangeInfo();
+            for (let i = 0; i < candleHistory.length; i++) {
+                await this.update(candleHistory[i]);
+            }
+            // reset settings
+            console.log(
+                `${this.strategyName} running on ${this.ticker.interval} intervals against ${this.pair}`
+            );
+            this.tradeAdvisor.endAdvisor(this.candle?.close);
+            this.strategyName = this.strategyName;
+            this.resetParameters();
+            await this.setAdvisor();
+        } catch (error) {
+            throw new Error('BaseStraat: loadHistory() Failed');
         }
-        // reset settings
-        console.log(`${this.strategyName} running on ${this.ticker.interval} intervals against ${this.pair}`);
-        this.tradeAdvisor.endAdvisor(this.candle?.close);
-        this.strategyName = this.strategyName;
-        this.resetParameters();
     }
 
     createAlternateTimeframe(interval: Interval, cb: any) {
@@ -194,6 +212,7 @@ export abstract class BaseStrategy implements Strat {
         this.delayOn = this.delayStrat.checkDelay();
         this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
         if (this.age > this.history) {
+            await this.tradeAdvisor.trader.updateCurrencyAmountMongoDb(this.ticker);
             await this.advice();
             this.profitNotifier();
             this.logStatus(this.tradeAdvisor.profit);

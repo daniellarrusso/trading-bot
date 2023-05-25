@@ -34,23 +34,25 @@ export class Trader {
 
     async addStrategy(strats: Strat[]) {
         strats.map((s) => this._strategies.push(s));
-        for (let i = 0; i < this._strategies.length; i++)
-            await this.addSymbolModel(this._strategies[i].exchange.ticker);
     }
 
-    async updateCurrencyAmount(ticker: Ticker) {
-        const doc = await SymbolModel.findOne({ symbol: ticker.asset });
+    async updateCurrencyAmountMongoDb(ticker: Ticker) {
+        const doc = await SymbolModel.findOne({ ticker: ticker.pair });
         ticker.currencyAmount = doc.amount;
         ticker.isMarketOrders = doc.marketOrders;
     }
 
-    async addSymbolModel(ticker: Ticker) {
-        await SymbolModel.deleteMany();
+    findSymbolMongoDb(ticker: Ticker) {
+        return SymbolModel.findOne({ ticker: ticker.pair });
+    }
+
+    async addSymbolMongoDb(ticker: Ticker) {
+        const symbol = await this.findSymbolMongoDb(ticker);
         const doc = new SymbolModel({
-            symbol: ticker.asset,
+            ticker: ticker.pair,
             amount: ticker.currencyAmount,
         });
-        await doc.save();
+        !symbol && (await doc.save());
     }
 
     updateTicker(ticker: Ticker) {

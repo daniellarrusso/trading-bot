@@ -10,6 +10,7 @@ import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
 import { Intervals } from '../model/interval-converter';
+import { printDate } from '../utilities/utility';
 
 // import { Exchange } from '../interfaces/exchange';
 // import { KrakenOrder } from '../model/baseOrder';
@@ -43,7 +44,7 @@ export class KrakenService implements IExchangeService {
         this.exchange = new KrakenClient(apiKeys.krakenAccount.key, apiKeys.krakenAccount.secret);
     }
     async getHistory(ticker: Ticker) {
-        const { pair, interval } = this.ticker;
+        const { krakenPair: pair, interval } = this.ticker;
         const intervalConverted = Intervals.find((i) => i.interval === interval);
         try {
             const { result } = await this.exchange.api('OHLC', {
@@ -75,8 +76,7 @@ export class KrakenService implements IExchangeService {
             price: order.price.toFixed(this.ticker.pairDecimals),
             volume: order.quantity.toFixed(this.ticker.lotDecimals),
         };
-        const res = await this.exchange.api('AddOrder', limitOrder);
-        return res.result;
+        return this.exchange.api('AddOrder', limitOrder);
     }
     async cancelOrder(orderId: any) {
         const price = await this.exchange.api('CancelOrder', { txid: orderId });
@@ -84,16 +84,15 @@ export class KrakenService implements IExchangeService {
     }
 
     async getExchangeInfo(): Promise<void> {
-        this.ticker.pair = PairMapper[this.ticker.pair] ? PairMapper[this.ticker.pair] : this.ticker.pair;
-        const pair = this.ticker.pair;
+        console.log('Loading Kraken Exchange config');
+        const { krakenPair: pair } = this.ticker;
         try {
-            const { result } = await this.exchange.api('AssetPairs', { info: {}, pair: pair });
+            const { result } = await this.exchange.api('AssetPairs', { info: {}, pair });
             const { [pair]: settings } = result;
             this.ticker.pairDecimals = settings.pair_decimals;
             this.ticker.lotDecimals = settings.lot_decimals;
             this.ticker.asset = settings.base;
             this.ticker.currency = settings.quote;
-            // this.baseOrder = new KrakenOrder(this.ticker);
             await this.getTradingBalance();
         } catch (error: any) {
             throw new Error('something went wrong: ' + error?.message);
@@ -121,7 +120,7 @@ export class KrakenService implements IExchangeService {
     }
 
     async getOHLCLatest(ticker: Ticker, cb) {
-        const { pair, interval } = this.ticker;
+        const { krakenPair: pair, interval } = this.ticker;
         const intervalConverted = Intervals.find((i) => i.interval === interval);
         try {
             if (new Date().getSeconds() === 5) {
@@ -225,6 +224,7 @@ export class KrakenService implements IExchangeService {
             green: +close > +open,
             isFinal: true,
             time: new Date(time * 1000),
+            printTime: printDate(new Date(time * 1000)),
         } as Candle;
 
         return candle;

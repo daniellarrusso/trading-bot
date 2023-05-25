@@ -17,30 +17,18 @@ export class LiveAdvisor extends Advisor {
     constructor(exchange: IExchangeService) {
         super(exchange);
     }
-    async setup(): Promise<void> {
-        try {
-            this.ticker = await this.exchange.getTradingBalance();
-            console.log(
-                `Starting Live Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
-            );
-        } catch (error) {
-            console.log(error);
-        }
+
+    setup() {
+        console.log(
+            `Starting Live Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
+        );
     }
 
     async trade(price?: number, side?: Side) {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        try {
-            const response: TradeResponse = await this.exchange.createOrder(
-                new LimitOrder(price, quantity, side)
-            );
-            await this.logBalance();
-            return response;
-        } catch (error) {
-            console.log(error);
-        }
+        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
     }
 
     async logBalance() {

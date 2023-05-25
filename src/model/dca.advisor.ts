@@ -28,6 +28,20 @@ export class DCAAdvisor extends Advisor {
         super(exchange);
     }
 
+    async logBalance() {
+        try {
+            // await this.exchange.getTradingBalance();
+            const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+            console.log(
+                `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+            );
+        } catch (error) {
+            let errorMessage = error?.message;
+            errorMessage += '. Could not get trading balance';
+            console.log(errorMessage);
+        }
+    }
+
     async long(candle: Candle, amount?: number) {}
     async short(candle: Candle, half?: boolean) {}
     end(closingPrice: any) {

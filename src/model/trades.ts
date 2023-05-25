@@ -8,9 +8,9 @@ export class Trades {
 
     constructor() {}
 
-    async addTrade(trade: TradeResponse, advisorType: string) {
+    async addTrade(trade: TradeResponse) {
         this.tradeResponses.push(trade);
-        if (advisorType === 'Backtest') return;
+        if (trade.advisorType === 'Backtest') return;
         try {
             const doc = new TradeModel({
                 date: new Date(),
@@ -20,7 +20,7 @@ export class Trades {
                 cost: trade.cummulativeQuoteQty,
                 price: trade.quotePrice,
                 side: trade.side,
-                advisorType: advisorType,
+                advisorType: trade.advisorType,
             });
             await doc.save();
         } catch (error) {

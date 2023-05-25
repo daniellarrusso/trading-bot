@@ -3,6 +3,7 @@ import { ActionType } from './enums';
 
 export class Ticker {
     pair: string;
+    krakenPair: string;
     assetQuantity: number;
     currencyQuantity: number;
     minQty: number;
@@ -24,6 +25,7 @@ export class Ticker {
         public currencyAmount = 100
     ) {
         this.pair = asset + currency;
+        this.krakenPair = asset + '/' + currency;
         this._action = action;
     }
 

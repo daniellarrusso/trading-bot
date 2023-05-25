@@ -7,7 +7,6 @@ import { Ticker } from './ticker';
 import { TradeResponse } from './trade-response';
 import { Side } from './literals';
 import { Trades } from './trades';
-import { Settings } from '../../settings';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { MockExchangeService } from '../services/mock-exchange.service';
 
@@ -54,14 +53,23 @@ export class TradeAdvisor {
     async trade(price?: number, side?: Side) {
         if (this.processingTick) return;
         this.currentTick = this.ticker.ticks;
-        if (!this.isBacktest) await this.trader.updateCurrencyAmount(this.ticker);
+        if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
         try {
-            if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
             const res = await this.advisor.trade(price, side);
-            await this.setTraderAction(res);
+            await this.advisor.logBalance();
+            await this.setTraderAction(this.generateFullTradeResponse(res));
         } catch (error) {
             console.log(error);
         }
+    }
+
+    private generateFullTradeResponse(res: TradeResponse) {
+        return new TradeResponse({
+            ...res,
+            closeTime: this.ticker.candle.closeTime,
+            currency: this.ticker.currency,
+            advisorType: this.advisor.type,
+        } as TradeResponse);
     }
 
     /** Bolle  */
@@ -83,7 +91,7 @@ export class TradeAdvisor {
     }
 
     async setTraderAction(trade: TradeResponse) {
-        await this.trades.addTrade(trade, this.advisor.type);
+        await this.trades.addTrade(trade);
         this.logMessage(trade);
         this.trader.updateTicker(this.ticker);
         this.ticker.isLong && this.calculateProfit();

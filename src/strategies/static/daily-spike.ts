@@ -36,7 +36,7 @@ export class DailySpikeStrategy extends BaseStrategy {
                 await this.cancelExistingOrder();
                 const price = this.candle.close * 0.9;
                 const res = await this.tradeAdvisor.advisor.createOrder(price, 'buy');
-                this.order.orderId = res.txid[0];
+                this.order.orderId = res['result'].txid[0];
                 this.order.day = new Date().getDay();
             }
         }
