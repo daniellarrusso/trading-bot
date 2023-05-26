@@ -1,7 +1,5 @@
 import { Trade, TradeModel } from '../db/trades';
-import { Trader } from '../services/trader-service';
 import { returnPercentageIncrease } from '../utilities/utility';
-import { TradeResponse } from './trade-response';
 
 export class Trades {
     private tradeResponses: Trade[] = [];

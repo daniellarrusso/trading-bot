@@ -56,23 +56,9 @@ export class TradeAdvisor {
         if (this.processingTick) return;
         this.currentTick = this.ticker.ticks;
         if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
-        try {
-            const res = await this.advisor.trade(price, side);
-            await this.advisor.logBalance();
-            await this.setTraderAction(this.addAdvisorType(res));
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    async createOrder(price: number, side: Side, quantity?: number) {
-        try {
-            const trade = await this.advisor.createOrder(price, side);
-            // await this.trades.addTrade(trade);
-            return trade;
-        } catch (error) {
-            throw new Error(error);
-        }
+        const res = await this.advisor.trade(price, side);
+        await this.advisor.logBalance();
+        this.setTraderAction(this.addAdvisorType(res));
     }
 
     private addAdvisorType(res: Trade) {
@@ -97,8 +83,7 @@ export class TradeAdvisor {
         this.advisor.addProfitResults(this.shortPrice, this.lastBuy);
     }
 
-    async setTraderAction(trade: Trade) {
-        // await this.trades.addTrade(trade);
+    setTraderAction(trade: Trade) {
         this.logMessage(trade);
         this.trader.updateTicker(this.ticker);
         this.ticker.isLong && this.calculateProfit();

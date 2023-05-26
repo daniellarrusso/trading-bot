@@ -31,13 +31,6 @@ export class PaperAdvisor extends Advisor {
         // this.telegram.sendMessage(message);
     }
 
-    async trade(price?: number, side?: Side): Promise<Trade> {
-        if (!price) price = this.ticker.candle.close;
-        if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-        const quantity = this.ticker.currencyAmount / price;
-        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
-    }
-
     async setup(): Promise<void> {
         await console.log('Paper Trader set up', this.ticker);
     }

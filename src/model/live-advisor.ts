@@ -24,13 +24,6 @@ export class LiveAdvisor extends Advisor {
         );
     }
 
-    async trade(price?: number, side?: Side) {
-        if (!price) price = this.ticker.candle.close;
-        if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
-        const quantity = this.ticker.currencyAmount / price;
-        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
-    }
-
     async logBalance() {
         try {
             await this.exchange.getTradingBalance();

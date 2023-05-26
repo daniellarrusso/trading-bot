@@ -14,9 +14,7 @@ export class OrderAdvisor extends Advisor {
     constructor(exchange: IExchangeService) {
         super(exchange);
     }
-    trade(price?: number, side?: Side): Promise<Trade> {
-        throw new Error('Method not implemented.');
-    }
+
     end(closingPrice: any) {
         throw new Error('Method not implemented.');
     }
@@ -44,7 +42,7 @@ export class OrderAdvisor extends Advisor {
         try {
             this.ticker = await this.exchange.getTradingBalance();
             console.log(
-                `Starting Live Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
+                `Starting Order Advisor: Currency (${this.ticker.currency} ${this.ticker.currencyQuantity}). Asset (${this.ticker.asset} ${this.ticker.assetQuantity})`
             );
         } catch (error) {
             console.log(error);

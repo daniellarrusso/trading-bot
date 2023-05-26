@@ -1,3 +1,4 @@
+import { Trade } from '../db/trades';
 import { Candle } from './candle';
 import { ActionType } from './enums';
 import { Interval, Intervals } from './interval-converter';
@@ -18,6 +19,7 @@ export class Ticker {
     pairDecimals: any;
     lotDecimals: any;
     intervalObj: Interval;
+    lastTrade: Trade;
 
     constructor(
         public asset: string,

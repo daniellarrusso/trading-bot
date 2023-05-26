@@ -25,11 +25,30 @@ export abstract class Advisor {
         this.trades = new Trades();
     }
 
-    trade(price?: number, side?: Side): Promise<Trade> {
+    async trade(price?: number, side?: Side): Promise<Trade> {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
+        try {
+            const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+            trade.advisorType = this.type;
+            this.trades.addTrade(trade);
+            return trade;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async createOrder(price: number, side: Side, quantity?: number): Promise<Trade> {
+        quantity = quantity ? quantity : this.ticker.currencyAmount / price;
+        try {
+            const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+            trade.advisorType = this.type;
+            this.trades.addTrade(trade);
+            return trade;
+        } catch (error) {
+            throw error;
+        }
     }
 
     abstract end(closingPrice: any);
@@ -44,11 +63,6 @@ export abstract class Advisor {
         await this.exchange.getExchangeInfo();
         this.ticker = await this.exchange.getTradingBalance();
         this.setup();
-    }
-
-    async createOrder(price: number, side: Side, quantity?: number): Promise<Trade> {
-        quantity = quantity ? quantity : this.ticker.currencyAmount / price;
-        return this.exchange.createOrder(new LimitOrder(price, quantity, side));
     }
 
     protected abstract setup();
