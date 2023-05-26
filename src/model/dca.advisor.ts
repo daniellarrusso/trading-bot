@@ -1,4 +1,5 @@
 import { ChatGroups } from '../../settings';
+import { Trade } from '../db/trades';
 import { IExchangeService } from '../services/IExchange-service';
 import { KrakenService } from '../services/kraken-service';
 import { Advisor } from './advisor';
@@ -10,7 +11,7 @@ import { TradeResponse } from './trade-response';
 // const ks = new KrakenService();
 
 export class DCAAdvisor extends Advisor {
-    trade(price?: number): Promise<TradeResponse> {
+    trade(price?: number): Promise<Trade> {
         throw new Error('Method not implemented.');
     }
     actionType: ActionType;
@@ -50,7 +51,7 @@ export class DCAAdvisor extends Advisor {
     notifyTelegramBot(): void {
         this.telegramBot.sendMessage(this.message);
     }
-    addProfitResults(lastSell: number, lastBuy: TradeResponse) {
+    addProfitResults(lastSell: number, lastBuy: Trade) {
         console.log('Method not implemented.');
     }
     async doSetup(sendMessage: boolean) {

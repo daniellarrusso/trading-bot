@@ -1,5 +1,6 @@
 import { Candle } from './candle';
 import { ActionType } from './enums';
+import { Interval, Intervals } from './interval-converter';
 
 export class Ticker {
     pair: string;
@@ -16,6 +17,7 @@ export class Ticker {
     ticks: number = 0;
     pairDecimals: any;
     lotDecimals: any;
+    intervalObj: Interval;
 
     constructor(
         public asset: string,
@@ -27,6 +29,7 @@ export class Ticker {
         this.pair = asset + currency;
         this.krakenPair = asset + '/' + currency;
         this._action = action;
+        this.intervalObj = Intervals.find((i) => i.interval === interval);
     }
 
     get action() {

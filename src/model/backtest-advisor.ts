@@ -7,6 +7,7 @@ import { MockExchangeService } from '../services/mock-exchange.service';
 import { Ticker } from './ticker';
 import { IExchangeService } from '../services/IExchange-service';
 import { LimitOrder } from './limit-order';
+import { Trade } from '../db/trades';
 
 export class BacktestAdvisor extends Advisor {
     assetAmount = 0;
@@ -23,7 +24,7 @@ export class BacktestAdvisor extends Advisor {
             this.exchange = new MockExchangeService(exchange.ticker);
     }
 
-    async trade(price?: number, side?: Side): Promise<TradeResponse> {
+    async trade(price?: number, side?: Side): Promise<Trade> {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
@@ -44,8 +45,8 @@ export class BacktestAdvisor extends Advisor {
         // }
     }
 
-    addProfitResults(closingPrice: number, lastBuy: TradeResponse) {
-        const amount = ((closingPrice - lastBuy.quotePrice) / lastBuy.quotePrice) * 100;
+    addProfitResults(closingPrice: number, lastBuy: Trade) {
+        const amount = ((closingPrice - lastBuy.price) / lastBuy.price) * 100;
         if (amount) this.profitResults.push(+amount.toFixed(2));
     }
 

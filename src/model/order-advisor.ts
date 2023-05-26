@@ -1,4 +1,5 @@
 import { ChatGroups } from '../../settings';
+import { Trade } from '../db/trades';
 import { IExchangeService } from '../services/IExchange-service';
 import { Advisor } from './advisor';
 import { Side, ordertypes } from './literals';
@@ -13,7 +14,7 @@ export class OrderAdvisor extends Advisor {
     constructor(exchange: IExchangeService) {
         super(exchange);
     }
-    trade(price?: number, side?: Side): Promise<TradeResponse> {
+    trade(price?: number, side?: Side): Promise<Trade> {
         throw new Error('Method not implemented.');
     }
     end(closingPrice: any) {
@@ -22,7 +23,7 @@ export class OrderAdvisor extends Advisor {
     notifyTelegramBot(message: string): void {
         throw new Error('Method not implemented.');
     }
-    addProfitResults(close: number, lastBuy: TradeResponse) {
+    addProfitResults(close: number, lastBuy: Trade) {
         throw new Error('Method not implemented.');
     }
 

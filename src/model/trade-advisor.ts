@@ -9,6 +9,7 @@ import { Side } from './literals';
 import { Trades } from './trades';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { MockExchangeService } from '../services/mock-exchange.service';
+import { Trade } from '../db/trades';
 
 export class TradeAdvisor {
     advisor: Advisor;
@@ -21,24 +22,25 @@ export class TradeAdvisor {
     currentTick: number;
 
     private ticker: Ticker;
-    trades: Trades;
 
     get longPrice() {
-        return this.trades.lastBuy?.quotePrice ?? 0;
+        return this.advisor.trades.lastBuy?.price ?? 0;
     }
 
     get shortPrice() {
-        return this.trades.lastSell?.quotePrice ?? 0;
+        return this.advisor.trades.lastSell?.price ?? 0;
     }
     get isBacktest() {
         return this.advisor instanceof BacktestAdvisor;
+    }
+    get lastBuy() {
+        return this.advisor.trades.lastBuy;
     }
 
     constructor(ticker: Ticker) {
         this.ticker = ticker;
         this.initialAction = this.ticker.action;
         this.advisor = new BacktestAdvisor(new MockExchangeService(ticker));
-        this.trades = new Trades();
     }
 
     get inTrade() {
@@ -57,19 +59,24 @@ export class TradeAdvisor {
         try {
             const res = await this.advisor.trade(price, side);
             await this.advisor.logBalance();
-            await this.setTraderAction(this.generateFullTradeResponse(res));
+            await this.setTraderAction(this.addAdvisorType(res));
         } catch (error) {
             console.log(error);
         }
     }
 
-    private generateFullTradeResponse(res: TradeResponse) {
-        return new TradeResponse({
-            ...res,
-            closeTime: this.ticker.candle.closeTime,
-            currency: this.ticker.currency,
-            advisorType: this.advisor.type,
-        } as TradeResponse);
+    async createOrder(price: number, side: Side, quantity?: number) {
+        try {
+            const trade = await this.advisor.createOrder(price, side);
+            // await this.trades.addTrade(trade);
+            return trade;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    private addAdvisorType(res: Trade) {
+        return { ...res, advisorType: this.advisor.type };
     }
 
     /** Bolle  */
@@ -87,23 +94,22 @@ export class TradeAdvisor {
         console.log(
             `'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${this.ticker.pair})`
         );
-        this.advisor.addProfitResults(this.shortPrice, this.trades.lastBuy);
+        this.advisor.addProfitResults(this.shortPrice, this.lastBuy);
     }
 
-    async setTraderAction(trade: TradeResponse) {
-        await this.trades.addTrade(trade);
+    async setTraderAction(trade: Trade) {
+        // await this.trades.addTrade(trade);
         this.logMessage(trade);
         this.trader.updateTicker(this.ticker);
         this.ticker.isLong && this.calculateProfit();
         this.ticker.setActionType();
     }
 
-    logMessage(trade: TradeResponse) {
+    logMessage(trade: Trade) {
         const { action, asset, currency, candle, tickSize, isMarketOrders: market } = this.ticker;
-        const quantity = trade.origQty;
+        const quantity = trade.quantity;
         const orderType = market ? 'Market' : 'Limit';
-        const currencyAmount =
-            this.ticker.normalisePrice(+trade.cummulativeQuoteQty) ?? this.ticker.currencyAmount;
+        const currencyAmount = this.ticker.normalisePrice(+trade.cost) ?? this.ticker.currencyAmount;
         let message = `${candle.printTime}: ${currencyAmount} ${currency} ${orderType} ${
             ActionType[action]
         } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;

@@ -12,6 +12,7 @@ import marketData from './responses/binance-market-buy.json';
 import limitData from './responses/binance-limit-buy.json';
 import { TradeResponse } from '../model/trade-response';
 import { MockOrders } from './mock-orders';
+import { Trade } from '../db/trades';
 
 const history = 1000;
 
@@ -37,11 +38,30 @@ export class MockExchangeService implements IExchangeService {
         throw new Error('Method not implemented.');
     }
 
-    async createOrder(order: LimitOrder): Promise<TradeResponse> {
+    async createOrder(order: LimitOrder): Promise<Trade> {
         const side = this.ticker.isMarketOrders ? order.marketSide : order.side;
         order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
         const priceString = this.normalisePrice(order.price);
-        return this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
+        const res = await this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
+        return this.assignQuoteQtyAndPrice(res);
+    }
+
+    private assignQuoteQtyAndPrice(res: TradeResponse): Trade {
+        if (res.type === 'MARKET') res.quotePrice = +res.cummulativeQuoteQty / +res.origQty;
+        else {
+            res.quotePrice = +res.price;
+            res.cummulativeQuoteQty = (+res.origQty * +res.price).toString();
+        }
+        return {
+            date: new Date(),
+            quantity: +res.origQty,
+            currency: this.ticker.currency,
+            cost: +res.cummulativeQuoteQty,
+            price: +res.quotePrice,
+            side: res.side,
+            closeTime: this.ticker.candle.closeTime,
+            orderId: res.orderId,
+        } as Trade;
     }
 
     normalisePrice(price: number): string {

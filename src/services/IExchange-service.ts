@@ -1,3 +1,4 @@
+import { Trade } from '../db/trades';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
@@ -27,7 +28,7 @@ export interface IExchangeService {
     // orders
     getOrders(pair: string): Promise<any[]>;
     checkOrderStatus(orderId: any);
-    createOrder(order: LimitOrder): Promise<TradeResponse>;
+    createOrder(order: LimitOrder): Promise<Trade>;
     getPrice();
 
     cancelOrder(orderId: any);

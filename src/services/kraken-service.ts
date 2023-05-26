@@ -11,11 +11,7 @@ import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
 import { Intervals } from '../model/interval-converter';
 import { printDate } from '../utilities/utility';
-
-// import { Exchange } from '../interfaces/exchange';
-// import { KrakenOrder } from '../model/baseOrder';
-// import { Intervals } from '../model/interval';
-// import { Trade } from '../model/tradeResponse';
+import { Trade } from '../db/trades';
 
 class Mapper {
     [pair: string]: string;
@@ -32,6 +28,17 @@ const PairMapper: Mapper = {
     BTCUSDT: 'XBTUSDT',
 };
 
+export interface KrakenOrderResponse {
+    error: [];
+    result: {
+        descr: {
+            order: string;
+            close: string;
+        };
+        txid: string[];
+    };
+}
+
 export class KrakenService implements IExchangeService {
     exchange: any;
     _last: number = 0;
@@ -44,12 +51,12 @@ export class KrakenService implements IExchangeService {
         this.exchange = new KrakenClient(apiKeys.krakenAccount.key, apiKeys.krakenAccount.secret);
     }
     async getHistory(ticker: Ticker) {
-        const { krakenPair: pair, interval } = this.ticker;
-        const intervalConverted = Intervals.find((i) => i.interval === interval);
+        const { krakenPair: pair } = this.ticker;
+
         try {
             const { result } = await this.exchange.api('OHLC', {
                 pair,
-                interval: intervalConverted?.minutes,
+                interval: ticker.intervalObj.minutes,
             });
             this.lastProcessed = result.last;
             const history: Candle[] = result[pair].map((candle: Candle) => this.createCandle(candle));
@@ -68,7 +75,7 @@ export class KrakenService implements IExchangeService {
     ): Promise<CandlesIndicatorResponse> {
         throw new Error('Method not implemented.');
     }
-    async createOrder(order: LimitOrder): Promise<TradeResponse> {
+    async createOrder(order: LimitOrder): Promise<Trade> {
         const limitOrder = {
             pair: this.ticker.pair,
             type: order.side,
@@ -76,8 +83,27 @@ export class KrakenService implements IExchangeService {
             price: order.price.toFixed(this.ticker.pairDecimals),
             volume: order.quantity.toFixed(this.ticker.lotDecimals),
         };
-        return this.exchange.api('AddOrder', limitOrder);
+        try {
+            const res: KrakenOrderResponse = await this.exchange.api('AddOrder', limitOrder);
+            return this.generateTradeResponse(res, order);
+        } catch (error) {
+            console.log(error);
+        }
     }
+
+    private generateTradeResponse(res: KrakenOrderResponse, order: LimitOrder): Trade {
+        return {
+            date: new Date(),
+            quantity: order.quantity,
+            currency: this.ticker.currency,
+            cost: +order.quantity * order.price,
+            price: order.price,
+            side: order.side,
+            closeTime: this.ticker.candle.closeTime,
+            orderId: res.result.txid[0],
+        } as Trade;
+    }
+
     async cancelOrder(orderId: any) {
         const price = await this.exchange.api('CancelOrder', { txid: orderId });
         return price.result;
@@ -121,13 +147,12 @@ export class KrakenService implements IExchangeService {
 
     async getOHLCLatest(ticker: Ticker, cb) {
         const { krakenPair: pair, interval } = this.ticker;
-        const intervalConverted = Intervals.find((i) => i.interval === interval);
         try {
             if (new Date().getSeconds() === 5) {
                 console.log('Calling API', new Date());
                 const { result } = await this.exchange.api('OHLC', {
                     pair,
-                    interval: intervalConverted?.minutes,
+                    interval: ticker.intervalObj.minutes,
                 });
                 const lastCandles: Array<Candle> = result[pair].map((candle: Candle) =>
                     this.createCandle(candle)
@@ -224,6 +249,7 @@ export class KrakenService implements IExchangeService {
             green: +close > +open,
             isFinal: true,
             time: new Date(time * 1000),
+            closeTime: new Date((time + this.ticker.intervalObj.minutes) * 1000),
             printTime: printDate(new Date(time * 1000)),
         } as Candle;
 

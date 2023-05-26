@@ -8,6 +8,7 @@ import { ActionType } from './enums';
 import { MockExchangeService } from '../services/mock-exchange.service';
 import { Ticker } from './ticker';
 import { LimitOrder } from './limit-order';
+import { Trade } from '../db/trades';
 
 export class PaperAdvisor extends Advisor {
     assetAmount = 0;
@@ -30,7 +31,7 @@ export class PaperAdvisor extends Advisor {
         // this.telegram.sendMessage(message);
     }
 
-    async trade(price?: number, side?: Side): Promise<TradeResponse> {
+    async trade(price?: number, side?: Side): Promise<Trade> {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
@@ -55,8 +56,8 @@ export class PaperAdvisor extends Advisor {
         }
     }
 
-    addProfitResults(lastSell: number, lastBuy: TradeResponse) {
-        const amount = ((lastSell - lastBuy.quotePrice) / lastBuy.quotePrice) * 100;
+    addProfitResults(lastSell: number, lastBuy: Trade) {
+        const amount = ((lastSell - lastBuy.price) / lastBuy.price) * 100;
         if (amount) this.profitResults.push(+amount.toFixed(2));
     }
 

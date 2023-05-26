@@ -1,7 +1,7 @@
 export class TradeResponse {
     quotePrice: number;
     symbol: string;
-    orderId: number;
+    orderId: string;
     clientOrderId: string;
     transactTime: number;
     price: string;

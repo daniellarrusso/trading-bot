@@ -15,10 +15,10 @@ import { KrakenService } from './services/kraken-service';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
-// const testStrat = new TemplateStrategy(
-//     new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
-//     advisorType
-// );
+const testStrat = new TemplateStrategy(
+    new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
+    advisorType
+);
 
 async function loadStrategy() {
     trader.addStrategy([

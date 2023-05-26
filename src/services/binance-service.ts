@@ -11,6 +11,7 @@ import { IndicatorStrategies } from '../indicators/indicator-strategies/indicato
 import { IExchangeService } from './IExchange-service';
 import { Side } from '../model/literals';
 import { printDate } from '../utilities/utility';
+import { Trade } from '../db/trades';
 
 // const FEE = Settings.fee;
 const history = 1000;
@@ -193,15 +194,35 @@ export class BinanceService implements IExchangeService {
         return this.exchange.prices('BTCUSDT');
     }
 
-    async createOrder(order: LimitOrder): Promise<TradeResponse> {
+    async createOrder(order: LimitOrder): Promise<Trade> {
         const side = this.ticker.isMarketOrders ? order.marketSide : order.side;
         order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
         const priceString = this.normalisePrice(order.price);
-        return this.exchange[side](
+        const res: TradeResponse = await this.exchange[side](
             this.ticker.pair,
             order.quantity,
             this.ticker.isMarketOrders ? {} : priceString
         );
+
+        return this.assignQuoteQtyAndPrice(res);
+    }
+
+    private assignQuoteQtyAndPrice(res: TradeResponse): Trade {
+        if (res.type === 'MARKET') res.quotePrice = +res.cummulativeQuoteQty / +res.origQty;
+        else {
+            res.quotePrice = +res.price;
+            res.cummulativeQuoteQty = (+res.origQty * +res.price).toString();
+        }
+        return {
+            date: new Date(),
+            quantity: +res.origQty,
+            currency: res.currency,
+            cost: +res.cummulativeQuoteQty,
+            price: +res.quotePrice,
+            side: res.side,
+            closeTime: this.ticker.candle.closeTime,
+            orderId: res.orderId,
+        } as Trade;
     }
 
     placeStopLimitOrder(side: Side, quantity: number, price: number, stopPrice: number) {

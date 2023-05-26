@@ -1,27 +1,18 @@
-import { TradeModel } from '../db/trades';
+import { Trade, TradeModel } from '../db/trades';
 import { Trader } from '../services/trader-service';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { TradeResponse } from './trade-response';
 
 export class Trades {
-    private tradeResponses: TradeResponse[] = [];
+    private tradeResponses: Trade[] = [];
 
     constructor() {}
 
-    async addTrade(trade: TradeResponse) {
+    async addTrade(trade: Trade) {
         this.tradeResponses.push(trade);
         if (trade.advisorType === 'Backtest') return;
         try {
-            const doc = new TradeModel({
-                date: new Date(),
-                quantity: trade.origQty,
-                currency: trade.currency,
-                closeTime: trade.closeTime,
-                cost: trade.cummulativeQuoteQty,
-                price: trade.quotePrice,
-                side: trade.side,
-                advisorType: trade.advisorType,
-            });
+            const doc = new TradeModel(trade);
             await doc.save();
         } catch (error) {
             this.tradeResponses.pop();
@@ -33,12 +24,12 @@ export class Trades {
         if (isBacktest) return;
     }
 
-    get lastBuy(): TradeResponse {
+    get lastBuy(): Trade {
         const filtered = this.tradeResponses.filter((tr) => tr.side === 'BUY');
         return filtered[filtered.length - 1];
     }
 
-    get lastSell(): TradeResponse {
+    get lastSell(): Trade {
         const filtered = this.tradeResponses.filter((tr) => tr.side === 'SELL');
         return filtered[filtered.length - 1];
     }
@@ -55,16 +46,12 @@ export class Trades {
         return this.tradeResponses[this.tradeResponses.length - 1];
     }
 
-    get lastTradeId() {
-        return this.lastTrade?.closeTime.getTime() ?? -1;
-    }
-
     get averageBuy() {
         if (this.numBought)
             return (
                 this.tradeResponses
                     .filter((b) => b.side === 'BUY')
-                    .map((t) => +t.quotePrice)
+                    .map((t) => +t.price)
                     .reduce((p, c) => p + c) / this.numBought
             );
     }
@@ -74,7 +61,7 @@ export class Trades {
             return (
                 this.tradeResponses
                     .filter((b) => b.side === 'SELL')
-                    .map((t) => +t.quotePrice)
+                    .map((t) => +t.price)
                     .reduce((p, c) => p + c) / this.numSold
             );
     }

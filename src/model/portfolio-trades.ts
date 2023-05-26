@@ -72,7 +72,7 @@ export class PortfolioTrades {
         const size = this.strategy.exchange.ticker.tickSize.length - 2;
         try {
             const response = await this.exchange.createOrder(order);
-            order.orderId = response.orderId;
+            // order.orderId = response.orderId;
             order.triggered = true;
             let message = `${order.side.toUpperCase()} Limit order triggered for ${order.quantity} ${
                 this.exchange.ticker.pair
