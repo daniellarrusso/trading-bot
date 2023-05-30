@@ -25,19 +25,13 @@ export class OrderAdvisor extends Advisor {
         throw new Error('Method not implemented.');
     }
 
-    async logBalance() {
-        try {
-            // await this.exchange.getTradingBalance();
-            const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
-            console.log(
-                `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
-            );
-        } catch (error) {
-            let errorMessage = error?.message;
-            errorMessage += '. Could not get trading balance';
-            console.log(errorMessage);
-        }
+    logBalance() {
+        const { currency, asset, assetQuantity, currencyQuantity } = this.ticker;
+        console.log(
+            `New Balance: Currency (${currency} ${currencyQuantity}). Asset (${asset} ${assetQuantity}) `
+        );
     }
+
     protected async setup() {
         try {
             this.ticker = await this.exchange.getTradingBalance();

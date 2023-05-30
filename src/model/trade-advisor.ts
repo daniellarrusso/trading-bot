@@ -58,11 +58,12 @@ export class TradeAdvisor {
         if (!this.startingPrice && this.inTrade) this.startingPrice = this.candle.close;
         const res = await this.advisor.trade(price, side);
         await this.advisor.logBalance();
-        this.setTraderAction(this.addAdvisorType(res));
+        this.setTraderAction(res);
     }
 
-    private addAdvisorType(res: Trade) {
-        return { ...res, advisorType: this.advisor.type };
+    async createOrder(price: number, side: Side, quantity?: number): Promise<Trade> {
+        const res = await this.advisor.createOrder(price, side, quantity);
+        return res;
     }
 
     /** Bolle  */

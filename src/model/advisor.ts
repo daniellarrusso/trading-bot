@@ -29,32 +29,29 @@ export abstract class Advisor {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        try {
-            const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
-            trade.advisorType = this.type;
-            this.trades.addTrade(trade);
-            return trade;
-        } catch (error) {
-            throw error;
-        }
+        const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+        trade.advisorType = this.type;
+        await this.trades.addTrade(trade);
+        return trade;
     }
 
-    async createOrder(price: number, side: Side, quantity?: number): Promise<Trade> {
+    async createOrder(price: number, side: Side, quantity?: number) {
         quantity = quantity ? quantity : this.ticker.currencyAmount / price;
-        try {
-            const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
-            trade.advisorType = this.type;
-            this.trades.addTrade(trade);
-            return trade;
-        } catch (error) {
-            throw error;
-        }
+        const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+        // trade.advisorType = this.type;
+        await this.trades.addTrade(trade).catch(async (error) => {
+            this.trades.removeTrade(trade);
+            await this.exchange.cancelOrder(trade.orderId);
+            console.log(error.message);
+            process.abort();
+        });
+        return trade;
     }
 
     abstract end(closingPrice: any);
     abstract notifyTelegramBot(message: string): void;
     abstract addProfitResults(close: number, lastBuy: Trade);
-    abstract logBalance(): Promise<void>;
+    abstract logBalance(): void;
     async doSetup(sendMessage: boolean): Promise<void> {
         const messageService = new TelegramBot(ChatGroups.mainAccount);
         const message = `${this.constructor.name} started: ${this.exchange.ticker.pair}`;

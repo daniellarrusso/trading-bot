@@ -9,13 +9,13 @@ export class Trades {
     async addTrade(trade: Trade) {
         this.tradeResponses.push(trade);
         if (trade.advisorType === 'Backtest') return;
-        try {
-            const doc = new TradeModel(trade);
-            await doc.save();
-        } catch (error) {
-            this.tradeResponses.pop();
-            throw new Error('Error Adding Trade to MongoDb');
-        }
+        const doc = new TradeModel(trade);
+        await doc.save();
+    }
+
+    removeTrade(trade: Trade) {
+        const index = this.tradeResponses.indexOf(trade);
+        this.tradeResponses.splice(index, 1);
     }
 
     checkTrades(isBacktest: boolean) {

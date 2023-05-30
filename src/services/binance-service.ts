@@ -132,7 +132,7 @@ export class BinanceService implements IExchangeService {
         });
     }
 
-    getOHLCLatest(ticker: Ticker, cb) {
+    getOHLCLatest(ticker: Ticker, cb): void {
         this.exchange.websockets.candlesticks([ticker.pair], ticker.interval, (candlesticks) => {
             let { e: eventType, E: eventTime, s: symbol, k: ticks } = candlesticks;
             const {

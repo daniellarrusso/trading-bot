@@ -3,12 +3,8 @@ import { ActionType, AdvisorType } from './model/enums';
 import './utilities/extensions';
 import { Trader } from './services/trader-service';
 import { Strat } from './model/interfaces/strat';
-import { NotifierStrategy } from './notifiers/notifier.strategy';
 import { BinanceService } from './services/binance-service';
 import { TemplateStrategy } from './strategies/template-strategy';
-import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
-import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
-import { DailyRSIStrategy } from './strategies/swing/daily-rsi';
 import connectApi from './api';
 import { DailySpikeStrategy } from './strategies/static/daily-spike';
 import { KrakenService } from './services/kraken-service';
@@ -24,7 +20,7 @@ async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new DailySpikeStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m', 20)),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1d', 820)),
             AdvisorType.order
         ),
     ]);
@@ -36,8 +32,6 @@ async function setup() {
     const tickers = trader.strategies.length;
     for (let i = 0; i < tickers; i++) {
         const strategy: Strat = trader.strategies[i];
-        // await strategy.loadMockExchangeInfo(); // assigns filters etc to Ticker
-        // await strategy.exchange.getExchangeInfo(); // run injected exchangeInfo
         const history = await strategy.exchange.getHistory(strategy.exchange.ticker);
         await strategy.loadHistory(history); // backtesting takes place inside strat
     }

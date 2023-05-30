@@ -15,7 +15,7 @@ export interface IExchangeService {
     getExchangeInfo();
     // Candle
     getOHLCLatest(ticker: Ticker, cb: any): void;
-    getHistory(ticker: Ticker);
+    getHistory(ticker: Ticker): Promise<Candle[]>;
     getTradingBalance(): Promise<Ticker>;
     getOHLCHistoryByPair(pair: string, interval: string): Promise<Candle[]>;
     getHistoryWithIndicator(
