@@ -149,7 +149,6 @@ export class KrakenService implements IExchangeService {
         const { krakenPair: pair, interval } = this.ticker;
         try {
             if (new Date().getSeconds() === 5) {
-                console.log('Calling API', new Date());
                 const { result } = await this.exchange.api('OHLC', {
                     pair,
                     interval: ticker.intervalObj.minutes,
@@ -158,11 +157,10 @@ export class KrakenService implements IExchangeService {
                     this.createCandle(candle)
                 );
                 if (this._last !== result.last) {
+                    console.log('Calling API at: ', new Date());
                     const candle = lastCandles[lastCandles.length - 1];
                     this._last = result.last;
                     cb(candle);
-                } else {
-                    console.log('candle wasnt ready', new Date());
                 }
             }
             setTimeout(() => this.getOHLCLatest(this.ticker, cb), 800);
