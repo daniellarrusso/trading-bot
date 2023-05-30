@@ -38,7 +38,7 @@ export abstract class Advisor {
     async createOrder(price: number, side: Side, quantity?: number) {
         quantity = quantity ? quantity : this.ticker.currencyAmount / price;
         const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
-        // trade.advisorType = this.type;
+        trade.advisorType = this.type;
         await this.trades.addTrade(trade).catch(async (error) => {
             this.trades.removeTrade(trade);
             await this.exchange.cancelOrder(trade.orderId);
