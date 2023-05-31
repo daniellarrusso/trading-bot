@@ -10,7 +10,7 @@ import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
 import { Intervals } from '../model/interval-converter';
-import { printDate } from '../utilities/utility';
+import { convertDate, printDate } from '../utilities/utility';
 import { Trade } from '../db/trades';
 
 class Mapper {
@@ -157,7 +157,6 @@ export class KrakenService implements IExchangeService {
                     this.createCandle(candle)
                 );
                 if (this._last !== result.last) {
-                    console.log('Calling API at: ', new Date());
                     const candle = lastCandles[lastCandles.length - 1];
                     this._last = result.last;
                     cb(candle);

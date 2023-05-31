@@ -5,6 +5,7 @@ import { AdvisorType } from '../../model/enums';
 import { LiveAdvisor } from '../../model/live-advisor';
 import { OrderAdvisor } from '../../model/order-advisor';
 import { IExchangeService } from '../../services/IExchange-service';
+import { getDayOfWeekName } from '../../utilities/utility';
 import { BaseStrategy } from '../base-strategy';
 
 export class DailySpikeStrategy extends BaseStrategy {
@@ -55,9 +56,9 @@ export class DailySpikeStrategy extends BaseStrategy {
     }
 
     logStatus(advice: any): void {
-        let enabled = this.canTrade ? 'YES' : 'NO';
-        const usedIndicators = this.logger.displayIndicators();
-        let message = `${this.ticker.pair} PRICE: ${this.candle.price}. Enabled: ${enabled}. Indicators: ${usedIndicators} Profit: ${advice}`;
+        let message = `${this.ticker.pair} PRICE: ${this.candle.price}. OrderId: ${
+            this.order.orderId
+        }. Day: ${getDayOfWeekName(this.order.day)}`;
         this.consoleColour(message);
     }
 }

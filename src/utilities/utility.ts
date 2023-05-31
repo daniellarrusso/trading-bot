@@ -26,3 +26,14 @@ export function createStrategy(name: string, exchange: Exchange) {
             break;
     }
 }
+
+export function convertDate(date: Date): Date {
+    const convertedDate = new Date(date);
+    convertedDate.setHours(convertedDate.getHours() - convertedDate.getTimezoneOffset() / 60);
+    return convertedDate;
+}
+
+export function getDayOfWeekName(dayNumber: number): string {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayNumber];
+}
