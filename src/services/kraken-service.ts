@@ -165,7 +165,7 @@ export class KrakenService implements IExchangeService {
             }
             setTimeout(() => this.getOHLCLatest(this.ticker, cb), 800);
         } catch (error: any) {
-            console.log(error.message);
+            console.log('Error getting latest Candle', error.message);
         }
     }
 
