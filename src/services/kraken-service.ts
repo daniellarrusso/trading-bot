@@ -42,6 +42,7 @@ export interface KrakenOrderResponse {
 export class KrakenService implements IExchangeService {
     exchange: any;
     _last: number = 0;
+    trys: number = 0;
 
     set lastProcessed(val: number) {
         if (this._last != val) this._last = val;
@@ -163,8 +164,10 @@ export class KrakenService implements IExchangeService {
                 }
             }
             setTimeout(() => this.getOHLCLatest(this.ticker, cb), 800);
-        } catch (error: any) {
+        } catch (error) {
             console.log('Error getting latest Candle', error.message);
+            this.trys++;
+            if (this.trys < 60) setTimeout(() => this.getOHLCLatest(this.ticker, cb), 60000); // try next minute
         }
     }
 
