@@ -10,7 +10,7 @@ import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
 import { Intervals } from '../model/interval-converter';
-import { convertDate, printDate } from '../utilities/utility';
+import { printDate } from '../utilities/utility';
 import { Trade } from '../db/trades';
 
 class Mapper {
@@ -167,27 +167,8 @@ export class KrakenService implements IExchangeService {
         } catch (error) {
             console.log('Error getting latest Candle', error.message);
             this.trys++;
+            console.log(`Try: ${this.trys} trying again`);
             if (this.trys < 60) setTimeout(() => this.getOHLCLatest(this.ticker, cb), 60000); // try next minute
-        }
-    }
-
-    async getOHLCHistory(): Promise<Candle[] | undefined> {
-        const { pair, interval } = this.ticker;
-        const intervalConverted = Intervals.find((i) => i.interval === interval);
-        try {
-            const { result } = await this.exchange.api('OHLC', {
-                pair,
-                interval: intervalConverted?.minutes,
-            });
-            this.lastProcessed = result.last;
-            const history: Candle[] = result[pair].map((candle: Candle) => this.createCandle(candle));
-            history.pop();
-            for (let i = 0; i < history.length; i++) {
-                history.push(this.createCandle(history[i]));
-            }
-            return history;
-        } catch (error: any) {
-            console.log(error.message);
         }
     }
 
