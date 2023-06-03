@@ -22,6 +22,7 @@ export class BacktestAdvisor extends Advisor {
         this.ticker.setActionType(ActionType.Long);
         if (!(this.exchange instanceof MockExchangeService))
             this.exchange = new MockExchangeService(exchange.ticker);
+        this.lastTrade = { advisorType: this.type } as Trade;
     }
 
     async logBalance() {

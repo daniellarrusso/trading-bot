@@ -65,7 +65,7 @@ export class Trades {
     }
 
     get profit() {
-        let increase = returnPercentageIncrease(this.averageBuy, this.averageSold);
+        let increase = returnPercentageIncrease(this.averageSold, this.averageBuy);
         if (this.averageSold > this.averageBuy) return Math.abs(+increase);
         return increase;
     }

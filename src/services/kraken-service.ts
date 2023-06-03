@@ -102,6 +102,7 @@ export class KrakenService implements IExchangeService {
             side: order.side,
             closeTime: this.ticker.candle.closeTime,
             orderId: res.result.txid[0],
+            status: 'NEW',
         } as Trade;
     }
 
@@ -230,7 +231,7 @@ export class KrakenService implements IExchangeService {
             green: +close > +open,
             isFinal: true,
             time: new Date(time * 1000),
-            closeTime: new Date((time + this.ticker.intervalObj.minutes) * 1000),
+            closeTime: new Date(time * 1000 + this.ticker.intervalObj.minutes),
             printTime: printDate(new Date(time * 1000)),
         } as Candle;
 

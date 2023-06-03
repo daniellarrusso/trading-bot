@@ -3,7 +3,7 @@ import { Candle } from '../model/candle';
 import { apiKeys } from '../../keys';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
-import { LimitOrder } from '../model/limit-order';
+import { LimitOrder, OrderSubject } from '../model/limit-order';
 import { Indicator } from '../model/indicator';
 import { Heikin } from '../model/heikin';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
@@ -18,6 +18,7 @@ const history = 1000;
 
 export class BinanceService implements IExchangeService {
     exchange: any;
+    limitOrder = new OrderSubject();
 
     constructor(public ticker: Ticker) {
         this.exchange = new Binance().options({
@@ -31,6 +32,14 @@ export class BinanceService implements IExchangeService {
     getOrders(pair: string): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.exchange.openOrders(pair, (error, openOrders, symbol) => {
+                resolve(openOrders);
+            });
+        });
+    }
+
+    getOrder(orderId: string, pair?: string) {
+        return new Promise((resolve, reject) => {
+            this.exchange.getOrder(pair, (error, openOrders, symbol) => {
                 resolve(openOrders);
             });
         });
@@ -222,6 +231,7 @@ export class BinanceService implements IExchangeService {
             side: res.side,
             closeTime: this.ticker.candle.closeTime,
             orderId: res.orderId,
+            status: res.status,
         } as Trade;
     }
 

@@ -2,6 +2,8 @@ import { Trade } from '../db/trades';
 import { Candle } from './candle';
 import { ActionType } from './enums';
 import { Interval, Intervals } from './interval-converter';
+import { OrderSubject } from './limit-order';
+import { Observer } from './observer';
 
 export class Ticker {
     pair: string;
@@ -32,6 +34,9 @@ export class Ticker {
         this.krakenPair = asset + '/' + currency;
         this._action = action;
         this.intervalObj = Intervals.find((i) => i.interval === interval);
+    }
+    update() {
+        throw new Error('Method not implemented.');
     }
 
     get action() {

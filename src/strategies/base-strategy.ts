@@ -157,9 +157,9 @@ export abstract class BaseStrategy implements Strat {
         }
     }
 
-    createAlternateTimeframe(interval: Interval, cb: any) {
+    createAlternateTimeframe(interval: Interval, cb?: any) {
         const tf: AlternateTimeframe = new AlternateTimeframe(interval, this.exchange);
-        cb(tf);
+        if (cb) cb(tf);
         return tf;
     }
 
@@ -267,7 +267,7 @@ export abstract class BaseStrategy implements Strat {
     }
 
     checkTradeStatus(cb: any) {
-        this.canTrade = cb() || this.backtestMode;
+        this.canTrade = cb();
     }
 
     printDate = printDate;

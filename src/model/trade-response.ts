@@ -15,6 +15,7 @@ export class TradeResponse {
     closeTime: Date;
     txid: string[];
     advisorType: string;
+    status: string;
     constructor(res: TradeResponse) {
         Object.assign(this, res);
         this.assignQuoteQtyAndPrice();

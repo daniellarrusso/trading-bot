@@ -61,6 +61,7 @@ export class MockExchangeService implements IExchangeService {
             side: res.side,
             closeTime: this.ticker.candle.closeTime,
             orderId: res.orderId,
+            status: res.status,
         } as Trade;
     }
 
@@ -214,7 +215,7 @@ export class MockExchangeService implements IExchangeService {
     }
 
     checkOrderStatus(id: any): Promise<any> {
-        return this.exchange.orderStatus(this.ticker.pair, id);
+        return this.exchange.orderStatus('ALPHAUSDT', id);
     }
 
     cancelOrder(orderId: any) {

@@ -10,6 +10,7 @@ export interface Trade {
     closeTime: Date;
     advisorType: string;
     orderId: string;
+    status: string;
 }
 
 const schema = new Schema<Trade>({
@@ -22,6 +23,7 @@ const schema = new Schema<Trade>({
     closeTime: { type: Date },
     advisorType: { type: String, required: true },
     orderId: { type: String, required: true },
+    status: { type: String, required: true },
 });
 
 export const TradeModel = model<Trade>('Trade', schema);

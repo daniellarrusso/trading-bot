@@ -8,6 +8,7 @@ import { TemplateStrategy } from './strategies/template-strategy';
 import connectApi from './api';
 import { DailySpikeStrategy } from './strategies/static/daily-spike';
 import { KrakenService } from './services/kraken-service';
+import { AltTimeframeMAStrategy } from './strategies/swing/alt-timeframe-ma.strategy';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
@@ -20,7 +21,7 @@ async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new DailySpikeStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1d', 20)),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1h', 100)),
             AdvisorType.order
         ),
     ]);
