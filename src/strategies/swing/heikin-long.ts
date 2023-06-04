@@ -48,9 +48,6 @@ export class HeikinLongStrategy extends BaseStrategy {
             return this.ema20.result < this.sma50.result;
         });
 
-        if (!this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
         if (!this.longTriggered && trues > 2) {
             this.longTriggered = true;
             this.buyTrigger = this.candle.high;
@@ -75,10 +72,6 @@ export class HeikinLongStrategy extends BaseStrategy {
         }
 
         this.majorCandle = this.candle.candleSize > 1.8 && this.candle.green ? this.candle : this.majorCandle;
-        // run in backTest
-        if (this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
     }
 
     logStatus(advice: any): void {

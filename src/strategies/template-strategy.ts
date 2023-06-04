@@ -23,11 +23,6 @@ export class TemplateStrategy extends BaseStrategy {
             return true;
         });
 
-        /// Alternate Timeframe
-        if (!this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
-
         /// Go Long
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
             await this.tradeAdvisor.trade();
@@ -37,10 +32,6 @@ export class TemplateStrategy extends BaseStrategy {
         if (this.tradeAdvisor.inTrade) {
             await this.tradeAdvisor.trade();
             this.delayStrat.start(new CallbackDelay(0));
-        }
-        // run in backTest
-        if (this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
         }
     }
 

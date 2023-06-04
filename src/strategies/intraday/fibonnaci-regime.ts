@@ -51,10 +51,6 @@ export class FibonnaciRegimeStrategy extends BaseStrategy {
         if (this.tradeAdvisor.inTrade) {
             if (this.candle.low < low && this.candle.high < high) this.tradeAdvisor.trade();
         }
-        // run in backTest
-        if (this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
     }
 
     logStatus(advice: any): void {

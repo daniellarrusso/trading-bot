@@ -40,11 +40,6 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
             return true;
         });
 
-        /// Alternate Timeframe
-        if (!this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
-
         /// Go Long
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
             if (
@@ -63,10 +58,6 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
                 // console.log('Volume breakout Downside');
                 this.tradeAdvisor.trade();
             }
-        }
-        // run in backTest
-        if (this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
         }
     }
 

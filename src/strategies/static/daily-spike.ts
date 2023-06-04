@@ -27,24 +27,15 @@ export class DailySpikeStrategy extends BaseStrategy {
             return true;
         });
 
-        /// Alternate Timeframe
-        if (!this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
+        const candleDay = this.candle.closeTime.getDay();
 
         if (this.tradeAdvisor.advisor instanceof OrderAdvisor) {
-            if (new Date().getDay() !== this.order.day) {
+            if (candleDay !== this.order.day) {
                 await this.cancelExistingOrder();
                 const price = this.candle.close * 0.94;
                 const res = await this.tradeAdvisor.createOrder(price, 'buy');
-                this.order.orderId = res.orderId;
-                this.order.day = new Date().getDay();
+                this.order = { orderId: res.orderId, day: candleDay };
             }
-        }
-
-        // run in backTest
-        if (this.backtestMode && this.hasDailyCandles) {
-            await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
         }
     }
     async cancelExistingOrder() {

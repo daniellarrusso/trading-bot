@@ -279,32 +279,6 @@ export abstract class BaseStrategy implements Strat {
     abstract advice(): Promise<void>;
 
     protected abstract logStatus(advice: any);
-
-    async getDailyCandles(pair: string, indicator: any) {
-        let hour = 0;
-        if (isBST(this.candle.time)) hour = 1;
-        const endTime = new Date(this.candle.closeTime.getTime() + 1000);
-        if (!this.dailyCandles && !this.backtestMode) {
-            try {
-                this.dailyCandles = await this.exchange.getHistoryWithIndicator(
-                    pair,
-                    '1d',
-                    indicator,
-                    null,
-                    true
-                );
-            } catch (error) {
-                console.log(error.body);
-            }
-        }
-        if (endTime.getHours() === hour) {
-            try {
-                this.dailyCandles = await this.exchange.getHistoryWithIndicator(pair, '1d', indicator);
-            } catch (error) {
-                console.log(error.body);
-            }
-        }
-    }
 }
 
 function lastSunday(month, year) {
