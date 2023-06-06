@@ -159,6 +159,7 @@ export class KrakenService implements IExchangeService {
                     this.createCandle(candle)
                 );
                 if (this._last !== result.last) {
+                    this.trys = 0;
                     const candle = lastCandles[lastCandles.length - 1];
                     this._last = result.last;
                     cb(candle);
@@ -166,10 +167,14 @@ export class KrakenService implements IExchangeService {
             }
             setTimeout(() => this.getOHLCLatest(this.ticker, cb), 800);
         } catch (error) {
-            console.log('Error getting latest Candle', error.message);
+            console.log(
+                'Error getting latest Candle',
+                error.message,
+                `\nLast Candle processed ${this.ticker.candle.closeTime}`
+            );
             this.trys++;
             console.log(`Try: ${this.trys} trying again`);
-            if (this.trys < 60) setTimeout(() => this.getOHLCLatest(this.ticker, cb), 60000); // try next minute
+            if (this.trys < 60) setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000); // try next minute
         }
     }
 
