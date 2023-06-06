@@ -9,6 +9,7 @@ import connectApi from './api';
 import { DailySpikeStrategy } from './strategies/static/daily-spike';
 import { KrakenService } from './services/kraken-service';
 import { AltTimeframeMAStrategy } from './strategies/swing/alt-timeframe-ma.strategy';
+import { HeikinLongStrategy } from './strategies/swing/heikin-long';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;

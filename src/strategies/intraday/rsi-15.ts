@@ -11,7 +11,6 @@ export class RSI15trategy extends BaseStrategy {
     constructor(public strat: IExchangeService, advisor: AdvisorType) {
         super(strat, advisor);
         this.strategyName = 'Template';
-        this.hasDailyCandles = false;
     }
 
     loadIndicators() {

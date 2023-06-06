@@ -3,6 +3,7 @@ import { addIndicator } from '../../indicators/base-indicator';
 import { Candle } from '../../model/candle';
 import { ActionType, AdvisorType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
+import { Interval } from '../../model/interval-converter';
 import { IExchangeService } from '../../services/IExchange-service';
 import { BaseStrategy } from '../base-strategy';
 
@@ -15,7 +16,6 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
     constructor(public strat: IExchangeService, advisor: AdvisorType) {
         super(strat, advisor);
         this.strategyName = 'Breakout Volume';
-        this.hasDailyCandles = true;
     }
 
     loadIndicators() {
@@ -44,7 +44,7 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
             if (
                 volumeIncreasePercentage > 130 &&
-                this.candle.close > this.dailyCandles.lastCandle.high &&
+                // this.candle.close > this.dailyCandles.lastCandle.high &&
                 this.candle.green
             ) {
                 // console.log('Volume breakout Upside');
@@ -54,10 +54,10 @@ export class BreakoutVolumeStrategy extends BaseStrategy {
 
         // Go Short
         if (this.tradeAdvisor.inTrade) {
-            if (this.candle.close < this.dailyCandles.lastCandle.low) {
-                // console.log('Volume breakout Downside');
-                this.tradeAdvisor.trade();
-            }
+            // if (this.candle.close < this.dailyCandles.lastCandle.low) {
+            //     // console.log('Volume breakout Downside');
+            //     this.tradeAdvisor.trade();
+            // }
         }
     }
 

@@ -57,8 +57,6 @@ export abstract class BaseStrategy implements Strat {
         { percent: 13, notified: false },
     ];
     protected intervalsInDay: number;
-    protected dailyCandles: CandlesIndicatorResponse;
-    protected hasDailyCandles: boolean = false;
     protected canBuy: boolean;
     protected canSell: boolean;
 

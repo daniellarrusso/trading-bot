@@ -37,11 +37,6 @@ export class FibonnaciRegimeStrategy extends BaseStrategy {
             return true;
         });
 
-        /// Alternate Timeframe
-        if (!this.backtestMode && this.hasDailyCandles) {
-            //   await this.getDailyCandles(this.pair, addIndicator('rsi', { weight: 14 }));
-        }
-
         /// Go Long
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
             if (this.candle.high > high && this.candle.low > low) this.tradeAdvisor.trade();

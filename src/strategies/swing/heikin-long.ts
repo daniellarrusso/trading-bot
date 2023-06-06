@@ -1,7 +1,9 @@
 import { addIndicator } from '../../indicators/base-indicator';
+import { AlternateTimeframe } from '../../model/alternate-timeframe';
 import { Candle } from '../../model/candle';
 import { ActionType, AdvisorType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
+import { Interval } from '../../model/interval-converter';
 
 import { IExchangeService } from '../../services/IExchange-service';
 
@@ -15,11 +17,12 @@ export class HeikinLongStrategy extends BaseStrategy {
     majorCandle: Candle;
     longTriggered: boolean = false;
     buyTrigger: number = 0;
+    altTf: AlternateTimeframe;
+    altRSI: Indicator;
 
     constructor(public strat: IExchangeService, advisor: AdvisorType) {
         super(strat, advisor);
         this.strategyName = 'Heikin Long Strategy';
-        this.hasDailyCandles = true;
     }
 
     loadIndicators() {
@@ -27,6 +30,9 @@ export class HeikinLongStrategy extends BaseStrategy {
         this.sma200 = addIndicator('sma', { weight: 200, name: 'sma200' });
         this.cci = addIndicator('sniper-cci', { weight: 14, input: 'close', inputType: 'heikin' });
         this.volumeMa = addIndicator('sma', { weight: 90, input: 'volume', inputType: 'candle' });
+
+        this.altTf = this.createAlternateTimeframe(new Interval('1d'));
+        this.altRSI = this.altTf.createIndicator('rsi', { weight: 14 });
     }
 
     async realtimeAdvice(candle: Candle) {}
@@ -48,25 +54,18 @@ export class HeikinLongStrategy extends BaseStrategy {
             return this.ema20.result < this.sma50.result;
         });
 
-        if (!this.longTriggered && trues > 2) {
-            this.longTriggered = true;
-            this.buyTrigger = this.candle.high;
-        }
-        if (this.longTriggered && this.cci.result < 0) {
-            this.longTriggered = false;
-        }
+        await this.altTf.process(this.candle, this.backtestMode);
+
+        this.longTriggered = trues > 2 && this.cci.result > 0;
 
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
-            if (
-                this.longTriggered &&
-                this.candle.close > this.buyTrigger &&
-                this.dailyCandles.indicator.result > 50
-            ) {
+            if (this.longTriggered && this.candle.close > this.buyTrigger && this.altRSI.result > 50) {
                 this.tradeAdvisor.trade();
             }
         }
+
         if (this.tradeAdvisor.inTrade) {
-            if (this.dailyCandles.indicator.result < 45) {
+            if (this.altRSI.result < 45) {
                 this.tradeAdvisor.trade();
             }
         }

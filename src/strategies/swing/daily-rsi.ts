@@ -20,7 +20,6 @@ export class DailyRSIStrategy extends BaseStrategy {
     constructor(public strat: IExchangeService, advisor: AdvisorType) {
         super(strat, advisor);
         this.strategyName = 'Daily RSI';
-        this.hasDailyCandles = true;
     }
 
     loadIndicators() {
