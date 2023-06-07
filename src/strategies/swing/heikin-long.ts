@@ -51,7 +51,7 @@ export class HeikinLongStrategy extends BaseStrategy {
         const trues = longArray.filter((a) => a.result).length;
 
         this.checkTradeStatus(() => {
-            return this.ema20.result < this.sma50.result;
+            return this.altRSI.result < 45;
         });
 
         await this.altTf.process(this.candle, this.backtestMode);

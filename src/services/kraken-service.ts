@@ -9,9 +9,10 @@ import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
-import { Intervals } from '../model/interval-converter';
+import { Interval, Intervals } from '../model/interval-converter';
 import { printDate } from '../utilities/utility';
 import { Trade } from '../db/trades';
+import moment from 'moment';
 
 class Mapper {
     [pair: string]: string;
@@ -67,6 +68,25 @@ export class KrakenService implements IExchangeService {
             console.log(error.message);
         }
     }
+
+    async getOHLCHistoryByPair(pair: string, interval: Interval): Promise<Candle[]> {
+        const { krakenPair: pair2 } = this.ticker;
+
+        try {
+            const { result } = await this.exchange.api('OHLC', {
+                pair: pair2,
+                interval: interval.minutes,
+            });
+            const history: Candle[] = result[pair2].map((candle: Candle) =>
+                this.createCandle(candle, interval.minutes)
+            );
+            history.pop();
+            return history;
+        } catch (error: any) {
+            console.log(error.message);
+        }
+    }
+
     getHistoryWithIndicator(
         pair: any,
         interval: any,
@@ -160,7 +180,7 @@ export class KrakenService implements IExchangeService {
                 );
                 if (this._last !== result.last) {
                     this.trys = 0;
-                    const candle = lastCandles[lastCandles.length - 1];
+                    const candle = lastCandles[lastCandles.length - 2];
                     this._last = result.last;
                     cb(candle);
                 }
@@ -189,9 +209,6 @@ export class KrakenService implements IExchangeService {
         }
     }
 
-    getOHLCHistoryByPair(): Promise<Candle[]> {
-        throw new Error('Method not implemented.');
-    }
     getLatest(): void {
         throw new Error('Method not implemented.');
     }
@@ -223,7 +240,7 @@ export class KrakenService implements IExchangeService {
         return res.result;
     }
 
-    private createCandle(arr: any) {
+    private createCandle(arr: any, minutes?: number) {
         const [time, open, high, low, close, vwap, volume] = arr;
         const candle: Candle = {
             pair: this.ticker.pair,
@@ -236,10 +253,16 @@ export class KrakenService implements IExchangeService {
             green: +close > +open,
             isFinal: true,
             time: new Date(time * 1000),
-            closeTime: new Date(time * 1000 + this.ticker.intervalObj.minutes),
+            closeTime: addMinutes(new Date(time * 1000), minutes || this.ticker.intervalObj.minutes),
             printTime: printDate(new Date(time * 1000)),
         } as Candle;
 
         return candle;
     }
+}
+
+function addMinutes(date, minutes) {
+    date.setMinutes(date.getMinutes() + minutes);
+
+    return date;
 }

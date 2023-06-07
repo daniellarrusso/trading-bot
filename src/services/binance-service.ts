@@ -12,6 +12,7 @@ import { IExchangeService } from './IExchange-service';
 import { Side } from '../model/literals';
 import { printDate } from '../utilities/utility';
 import { Trade } from '../db/trades';
+import { Interval } from '../model/interval-converter';
 
 // const FEE = Settings.fee;
 const history = 1000;
@@ -79,11 +80,11 @@ export class BinanceService implements IExchangeService {
         });
     }
 
-    getOHLCHistoryByPair(pair: string, interval: string): Promise<Candle[]> {
+    getOHLCHistoryByPair(pair: string, interval: Interval): Promise<Candle[]> {
         return new Promise((resolve, reject) => {
             this.exchange.candlesticks(
                 pair,
-                interval,
+                interval.interval,
                 (error, ticks, symbol) => {
                     const history = [];
                     for (let i = 0; i < ticks.length; i++) {

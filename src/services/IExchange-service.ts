@@ -2,6 +2,7 @@ import { Trade } from '../db/trades';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
+import { Interval } from '../model/interval-converter';
 import { LimitOrder } from '../model/limit-order';
 import { Side } from '../model/literals';
 import { CandlesIndicatorResponse } from '../model/multi-timeframe';
@@ -17,7 +18,7 @@ export interface IExchangeService {
     getOHLCLatest(ticker: Ticker, cb: any): void;
     getHistory(ticker: Ticker): Promise<Candle[]>;
     getTradingBalance(): Promise<Ticker>;
-    getOHLCHistoryByPair(pair: string, interval: string): Promise<Candle[]>;
+    getOHLCHistoryByPair(pair: string, interval: Interval): Promise<Candle[]>;
     getHistoryWithIndicator(
         pair,
         interval,
