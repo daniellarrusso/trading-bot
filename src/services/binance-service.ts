@@ -353,10 +353,10 @@ function getCandle(tick, ticker): Candle {
         volume: +volume,
         green: +close > +open,
         time: new Date(time),
-        closeTime: new Date(closeTime + 1),
+        closeTime: addMinute(new Date(closeTime)),
         isFinal: true,
         candleSize: getCandleSize(+open, +close),
-        printTime: printTime(closeTime + 1),
+        printTime: printTime(addMinute(new Date(closeTime))),
     } as Candle;
     return candle;
 }
@@ -399,4 +399,10 @@ function getPrecision(tickSize) {
         p++;
     }
     return p;
+}
+
+function addMinute(date: Date) {
+    date.setSeconds(date.getSeconds() + 1);
+
+    return date;
 }

@@ -22,7 +22,7 @@ async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new HeikinLongStrategy(
-            new BinanceService(new Ticker('BTC', 'GBP', ActionType.Long, '1h', 100)),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m', 100)),
             AdvisorType.live
         ),
     ]);

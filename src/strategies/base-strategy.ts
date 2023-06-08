@@ -23,6 +23,7 @@ import { ordertypes } from '../model/literals';
 import { LiveAdvisor } from '../model/live-advisor';
 import { MockExchangeService } from '../services/mock-exchange.service';
 import { OrderAdvisor } from '../model/order-advisor';
+import { BackTestSubject } from '../model/backTestSubject';
 
 export abstract class BaseStrategy implements Strat {
     telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -41,7 +42,7 @@ export abstract class BaseStrategy implements Strat {
     private history: number;
     private age = 0;
     protected candleStats: CandleStatistics;
-    protected canTrade: boolean = true;
+    protected canTrade: boolean = false;
     protected backtestMode: boolean;
     protected previousCandle: Candle;
     private hasTraded: boolean = false;
@@ -59,6 +60,7 @@ export abstract class BaseStrategy implements Strat {
     protected intervalsInDay: number;
     protected canBuy: boolean;
     protected canSell: boolean;
+    protected backtestSubject: BackTestSubject;
 
     get profit() {
         return this.tradeAdvisor.profit;
@@ -71,6 +73,7 @@ export abstract class BaseStrategy implements Strat {
         this.candleStats = new CandleStatistics(this.ticker.interval);
         this.tradeAdvisor = new TradeAdvisor(this.ticker);
         this.loadDefaultIndicators();
+        this.backtestSubject = new BackTestSubject();
     }
 
     async loadMockExchangeInfo() {
@@ -156,7 +159,8 @@ export abstract class BaseStrategy implements Strat {
     }
 
     createAlternateTimeframe(interval: Interval, cb?: any) {
-        const tf: AlternateTimeframe = new AlternateTimeframe(interval, this.exchange);
+        const tf: AlternateTimeframe = new AlternateTimeframe(interval, this.exchange, this.backtestSubject);
+        this.backtestSubject.addObserver(tf);
         if (cb) cb(tf);
         return tf;
     }
@@ -208,7 +212,7 @@ export abstract class BaseStrategy implements Strat {
     private async check() {
         this.candleStats.calculateStatistics(this.candle); // 5 minute candle
         this.delayOn = this.delayStrat.checkDelay();
-        this.backtestMode = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
+        this.backtestMode = this.backtestSubject.value = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
         if (this.age > this.history) {
             await this.tradeAdvisor.trader.updateCurrencyAmountMongoDb(this.ticker);
             await this.advice();
@@ -265,12 +269,16 @@ export abstract class BaseStrategy implements Strat {
     }
 
     checkTradeStatus(cb: any) {
-        this.canTrade = cb();
+        if (cb()) {
+            this.canTrade = true;
+        }
     }
 
     printDate = printDate;
 
-    protected resetParameters() {}
+    resetParameters() {
+        this.canTrade = false;
+    }
 
     abstract realtimeAdvice(candle: Candle): Promise<void>;
 

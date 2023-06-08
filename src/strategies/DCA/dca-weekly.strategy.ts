@@ -17,7 +17,7 @@ export class DCAWeeklytrategy extends BaseStrategy {
     }
 
     loadIndicators() {
-        this.af = new AlternateTimeframe(new Interval('4h'), new BinanceService(this.strat.ticker));
+        // this.af = new AlternateTimeframe(new Interval('4h'), new BinanceService(this.strat.ticker));
         this.af.createIndicator('sma', { weight: 50 });
         this.af.createIndicator('ema', { weight: 20 });
         this.af = this.createAlternateTimeframe(new Interval('4h', 60 * 4), (tf: AlternateTimeframe) => {
@@ -29,7 +29,7 @@ export class DCAWeeklytrategy extends BaseStrategy {
     async realtimeAdvice(candle: Candle) {}
 
     async advice() {
-        await this.af.processHigherTimeframe(this.candle, this.backtestMode);
+        await this.af.process(this.candle);
         // Can Trade after certain criteria met (sometimes you don;t want to trade straight away)
         this.checkTradeStatus(() => {
             return true;

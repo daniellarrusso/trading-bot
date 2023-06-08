@@ -31,7 +31,7 @@ export class HeikinLongStrategy extends BaseStrategy {
         this.cci = addIndicator('sniper-cci', { weight: 14, input: 'close', inputType: 'heikin' });
         this.volumeMa = addIndicator('sma', { weight: 90, input: 'volume', inputType: 'candle' });
 
-        this.altTf = this.createAlternateTimeframe(new Interval('1d'));
+        this.altTf = this.createAlternateTimeframe(new Interval('5m'));
         this.altRSI = this.altTf.createIndicator('rsi', { weight: 14 });
     }
 
@@ -43,30 +43,29 @@ export class HeikinLongStrategy extends BaseStrategy {
             this.volumeMa.result
         );
         const longArray = [];
-        longArray.push({ type: 'cci', result: this.cci.result > 0 && this.cci.result < 100 });
-        longArray.push({ type: 'volume', result: volumeIncreasePercentage > 100 });
-        longArray.push({ type: 'aboveSam', result: this.candle.close > this.sma200.result });
+        longArray.push({ type: 'cci', result: this.cci.result > 0 });
+        longArray.push({ type: 'aboveSma', result: this.candle.close > this.sma200.result });
         longArray.push({ type: 'heikin', result: this.heikin.green });
 
         const trues = longArray.filter((a) => a.result).length;
 
         this.checkTradeStatus(() => {
-            return this.altRSI.result < 45;
+            return this.altRSI.movingAverage < 50;
         });
 
-        await this.altTf.process(this.candle, this.backtestMode);
+        await this.altTf.process(this.candle);
 
         this.longTriggered = trues > 2 && this.cci.result > 0;
 
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
-            if (this.longTriggered && this.candle.close > this.buyTrigger && this.altRSI.result > 50) {
-                this.tradeAdvisor.trade();
+            if (this.altRSI.movingAverage > 50) {
+                await this.tradeAdvisor.trade();
             }
         }
 
         if (this.tradeAdvisor.inTrade) {
-            if (this.altRSI.result < 45) {
-                this.tradeAdvisor.trade();
+            if (this.rsi14.result < 70 && this.rsi14.previousResult > 70) {
+                await this.tradeAdvisor.trade();
             }
         }
 

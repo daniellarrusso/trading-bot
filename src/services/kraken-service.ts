@@ -254,7 +254,9 @@ export class KrakenService implements IExchangeService {
             isFinal: true,
             time: new Date(time * 1000),
             closeTime: addMinutes(new Date(time * 1000), minutes || this.ticker.intervalObj.minutes),
-            printTime: printDate(new Date(time * 1000)),
+            printTime: printDate(
+                addMinutes(new Date(time * 1000), minutes || this.ticker.intervalObj.minutes)
+            ),
         } as Candle;
 
         return candle;

@@ -1,121 +1,72 @@
 import { addIndicator, IndicatorName } from '../indicators/base-indicator';
 import { Candle } from './candle';
 import { Indicator, IndicatorSettings } from './indicator';
-import { Interval, IntervalType } from './interval-converter';
-import { Observer } from './observer';
-import { DaylightSavings } from './daylight-savings';
+import { Interval } from './interval-converter';
 import moment from 'moment';
 import { IExchangeService } from '../services/IExchange-service';
+import { Observer } from './observer';
+import { BackTestSubject } from './backTestSubject';
 
 export class AlternateTimeframe implements Observer {
     interval: Interval;
     candles: Candle[];
     lastCandle: Candle;
     indicators: Indicator[] = [];
-    private nextInterval;
-    daylightSavings: DaylightSavings;
-    isBacktest: boolean;
-    constructor(interval: Interval, public service: IExchangeService) {
+    private readonly backTestSubject: BackTestSubject;
+    constructor(interval: Interval, public service: IExchangeService, subject: BackTestSubject) {
         this.interval = interval;
-        this.daylightSavings = new DaylightSavings();
-        this.daylightSavings.addObserver(this);
+        this.backTestSubject = subject;
     }
-
-    get nextIntervalDate() {
-        return new Date(this.nextInterval);
-    }
-
     update() {
-        console.log('Daylight Savings updated');
-        let nextIntervalDate = new Date(this.nextInterval);
-        if (this.daylightSavings.isDST) {
-            nextIntervalDate.setHours(nextIntervalDate.getHours() + 1);
-        } else {
-            nextIntervalDate.setHours(nextIntervalDate.getHours() - 1);
-        }
-        this.nextInterval = nextIntervalDate.getTime();
-    }
-    private updateInterval(closeTime: Date) {
-        const nextDate = new Date(closeTime);
-        switch (this.interval.type) {
-            case IntervalType.minute:
-                nextDate.setMinutes(nextDate.getMinutes() + this.interval.distance);
-                break;
-            case IntervalType.hour:
-                nextDate.setHours(nextDate.getHours() + this.interval.distance);
-                break;
-            case IntervalType.day:
-                nextDate.setDate(nextDate.getDate() + this.interval.distance);
-                break;
-            case IntervalType.week:
-                nextDate.setDate(nextDate.getDate() + this.interval.distance);
-                break;
-            default:
-                break;
-        }
-        this.nextInterval = nextDate.toLocaleString();
+        console.log('BackTestMode updated to:' + this.backTestSubject.value);
     }
 
-    async process(candle: Candle, isBacktest: boolean) {
-        this.isBacktest = isBacktest;
-        this.daylightSavings.update(moment(candle.time).isDST());
-
+    async process(candle: Candle) {
         if (this.processNextCandle(candle.closeTime)) {
             await this.getHistory(candle);
-            this.updateInterval(candle.closeTime);
         }
     }
 
     processNextCandle(time: Date): boolean {
+        let adjustedTime = new Date(time);
         if (moment(time).isDST()) {
-            time = subtractHour(time);
+            adjustedTime = subtractHour(adjustedTime);
         }
-
         switch (this.interval.minutes) {
             case 5:
-                return [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].some((i) => i === time.getMinutes());
+                return [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].some(
+                    (i) => i === adjustedTime.getMinutes()
+                );
             case 15:
-                return [0, 15, 30, 45].some((i) => i === time.getMinutes());
+                return [0, 15, 30, 45].some((i) => i === adjustedTime.getMinutes());
             case 60:
-                return [0].some((i) => i === time.getHours());
+                return [0].some((i) => i === adjustedTime.getHours());
             case 60 * 4:
-                return [0, 4, 8, 12, 16, 20].some((i) => i === time.getHours());
+                return [0, 4, 8, 12, 16, 20].some((i) => i === adjustedTime.getHours());
             case 60 * 24:
-                return time.getHours() === 0;
+                return adjustedTime.getHours() === 0;
             default:
                 throw Error('Interval has no conversion');
         }
     }
 
-    async processHigherTimeframe(candle: Candle, isBacktest: boolean) {
-        const monthsago = moment().subtract(4, 'months');
-
-        this.daylightSavings.update(moment(candle.time).isDST());
-        if (moment(candle.time) < monthsago) return;
-        await this.getHistory(candle);
-        this.updateInterval(this.lastCandle?.closeTime);
-    }
-
     async getHistory(candle: Candle) {
-        if (this.isBacktest) {
+        if (this.backTestSubject.value) {
+            let candles;
             if (this.candles) {
-                const candles = this.candles.filter(
-                    (c) => c.closeTime.getTime() <= candle.closeTime.getTime()
-                );
+                candles = this.candles.filter((c) => c.closeTime.getTime() <= candle.closeTime.getTime());
                 this.lastCandle = candles[candles.length - 1];
             } else {
                 this.candles = await this.service.getOHLCHistoryByPair(candle.pair, this.interval);
-                const candles = this.candles.filter(
-                    (c) => c.closeTime.getTime() <= candle.closeTime.getTime()
-                );
+                candles = this.candles.filter((c) => c.closeTime.getTime() <= candle.closeTime.getTime());
                 this.lastCandle = candles[candles.length - 1];
             }
-            this.updateIndicator();
+            this.updateIndicator(candles);
         } else {
             this.candles = await this.service.getOHLCHistoryByPair(candle.pair, this.interval);
             const candles = this.candles.filter((c) => c.closeTime.getTime() <= candle.closeTime.getTime());
             this.lastCandle = candles[candles.length - 1];
-            this.updateIndicator();
+            this.updateIndicator(candles);
         }
     }
 
@@ -128,19 +79,12 @@ export class AlternateTimeframe implements Observer {
         return this.indicators.find((i) => i.name.toLowerCase() === name.toLowerCase());
     }
 
-    private updateIndicator() {
-        if (this.nextInterval) {
-            this.indicators.map((i) => {
-                i.update(this.lastCandle.close);
-            });
-        } else {
-            this.indicators.map((i) => this.candles.map((c) => i.update(c.close)));
-        }
+    private updateIndicator(candlesToUpdate: Candle[]) {
+        this.indicators.map((i) => candlesToUpdate.map((c) => i.update(c.close)));
     }
 }
 
 function subtractHour(date) {
     date.setHours(date.getHours() - 1);
-
     return date;
 }

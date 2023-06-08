@@ -43,8 +43,8 @@ export class DailyRSIStrategy extends BaseStrategy {
         });
 
         /// Alternate Timeframe(s)
-        await this.dayTf.process(this.candle, this.backtestMode);
-        await this.hourTf.process(this.candle, this.backtestMode);
+        await this.dayTf.process(this.candle);
+        await this.hourTf.process(this.candle);
 
         const { candles } = this.dayTf;
         if (candles) {
