@@ -24,6 +24,7 @@ import { LiveAdvisor } from '../model/live-advisor';
 import { MockExchangeService } from '../services/mock-exchange.service';
 import { OrderAdvisor } from '../model/order-advisor';
 import { BackTestSubject } from '../model/backTestSubject';
+import { Observer } from '../model/observer';
 
 export abstract class BaseStrategy implements Strat {
     telegram = new TelegramBot(ChatGroups.mainAccount);

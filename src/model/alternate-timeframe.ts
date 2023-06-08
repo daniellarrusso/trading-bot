@@ -17,9 +17,7 @@ export class AlternateTimeframe implements Observer {
         this.interval = interval;
         this.backTestSubject = subject;
     }
-    update() {
-        console.log('BackTestMode updated to:' + this.backTestSubject.value);
-    }
+    update() {}
 
     async process(candle: Candle) {
         if (this.processNextCandle(candle.closeTime)) {

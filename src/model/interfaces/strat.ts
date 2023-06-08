@@ -1,5 +1,6 @@
 import { IExchangeService } from '../../services/IExchange-service';
 import { Candle } from '../candle';
+import { Observer } from '../observer';
 
 export interface Strat {
     exchange: IExchangeService;
