@@ -1,13 +1,13 @@
 import { Schema, model } from 'mongoose';
 
-export interface Symbol {
+export interface TickerDb {
     ticker: string;
     amount: number;
     marketOrders: boolean;
 }
 
-export const SymbolModel = model<Symbol>(
-    'Symbol',
+export const TickerDbModel = model<TickerDb>(
+    'Ticker',
     new Schema<Symbol>({
         ticker: { type: String, required: true },
         amount: { type: Number, default: 0 },

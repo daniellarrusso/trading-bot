@@ -10,7 +10,7 @@ import { Trade, TradeModel } from '../db/trades';
 import { Trades } from './trades';
 import { ActionType } from './enums';
 import { Subject } from './subject';
-import { SymbolModel } from '../db/symbols';
+import { TickerDbModel } from '../db/tickers';
 
 export abstract class Advisor extends Subject {
     profitResults: number[];
@@ -45,7 +45,7 @@ export abstract class Advisor extends Subject {
 
     async checkOrderStatus() {
         try {
-            const order = await SymbolModel.findOne({ ticker: 'BTCUSDT' });
+            const order = await TickerDbModel.findOne({ ticker: 'BTCUSDT' });
             if (order.amount === 20) {
                 this.currentOrderStatus = false;
                 setTimeout(() => {

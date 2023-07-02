@@ -4,7 +4,7 @@ import connect from '../db/connection';
 import { Strat } from '../model/interfaces/strat';
 import { TradeModel } from '../db/trades';
 import { TradeResponse } from '../model/trade-response';
-import { SymbolModel } from '../db/symbols';
+import { TickerDbModel } from '../db/tickers';
 
 export class Trader {
     private static instance: Trader;
@@ -37,18 +37,18 @@ export class Trader {
     }
 
     async updateCurrencyAmountMongoDb(ticker: Ticker) {
-        const doc = await SymbolModel.findOne({ ticker: ticker.pair });
+        const doc = await TickerDbModel.findOne({ ticker: ticker.pair });
         ticker.currencyAmount = doc.amount;
         ticker.isMarketOrders = doc.marketOrders;
     }
 
     findSymbolMongoDb(ticker: Ticker) {
-        return SymbolModel.findOne({ ticker: ticker.pair });
+        return TickerDbModel.findOne({ ticker: ticker.pair });
     }
 
     async addSymbolMongoDb(ticker: Ticker) {
         const symbol = await this.findSymbolMongoDb(ticker);
-        const doc = new SymbolModel({
+        const doc = new TickerDbModel({
             ticker: ticker.pair,
             amount: ticker.currencyAmount,
         });
