@@ -11,18 +11,22 @@ import { HeikinLongStrategy } from './strategies/swing/heikin-long';
 import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
 
 const trader = Trader.getInstance();
-const advisorType: AdvisorType = AdvisorType.paper;
+const advisor: AdvisorType = AdvisorType.paper;
 const testStrat = new TemplateStrategy(
     new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
-    advisorType
+    AdvisorType.paper
 );
 
 async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new SimpleMAStrategy(
-            new KrakenService(new Ticker('ETH', 'GBP', ActionType.Long, '4h', 100)),
-            AdvisorType.live
+            new KrakenService(new Ticker('ETH', 'GBP', ActionType.Long, '4h', 1000)),
+            advisor
+        ),
+        new SimpleMAStrategy(
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '4h', 1000)),
+            advisor
         ),
     ]);
 
