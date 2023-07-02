@@ -204,7 +204,7 @@ export class MockExchangeService implements IExchangeService {
                 const cq = await this.exchange.balance();
                 this.ticker.assetQuantity = aq[this.ticker.asset].available;
                 this.ticker.currencyQuantity = cq[this.ticker.currency].available;
-                return this.ticker;
+                resolve(this.ticker);
             } catch (err) {
                 reject(handleError(err));
             }
