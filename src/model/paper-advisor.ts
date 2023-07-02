@@ -32,7 +32,7 @@ export class PaperAdvisor extends Advisor {
     }
 
     async setup(): Promise<void> {
-        await console.log('Paper Trader set up', this.ticker);
+        await console.log('Paper Trader set up');
     }
 
     async logBalance() {
