@@ -1,4 +1,5 @@
 import { addIndicator } from '../../indicators/base-indicator';
+import { CallbackDelay } from '../../model/callback-delay';
 import { AdvisorType } from '../../model/enums';
 import { Indicator } from '../../model/indicator';
 import { IExchangeService } from '../../services/IExchange-service';
@@ -22,7 +23,7 @@ export class SimpleMAStrategy extends BaseStrategy {
 
     async advice() {
         this.checkTradeStatus(() => {
-            return true;
+            return this.ema20.result < this.sma50.result;
         });
 
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
@@ -33,6 +34,10 @@ export class SimpleMAStrategy extends BaseStrategy {
         if (this.tradeAdvisor.inTrade) {
             if (this.ema20.result < this.sma50.result) {
                 await this.tradeAdvisor.trade();
+            }
+            if (this.rsi14.movingAverage > 65) {
+                await this.tradeAdvisor.trade();
+                this.delayStrat.start(new CallbackDelay(2, () => this.ema20.result > this.sma50.result));
             }
         }
     }

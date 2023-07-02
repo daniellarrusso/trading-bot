@@ -2,10 +2,9 @@ import { Trade } from '../db/trades';
 import { Candle } from './candle';
 import { ActionType } from './enums';
 import { Interval, Intervals } from './interval-converter';
-import { OrderSubject } from './limit-order';
-import { Observer } from './observer';
+import { Subject } from './subject';
 
-export class Ticker {
+export class Ticker extends Subject {
     pair: string;
     krakenPair: string;
     assetQuantity: number;
@@ -23,6 +22,15 @@ export class Ticker {
     intervalObj: Interval;
     lastTrade: Trade;
 
+    private _backTestMode: boolean;
+    public get backTestMode(): boolean {
+        return this._backTestMode;
+    }
+    public set backTestMode(v: boolean) {
+        this._backTestMode = v;
+        this.notifyObservers();
+    }
+
     constructor(
         public asset: string,
         public currency: string,
@@ -30,13 +38,11 @@ export class Ticker {
         public interval: string,
         public currencyAmount = 100
     ) {
+        super();
         this.pair = asset + currency;
         this.krakenPair = asset + '/' + currency;
         this._action = action;
         this.intervalObj = Intervals.find((i) => i.interval === interval);
-    }
-    update() {
-        throw new Error('Method not implemented.');
     }
 
     get action() {

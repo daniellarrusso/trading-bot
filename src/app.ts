@@ -6,10 +6,9 @@ import { Strat } from './model/interfaces/strat';
 import { BinanceService } from './services/binance-service';
 import { TemplateStrategy } from './strategies/template-strategy';
 import connectApi from './api';
-import { DailySpikeStrategy } from './strategies/static/daily-spike';
 import { KrakenService } from './services/kraken-service';
-import { AltTimeframeMAStrategy } from './strategies/swing/alt-timeframe-ma.strategy';
 import { HeikinLongStrategy } from './strategies/swing/heikin-long';
+import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
 
 const trader = Trader.getInstance();
 const advisorType: AdvisorType = AdvisorType.paper;
@@ -21,8 +20,8 @@ const testStrat = new TemplateStrategy(
 async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
-        new HeikinLongStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m', 100)),
+        new SimpleMAStrategy(
+            new KrakenService(new Ticker('ETH', 'GBP', ActionType.Long, '4h', 100)),
             AdvisorType.live
         ),
     ]);

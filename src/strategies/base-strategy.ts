@@ -5,7 +5,6 @@ import { Indicator } from '../model/indicator';
 import { CandleStatistics } from '../model/candle-statistics';
 import { Strat } from '../model/interfaces/strat';
 import { TradeAdvisor } from '../model/trade-advisor';
-import { BacktestAdvisor } from '../model/backtest-advisor';
 import { DelayStrategy } from '../model/delay-strategy';
 import { Interval } from '../model/interval-converter';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
@@ -14,17 +13,13 @@ import { ChatGroups, Settings } from '../../settings';
 import { addIndicator } from '../indicators/base-indicator';
 import { Ticker } from '../model/ticker';
 import { AdvisorType } from '../model/enums';
-import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { AlternateTimeframe } from '../model/alternate-timeframe';
 import { printDate } from '../utilities/utility';
 import { IExchangeService } from '../services/IExchange-service';
 import { PaperAdvisor } from '../model/paper-advisor';
-import { ordertypes } from '../model/literals';
 import { LiveAdvisor } from '../model/live-advisor';
 import { MockExchangeService } from '../services/mock-exchange.service';
 import { OrderAdvisor } from '../model/order-advisor';
-import { BackTestSubject } from '../model/backTestSubject';
-import { Observer } from '../model/observer';
 
 export abstract class BaseStrategy implements Strat {
     telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -46,7 +41,6 @@ export abstract class BaseStrategy implements Strat {
     protected canTrade: boolean = false;
     protected backtestMode: boolean;
     protected previousCandle: Candle;
-    private hasTraded: boolean = false;
     protected delayStrat = new DelayStrategy();
     protected delayOn: boolean;
     private indicatorWeight: number = 20;
@@ -61,7 +55,6 @@ export abstract class BaseStrategy implements Strat {
     protected intervalsInDay: number;
     protected canBuy: boolean;
     protected canSell: boolean;
-    protected backtestSubject: BackTestSubject;
 
     get profit() {
         return this.tradeAdvisor.profit;
@@ -74,7 +67,6 @@ export abstract class BaseStrategy implements Strat {
         this.candleStats = new CandleStatistics(this.ticker.interval);
         this.tradeAdvisor = new TradeAdvisor(this.ticker);
         this.loadDefaultIndicators();
-        this.backtestSubject = new BackTestSubject();
     }
 
     async loadMockExchangeInfo() {
@@ -138,6 +130,7 @@ export abstract class BaseStrategy implements Strat {
     }
 
     async loadHistory(candleHistory: Candle[]) {
+        this.ticker.backTestMode = true;
         this.loadIndicators();
         this.calculateIndicatorWeight();
         this.history = candleHistory.length;
@@ -154,14 +147,15 @@ export abstract class BaseStrategy implements Strat {
             this.strategyName = this.strategyName;
             this.resetParameters();
             await this.setAdvisor();
+            this.ticker.backTestMode = false;
         } catch (error) {
             throw new Error('BaseStraat: loadHistory() Failed');
         }
     }
 
     createAlternateTimeframe(interval: Interval, cb?: any) {
-        const tf: AlternateTimeframe = new AlternateTimeframe(interval, this.exchange, this.backtestSubject);
-        this.backtestSubject.addObserver(tf);
+        const tf: AlternateTimeframe = new AlternateTimeframe(interval, this.exchange);
+        this.ticker.addObserver(tf);
         if (cb) cb(tf);
         return tf;
     }
@@ -213,7 +207,6 @@ export abstract class BaseStrategy implements Strat {
     private async check() {
         this.candleStats.calculateStatistics(this.candle); // 5 minute candle
         this.delayOn = this.delayStrat.checkDelay();
-        this.backtestMode = this.backtestSubject.value = this.tradeAdvisor.advisor instanceof BacktestAdvisor;
         if (this.age > this.history) {
             await this.tradeAdvisor.trader.updateCurrencyAmountMongoDb(this.ticker);
             await this.advice();

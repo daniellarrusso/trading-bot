@@ -5,19 +5,21 @@ import { Interval } from './interval-converter';
 import moment from 'moment';
 import { IExchangeService } from '../services/IExchange-service';
 import { Observer } from './observer';
-import { BackTestSubject } from './backTestSubject';
 
 export class AlternateTimeframe implements Observer {
     interval: Interval;
     candles: Candle[];
     lastCandle: Candle;
     indicators: Indicator[] = [];
-    private readonly backTestSubject: BackTestSubject;
-    constructor(interval: Interval, public service: IExchangeService, subject: BackTestSubject) {
+    backtestMode: boolean;
+    constructor(interval: Interval, public service: IExchangeService) {
         this.interval = interval;
-        this.backTestSubject = subject;
+        this.backtestMode = this.service.ticker.backTestMode;
     }
-    update() {}
+    update() {
+        this.backtestMode = this.service.ticker.backTestMode;
+        console.log('BacktestMode is: ', this.backtestMode);
+    }
 
     async process(candle: Candle) {
         if (this.processNextCandle(candle.closeTime)) {
@@ -49,7 +51,7 @@ export class AlternateTimeframe implements Observer {
     }
 
     async getHistory(candle: Candle) {
-        if (this.backTestSubject.value) {
+        if (this.backtestMode) {
             let candles;
             if (this.candles) {
                 candles = this.candles.filter((c) => c.closeTime.getTime() <= candle.closeTime.getTime());

@@ -31,7 +31,7 @@ export class HeikinLongStrategy extends BaseStrategy {
         this.cci = addIndicator('sniper-cci', { weight: 14, input: 'close', inputType: 'heikin' });
         this.volumeMa = addIndicator('sma', { weight: 90, input: 'volume', inputType: 'candle' });
 
-        this.altTf = this.createAlternateTimeframe(new Interval('5m'));
+        this.altTf = this.createAlternateTimeframe(new Interval('1d'));
         this.altRSI = this.altTf.createIndicator('rsi', { weight: 14 });
     }
 
@@ -58,13 +58,17 @@ export class HeikinLongStrategy extends BaseStrategy {
         this.longTriggered = trues > 2 && this.cci.result > 0;
 
         if (!this.tradeAdvisor.inTrade && !this.delayOn && this.canTrade) {
-            if (this.altRSI.movingAverage > 50) {
+            if (this.altRSI.movingAverage > 50 && this.cci.result > 0) {
                 await this.tradeAdvisor.trade();
             }
         }
 
         if (this.tradeAdvisor.inTrade) {
-            if (this.rsi14.result < 70 && this.rsi14.previousResult > 70) {
+            if (this.altRSI.movingAverage < 50) {
+                await this.tradeAdvisor.trade();
+            }
+            if (this.profit > 5 || this.profit < -5) {
+                // trailing stop
                 await this.tradeAdvisor.trade();
             }
         }
