@@ -11,7 +11,7 @@ import { IndicatorStrategies } from '../indicators/indicator-strategies/indicato
 import { IExchangeService } from './IExchange-service';
 import { Side } from '../model/literals';
 import { printDate } from '../utilities/utility';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 import { Interval } from '../model/interval-converter';
 
 // const FEE = Settings.fee;

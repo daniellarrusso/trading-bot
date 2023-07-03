@@ -2,9 +2,9 @@ import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import connect from '../db/connection';
 import { Strat } from '../model/interfaces/strat';
-import { TradeModel } from '../db/trades';
+import { TradeModel } from '../db/trade';
 import { TradeResponse } from '../model/trade-response';
-import { TickerDbModel } from '../db/tickers';
+import { TickerDbModel } from '../db/ticker';
 
 export class Trader {
     private static instance: Trader;

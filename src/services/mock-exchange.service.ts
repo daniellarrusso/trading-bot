@@ -12,7 +12,7 @@ import marketData from './responses/binance-market-buy.json';
 import limitData from './responses/binance-limit-buy.json';
 import { TradeResponse } from '../model/trade-response';
 import { MockOrders } from './mock-orders';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 import { Interval } from '../model/interval-converter';
 
 const history = 1000;

@@ -1,5 +1,5 @@
 import { ChatGroups } from '../../settings';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 import { IExchangeService } from '../services/IExchange-service';
 import { Advisor } from './advisor';
 import { Side, ordertypes } from './literals';

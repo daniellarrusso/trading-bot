@@ -11,7 +11,7 @@ import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
 import { Interval, Intervals } from '../model/interval-converter';
 import { printDate } from '../utilities/utility';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 import moment from 'moment';
 
 class Mapper {

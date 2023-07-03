@@ -9,7 +9,7 @@ import { Side } from './literals';
 import { Trades } from './trades';
 import { returnPercentageIncrease } from '../utilities/utility';
 import { MockExchangeService } from '../services/mock-exchange.service';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 
 export class TradeAdvisor {
     advisor: Advisor;

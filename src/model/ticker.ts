@@ -1,4 +1,4 @@
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 import { Candle } from './candle';
 import { ActionType } from './enums';
 import { Interval, Intervals } from './interval-converter';

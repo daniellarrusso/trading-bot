@@ -6,11 +6,11 @@ import { TradeResponse } from './trade-response';
 import { ordertypes, Side } from './literals';
 import { Ticker } from './ticker';
 import { LimitOrder } from './limit-order';
-import { Trade, TradeModel } from '../db/trades';
+import { Trade, TradeModel } from '../db/trade';
 import { Trades } from './trades';
 import { ActionType } from './enums';
 import { Subject } from './subject';
-import { TickerDbModel } from '../db/tickers';
+import { TickerDbModel } from '../db/ticker';
 
 export abstract class Advisor extends Subject {
     profitResults: number[];

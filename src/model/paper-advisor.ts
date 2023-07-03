@@ -8,7 +8,7 @@ import { ActionType } from './enums';
 import { MockExchangeService } from '../services/mock-exchange.service';
 import { Ticker } from './ticker';
 import { LimitOrder } from './limit-order';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 
 export class PaperAdvisor extends Advisor {
     assetAmount = 0;

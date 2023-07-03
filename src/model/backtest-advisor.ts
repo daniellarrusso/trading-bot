@@ -7,7 +7,7 @@ import { MockExchangeService } from '../services/mock-exchange.service';
 import { Ticker } from './ticker';
 import { IExchangeService } from '../services/IExchange-service';
 import { LimitOrder } from './limit-order';
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 
 export class BacktestAdvisor extends Advisor {
     assetAmount = 0;

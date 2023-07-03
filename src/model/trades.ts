@@ -1,4 +1,4 @@
-import { Trade, TradeModel } from '../db/trades';
+import { Trade, TradeModel } from '../db/trade';
 import { returnPercentageIncrease } from '../utilities/utility';
 
 export class Trades {

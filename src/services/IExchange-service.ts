@@ -1,4 +1,4 @@
-import { Trade } from '../db/trades';
+import { Trade } from '../db/trade';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
