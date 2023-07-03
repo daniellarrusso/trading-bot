@@ -116,6 +116,7 @@ export class KrakenService implements IExchangeService {
         return {
             date: new Date(),
             quantity: order.quantity,
+            asset: this.ticker.asset,
             currency: this.ticker.currency,
             cost: +order.quantity * order.price,
             price: order.price,
@@ -123,7 +124,8 @@ export class KrakenService implements IExchangeService {
             closeTime: this.ticker.candle.closeTime,
             orderId: res.result.txid[0],
             status: 'NEW',
-        } as Trade;
+            advisorType: '',
+        };
     }
 
     async cancelOrder(orderId: any) {

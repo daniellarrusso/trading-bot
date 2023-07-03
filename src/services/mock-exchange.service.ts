@@ -56,6 +56,7 @@ export class MockExchangeService implements IExchangeService {
         return {
             date: new Date(),
             quantity: +res.origQty,
+            asset: this.ticker.asset,
             currency: this.ticker.currency,
             cost: +res.cummulativeQuoteQty,
             price: +res.quotePrice,
@@ -63,7 +64,8 @@ export class MockExchangeService implements IExchangeService {
             closeTime: this.ticker.candle.closeTime,
             orderId: res.orderId,
             status: res.status,
-        } as Trade;
+            advisorType: '',
+        };
     }
 
     normalisePrice(price: number): string {

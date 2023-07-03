@@ -226,6 +226,7 @@ export class BinanceService implements IExchangeService {
         return {
             date: new Date(),
             quantity: +res.origQty,
+            asset: this.ticker.asset,
             currency: res.currency,
             cost: +res.cummulativeQuoteQty,
             price: +res.quotePrice,
@@ -233,7 +234,8 @@ export class BinanceService implements IExchangeService {
             closeTime: this.ticker.candle.closeTime,
             orderId: res.orderId,
             status: res.status,
-        } as Trade;
+            advisorType: '',
+        };
     }
 
     placeStopLimitOrder(side: Side, quantity: number, price: number, stopPrice: number) {

@@ -6,6 +6,7 @@ export interface Trade {
     quantity: number;
     price: number;
     cost: number;
+    asset: string;
     currency: string;
     closeTime: Date;
     advisorType: string;
@@ -19,6 +20,7 @@ const schema = new Schema<Trade>({
     quantity: { type: Number },
     price: { type: Number },
     cost: { type: Number },
+    asset: { type: String, required: true },
     currency: { type: String },
     closeTime: { type: Date },
     advisorType: { type: String, required: true },
