@@ -21,11 +21,11 @@ async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new SimpleMAStrategy(
-            new KrakenService(new Ticker('ETH', 'GBP', ActionType.Short, '4h', 500)),
+            new KrakenService(new Ticker('ETH', 'GBP', ActionType.Long, '4h', 500)),
             advisor
         ),
         new SimpleMAStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '4h', 500)),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '4h', 500)),
             advisor
         ),
     ]);
