@@ -24,7 +24,7 @@ const schema = new Schema<Trade>({
     currency: { type: String, required: true },
     closeTime: { type: Date },
     advisorType: { type: String, required: true },
-    orderId: { type: String, required: true },
+    orderId: { type: String },
     status: { type: String },
 });
 
