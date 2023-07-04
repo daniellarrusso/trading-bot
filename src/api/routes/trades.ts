@@ -1,6 +1,7 @@
 import { Router, Response, Request } from 'express';
 import { TradeModel } from '../../db/trade';
 import { Trade } from '../../model/interfaces/mongoTrade';
+import { Error } from 'mongoose';
 
 const route = Router();
 
@@ -13,11 +14,20 @@ route.get('/', async (req: Request, res: Response) => {
     }
 });
 
-route.get('/:ticker', async (req: Request, res: Response) => {
+route.get('/search', async (req: Request, res: Response) => {
+    const obj = { ...req.query };
     try {
-        const ticker = req.params.ticker;
-        const response = await TradeModel.findOne({ ticker: ticker });
-        res.json(response ? true : false);
+        const trades = await TradeModel.find({ ...obj });
+        res.status(200).json(trades);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+route.get('/:asset', async (req: Request, res: Response) => {
+    try {
+        const trades = await TradeModel.find({ asset: req.params.asset });
+        res.status(200).json(trades);
     } catch (error) {
         console.log(error);
     }
