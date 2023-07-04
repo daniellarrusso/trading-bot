@@ -21,11 +21,11 @@ const schema = new Schema<Trade>({
     price: { type: Number },
     cost: { type: Number },
     asset: { type: String, required: true },
-    currency: { type: String },
+    currency: { type: String, required: true },
     closeTime: { type: Date },
     advisorType: { type: String, required: true },
-    orderId: { type: String, required: true },
-    status: { type: String, required: true },
+    orderId: { type: String },
+    status: { type: String },
 });
 
 export const TradeModel = model<Trade>('Trade', schema);
