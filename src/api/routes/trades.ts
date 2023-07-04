@@ -27,10 +27,10 @@ route.post('/', async (req: Request, res: Response) => {
     const trade: Trade = { ...req.body };
     try {
         const doc = await new TradeModel(trade);
-        doc.save();
-        res.json(doc);
+        await doc.save();
+        res.status(200).send(doc);
     } catch (error) {
-        console.log(error.errors);
+        res.status(400).send('Bad Request ' + error.message);
     }
 });
 
