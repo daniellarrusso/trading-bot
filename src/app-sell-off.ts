@@ -8,22 +8,14 @@ import { Trader } from './services/trader-service';
 
 const apiAccount = apiKeys.crypAccount;
 
-const SELLHALF = 0.5;
+const SELLHALF = 1;
 
 export const assets = [
-    { ticker: 'AAVE', percentage: SELLHALF },
-    { ticker: 'EGLD', percentage: SELLHALF },
-    { ticker: 'ETH', percentage: SELLHALF },
-    { ticker: 'LINK', percentage: SELLHALF },
-    { ticker: 'SOL', percentage: SELLHALF },
-    { ticker: 'ALGO', percentage: SELLHALF },
-    { ticker: 'CTSI', percentage: SELLHALF },
-    { ticker: 'ADA', percentage: SELLHALF },
-    { ticker: 'ZEC', percentage: SELLHALF },
-    { ticker: 'DOT', percentage: SELLHALF },
+    { ticker: 'CKB', percentage: SELLHALF },
+    { ticker: 'SAND', percentage: SELLHALF },
+    { ticker: 'ETHW', percentage: SELLHALF },
+    { ticker: 'BTS', percentage: SELLHALF },
     { ticker: 'ALPHA', percentage: SELLHALF },
-    { ticker: 'BTC', percentage: SELLHALF },
-    { ticker: 'BNB', percentage: SELLHALF },
     // { ticker: 'CAKE', percentage: 50 },
 
     // { ticker: 'KCS', percentage: 2 },

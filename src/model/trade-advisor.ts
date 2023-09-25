@@ -63,6 +63,7 @@ export class TradeAdvisor {
 
     async createOrder(price: number, side: Side, quantity?: number): Promise<Trade> {
         const res = await this.advisor.createOrder(price, side, quantity);
+        this.setTraderAction(res);
         return res;
     }
 
@@ -77,9 +78,12 @@ export class TradeAdvisor {
 
     calculateProfit() {
         if (!this.longPrice) return; // no profit to calculate
-        this.roundtripProfit = ((this.shortPrice - this.longPrice) / this.longPrice) * 100;
+        this.roundtripProfit =
+            ((this.shortPrice - this.longPrice) / this.longPrice) * 100;
         console.log(
-            `'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${this.ticker.pair})`
+            `'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${
+                this.ticker.pair
+            })`
         );
         this.advisor.addProfitResults(this.shortPrice, this.lastBuy);
     }
@@ -92,13 +96,16 @@ export class TradeAdvisor {
     }
 
     logMessage(trade: Trade) {
-        const { action, asset, currency, candle, tickSize, isMarketOrders: market } = this.ticker;
+        const { asset, currency, candle, tickSize, isMarketOrders: market } = this.ticker;
         const quantity = trade.quantity;
         const orderType = market ? 'Market' : 'Limit';
-        const currencyAmount = this.ticker.normalisePrice(+trade.cost) ?? this.ticker.currencyAmount;
+        const currencyAmount =
+            this.ticker.normalisePrice(+trade.cost) ?? this.ticker.currencyAmount;
         let message = `${candle.printTime}: ${currencyAmount} ${currency} ${orderType} ${
-            ActionType[action]
-        } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(tickSize)}`;
+            trade.side
+        } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(
+            tickSize
+        )}`;
 
         console.log(message);
         this.advisor.notifyTelegramBot(message);

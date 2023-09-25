@@ -16,34 +16,37 @@ export class DCAWeeklytrategy extends BaseStrategy {
         this.strategyName = 'Template';
     }
 
-    loadIndicators() {
-        // this.af = new AlternateTimeframe(new Interval('4h'), new BinanceService(this.strat.ticker));
-        this.af.createIndicator('sma', { weight: 50 });
-        this.af.createIndicator('ema', { weight: 20 });
-        this.af = this.createAlternateTimeframe(new Interval('4h', 60 * 4), (tf: AlternateTimeframe) => {
-            this.afSma = tf.createIndicator('sma', { weight: 50 });
-            this.afEma = tf.createIndicator('ema', { weight: 20 });
-        });
-    }
+    loadIndicators() {}
 
     async realtimeAdvice(candle: Candle) {}
 
     async advice() {
-        await this.af.process(this.candle);
         // Can Trade after certain criteria met (sometimes you don;t want to trade straight away)
         this.checkTradeStatus(() => {
             return true;
         });
 
-        /// Go Long
-        if (this.candle.green) {
-            this.tradeAdvisor.trade(this.candle.close, 'buy');
-        }
+        const isSundayClose = this.candle.time.getDay() === 0; // Sunday
+        const lastWeeksClose =
+            this.candleStats.candleHistory[this.candleStats.candleHistory.length - 8];
 
-        // Go Short
-        if (!this.candle.green) {
-            this.tradeAdvisor.trade(this.candle.close, 'sell');
+        const quantity =
+            this.ema20.result > this.sma50.result &&
+            this.sma50.result > (this.sma200?.result || this.sma50.previousResult)
+                ? this.setQuantity(400)
+                : this.setQuantity(300);
+        /// Go Long
+        if (isSundayClose && this.candle.close < lastWeeksClose.close) {
+            this.tradeAdvisor.createOrder(this.candle.close, 'buy', quantity);
         }
+        // Go Short
+        if (isSundayClose && this.candle.close > lastWeeksClose.close) {
+            this.tradeAdvisor.createOrder(this.candle.close, 'sell', quantity);
+        }
+    }
+
+    setQuantity(currencyAmount: number): number {
+        return currencyAmount / this.candle.close;
     }
 
     logStatus(advice: any): void {

@@ -9,11 +9,12 @@ import connectApi from './api';
 import { KrakenService } from './services/kraken-service';
 import { HeikinLongStrategy } from './strategies/swing/heikin-long';
 import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
+import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
 
 const trader = Trader.getInstance();
 const advisor: AdvisorType = AdvisorType.live;
 const testStrat = new TemplateStrategy(
-    new BinanceService(new Ticker('BTC', 'USDT', ActionType.Long, '1m')),
+    new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m')),
     AdvisorType.paper
 );
 
@@ -26,7 +27,7 @@ async function loadStrategy() {
         ),
         new SimpleMAStrategy(
             new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '4h', 500)),
-            advisor
+            AdvisorType.paper
         ),
     ]);
 
