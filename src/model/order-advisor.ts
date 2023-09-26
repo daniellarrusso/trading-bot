@@ -19,7 +19,7 @@ export class OrderAdvisor extends Advisor {
         throw new Error('Method not implemented.');
     }
     notifyTelegramBot(message: string): void {
-        throw new Error('Method not implemented.');
+        console.log('Method not implemented.');
     }
     addProfitResults(close: number, lastBuy: Trade) {
         throw new Error('Method not implemented.');
