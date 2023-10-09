@@ -23,7 +23,7 @@ async function loadStrategy() {
     trader.addStrategy([
         // testStrat,
         new DailySpikeStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1h', 1000)),
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m', 10)),
             AdvisorType.order
         ),
     ]);

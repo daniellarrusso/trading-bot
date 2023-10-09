@@ -29,6 +29,9 @@ export class MockExchangeService implements IExchangeService {
             recvWindow: 60000,
         });
     }
+    updateOrder(trade: Trade): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
     getHistoryWithIndicator(
         pair: any,
         interval: any,
@@ -43,12 +46,17 @@ export class MockExchangeService implements IExchangeService {
         const side = this.ticker.isMarketOrders ? order.marketSide : order.side;
         order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
         const priceString = this.normalisePrice(order.price);
-        const res = await this.mockOrders[side](this.ticker.pair, order.quantity, priceString);
+        const res = await this.mockOrders[side](
+            this.ticker.pair,
+            order.quantity,
+            priceString
+        );
         return this.assignQuoteQtyAndPrice(res);
     }
 
     private assignQuoteQtyAndPrice(res: TradeResponse): Trade {
-        if (res.type === 'MARKET') res.quotePrice = +res.cummulativeQuoteQty / +res.origQty;
+        if (res.type === 'MARKET')
+            res.quotePrice = +res.cummulativeQuoteQty / +res.origQty;
         else {
             res.quotePrice = +res.price;
             res.cummulativeQuoteQty = (+res.origQty * +res.price).toString();
@@ -107,9 +115,15 @@ export class MockExchangeService implements IExchangeService {
         const x = await this.exchange.exchangeInfo();
         let { pair } = this.ticker;
         const filters = x['symbols'].find((s) => s.symbol === pair).filters;
-        this.ticker.tickSize = filters.find((price) => price.filterType === 'PRICE_FILTER').tickSize;
-        this.ticker.minQty = filters.find((price) => price.filterType === 'LOT_SIZE').minQty;
-        this.ticker.stepSize = filters.find((price) => price.filterType === 'LOT_SIZE').stepSize;
+        this.ticker.tickSize = filters.find(
+            (price) => price.filterType === 'PRICE_FILTER'
+        ).tickSize;
+        this.ticker.minQty = filters.find(
+            (price) => price.filterType === 'LOT_SIZE'
+        ).minQty;
+        this.ticker.stepSize = filters.find(
+            (price) => price.filterType === 'LOT_SIZE'
+        ).stepSize;
         return this.ticker;
     }
 
@@ -156,43 +170,47 @@ export class MockExchangeService implements IExchangeService {
     }
 
     getOHLCLatest(ticker: Ticker, cb) {
-        this.exchange.websockets.candlesticks([ticker.pair], ticker.interval, (candlesticks) => {
-            let { e: eventType, E: eventTime, s: symbol, k: ticks } = candlesticks;
-            const {
-                t: time,
-                o: open,
-                h: high,
-                l: low,
-                c: close,
-                v: volume,
-                n: trades,
-                i: interval,
-                x: isFinal,
-                q: quoteVolume,
-                V: buyVolume,
-                Q: quoteBuyVolume,
-                T: closeTime,
-            } = ticks;
+        this.exchange.websockets.candlesticks(
+            [ticker.pair],
+            ticker.interval,
+            (candlesticks) => {
+                let { e: eventType, E: eventTime, s: symbol, k: ticks } = candlesticks;
+                const {
+                    t: time,
+                    o: open,
+                    h: high,
+                    l: low,
+                    c: close,
+                    v: volume,
+                    n: trades,
+                    i: interval,
+                    x: isFinal,
+                    q: quoteVolume,
+                    V: buyVolume,
+                    Q: quoteBuyVolume,
+                    T: closeTime,
+                } = ticks;
 
-            const tick: Candle = {
-                pair: ticker.pair,
-                open: +open,
-                high: +high,
-                low: +low,
-                close: +close,
-                price: close,
-                volume: +volume,
-                trades: +trades,
-                green: +close > +open,
-                time: new Date(+time),
-                closeTime: new Date(+closeTime + 1),
-                isFinal: isFinal,
-                candleSize: getCandleSize(+open, +close),
-                printTime: printTime(closeTime + 1),
-            } as Candle;
-            ticker.candle = tick;
-            cb(tick);
-        });
+                const tick: Candle = {
+                    pair: ticker.pair,
+                    open: +open,
+                    high: +high,
+                    low: +low,
+                    close: +close,
+                    price: close,
+                    volume: +volume,
+                    trades: +trades,
+                    green: +close > +open,
+                    time: new Date(+time),
+                    closeTime: new Date(+closeTime + 1),
+                    isFinal: isFinal,
+                    candleSize: getCandleSize(+open, +close),
+                    printTime: printTime(closeTime + 1),
+                } as Candle;
+                ticker.candle = tick;
+                cb(tick);
+            }
+        );
     }
 
     getBalances() {

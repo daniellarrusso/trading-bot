@@ -50,7 +50,16 @@ export class KrakenService implements IExchangeService {
     }
 
     constructor(public ticker: Ticker) {
-        this.exchange = new KrakenClient(apiKeys.krakenAccount.key, apiKeys.krakenAccount.secret);
+        this.exchange = new KrakenClient(
+            apiKeys.krakenAccount.key,
+            apiKeys.krakenAccount.secret
+        );
+    }
+
+    async updateOrder(trade: Trade): Promise<boolean> {
+        const res = await this.exchange.api('ClosedOrders');
+        const result = res?.closed?.[trade.orderId]?.status === 'closed';
+        return result;
     }
     async getHistory(ticker: Ticker) {
         const { krakenPair: pair } = this.ticker;
@@ -61,7 +70,9 @@ export class KrakenService implements IExchangeService {
                 interval: ticker.intervalObj.minutes,
             });
             this.lastProcessed = result.last;
-            const history: Candle[] = result[pair].map((candle: Candle) => this.createCandle(candle));
+            const history: Candle[] = result[pair].map((candle: Candle) =>
+                this.createCandle(candle)
+            );
             history.pop();
             return history;
         } catch (error: any) {
@@ -105,7 +116,10 @@ export class KrakenService implements IExchangeService {
             volume: order.quantity.toFixed(this.ticker.lotDecimals),
         };
         try {
-            const res: KrakenOrderResponse = await this.exchange.api('AddOrder', limitOrder);
+            const res: KrakenOrderResponse = await this.exchange.api(
+                'AddOrder',
+                limitOrder
+            );
             return this.generateTradeResponse(res, order);
         } catch (error) {
             console.log(error);
@@ -196,11 +210,16 @@ export class KrakenService implements IExchangeService {
             );
             this.trys++;
             console.log(`Try: ${this.trys} trying again`);
-            if (this.trys < 60) setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000); // try next minute
+            if (this.trys < 60)
+                setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000); // try next minute
         }
     }
 
-    async createLimitOrder(side: Side, quantity: number, price: number = 0): Promise<TradeResponse> {
+    async createLimitOrder(
+        side: Side,
+        quantity: number,
+        price: number = 0
+    ): Promise<TradeResponse> {
         // const order = this.baseOrder.createOrder(side, quantity, price | this.ticker.candle.close);
         try {
             const res = await this.exchange.api('AddOrder', {});
@@ -255,9 +274,15 @@ export class KrakenService implements IExchangeService {
             green: +close > +open,
             isFinal: true,
             time: new Date(time * 1000),
-            closeTime: addMinutes(new Date(time * 1000), minutes || this.ticker.intervalObj.minutes),
+            closeTime: addMinutes(
+                new Date(time * 1000),
+                minutes || this.ticker.intervalObj.minutes
+            ),
             printTime: printDate(
-                addMinutes(new Date(time * 1000), minutes || this.ticker.intervalObj.minutes)
+                addMinutes(
+                    new Date(time * 1000),
+                    minutes || this.ticker.intervalObj.minutes
+                )
             ),
         } as Candle;
 

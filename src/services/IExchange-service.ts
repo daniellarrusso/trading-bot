@@ -31,6 +31,7 @@ export interface IExchangeService {
     checkOrderStatus(orderId: any);
     createOrder(order: LimitOrder): Promise<Trade>;
     getPrice();
+    updateOrder(trade: Trade): Promise<boolean>;
 
     cancelOrder(orderId: any);
 }

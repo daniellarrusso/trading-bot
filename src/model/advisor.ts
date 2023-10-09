@@ -21,7 +21,10 @@ export abstract class Advisor extends Subject {
     abstract type: string;
     trades: Trades;
     currentOrderStatus = true;
-    lastTrade: Trade;
+
+    get lastTrade(): Trade {
+        return this.trades.lastTrade;
+    }
 
     constructor(public exchange: IExchangeService) {
         super();
@@ -34,25 +37,26 @@ export abstract class Advisor extends Subject {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        this.lastTrade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+        await this.exchange.createOrder(new LimitOrder(price, quantity, side));
         // this.currentOrderStatus = trade.status === 'COMPLETE'? 0 : 1;
         this.lastTrade.advisorType = this.type;
 
         await this.trades.addTrade(this.lastTrade);
-        // await this.checkOrderStatus();
         return this.lastTrade;
     }
 
     async checkOrderStatus() {
         try {
-            const order = await TickerDbModel.findOne({ ticker: 'BTCUSDT' });
-            if (order.amount === 20) {
-                this.currentOrderStatus = false;
+            const hasClosed = await this.exchange.updateOrder(this.trades.lastTrade);
+            if (!hasClosed) {
                 setTimeout(() => {
+                    console.log('OrderId: ' + this.trades.lastTrade + ' Not Completed');
                     this.checkOrderStatus();
-                }, 1000);
+                }, 10000);
             } else {
-                this.currentOrderStatus = true;
+                const doc = await TradeModel.findOne({ orderId: this.lastTrade.orderId });
+                doc.status = 'complete';
+                await doc.save();
             }
         } catch (error) {
             console.log(error);
@@ -61,7 +65,9 @@ export abstract class Advisor extends Subject {
 
     async createOrder(price: number, side: Side, quantity?: number) {
         quantity = quantity ? quantity : this.ticker.currencyAmount / price;
-        const trade = await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+        const trade = await this.exchange.createOrder(
+            new LimitOrder(price, quantity, side)
+        );
         trade.advisorType = this.type;
         await this.trades.addTrade(trade).catch(async (error) => {
             this.trades.removeTrade(trade);
@@ -69,6 +75,7 @@ export abstract class Advisor extends Subject {
             console.log(error.message);
             process.abort();
         });
+        await this.checkOrderStatus();
         return trade;
     }
 
