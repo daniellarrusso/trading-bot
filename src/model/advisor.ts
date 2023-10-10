@@ -21,10 +21,7 @@ export abstract class Advisor extends Subject {
     abstract type: string;
     trades: Trades;
     currentOrderStatus = true;
-
-    get lastTrade(): Trade {
-        return this.trades.lastTrade;
-    }
+    lastTrade: Trade;
 
     constructor(public exchange: IExchangeService) {
         super();
@@ -37,7 +34,9 @@ export abstract class Advisor extends Subject {
         if (!price) price = this.ticker.candle.close;
         if (!side) side = this.ticker.action === ActionType.Long ? 'buy' : 'sell';
         const quantity = this.ticker.currencyAmount / price;
-        await this.exchange.createOrder(new LimitOrder(price, quantity, side));
+        this.lastTrade = await this.exchange.createOrder(
+            new LimitOrder(price, quantity, side)
+        );
         // this.currentOrderStatus = trade.status === 'COMPLETE'? 0 : 1;
         this.lastTrade.advisorType = this.type;
 
@@ -50,7 +49,7 @@ export abstract class Advisor extends Subject {
             const hasClosed = await this.exchange.updateOrder(this.trades.lastTrade);
             if (!hasClosed) {
                 setTimeout(() => {
-                    console.log('OrderId: ' + this.trades.lastTrade + ' Not Completed');
+                    console.log('OrderId: ' + this.lastTrade.orderId + ' Not Completed');
                     this.checkOrderStatus();
                 }, 10000);
             } else {
@@ -65,18 +64,18 @@ export abstract class Advisor extends Subject {
 
     async createOrder(price: number, side: Side, quantity?: number) {
         quantity = quantity ? quantity : this.ticker.currencyAmount / price;
-        const trade = await this.exchange.createOrder(
+        this.lastTrade = await this.exchange.createOrder(
             new LimitOrder(price, quantity, side)
         );
-        trade.advisorType = this.type;
-        await this.trades.addTrade(trade).catch(async (error) => {
-            this.trades.removeTrade(trade);
-            await this.exchange.cancelOrder(trade.orderId);
+        this.lastTrade.advisorType = this.type;
+        await this.trades.addTrade(this.lastTrade).catch(async (error) => {
+            this.trades.removeTrade(this.lastTrade);
+            await this.exchange.cancelOrder(this.lastTrade.orderId);
             console.log(error.message);
             process.abort();
         });
         await this.checkOrderStatus();
-        return trade;
+        return this.lastTrade;
     }
 
     abstract end(closingPrice: any);

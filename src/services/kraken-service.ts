@@ -24,11 +24,6 @@ const CurrencyMapper: Mapper = {
     ETH: 'XETH',
 };
 
-const PairMapper: Mapper = {
-    BTCGBP: 'XXBTZGBP',
-    BTCUSDT: 'XBTUSDT',
-};
-
 export interface KrakenOrderResponse {
     error: [];
     result: {
@@ -58,7 +53,7 @@ export class KrakenService implements IExchangeService {
 
     async updateOrder(trade: Trade): Promise<boolean> {
         const res = await this.exchange.api('ClosedOrders');
-        const result = res?.closed?.[trade.orderId]?.status === 'closed';
+        const result = res?.result?.closed?.[trade.orderId]?.status === 'closed';
         return result;
     }
     async getHistory(ticker: Ticker) {
