@@ -23,6 +23,10 @@ export abstract class Advisor extends Subject {
     currentOrderStatus = true;
     lastTrade: Trade;
 
+    get recentTrade(): Trade {
+        return this.trades.lastTrade;
+    }
+
     constructor(public exchange: IExchangeService) {
         super();
         this.telegram = new TelegramBot(ChatGroups.mainAccount);
@@ -44,24 +48,6 @@ export abstract class Advisor extends Subject {
         return this.lastTrade;
     }
 
-    async checkOrderStatus() {
-        try {
-            const hasClosed = await this.exchange.updateOrder(this.trades.lastTrade);
-            if (!hasClosed) {
-                setTimeout(() => {
-                    console.log('OrderId: ' + this.lastTrade.orderId + ' Not Completed');
-                    this.checkOrderStatus();
-                }, 10000);
-            } else {
-                const doc = await TradeModel.findOne({ orderId: this.lastTrade.orderId });
-                doc.status = 'complete';
-                await doc.save();
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
     async createOrder(price: number, side: Side, quantity?: number) {
         quantity = quantity ? quantity : this.ticker.currencyAmount / price;
         this.lastTrade = await this.exchange.createOrder(
@@ -74,7 +60,7 @@ export abstract class Advisor extends Subject {
             console.log(error.message);
             process.abort();
         });
-        await this.checkOrderStatus();
+        this.trades.completeLimitOrder(this.exchange);
         return this.lastTrade;
     }
 

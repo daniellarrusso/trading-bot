@@ -32,7 +32,7 @@ export class DailySpikeStrategy extends BaseStrategy {
         if (this.tradeAdvisor.advisor instanceof OrderAdvisor) {
             if (candleDay !== this.order.day) {
                 await this.cancelExistingOrder();
-                const price = this.candle.close * 0.999999;
+                const price = this.candle.close * 0.95;
                 const res = await this.tradeAdvisor.createOrder(price, 'buy');
                 this.order = { orderId: res.orderId, day: candleDay };
             }
@@ -47,9 +47,10 @@ export class DailySpikeStrategy extends BaseStrategy {
     }
 
     logStatus(advice: any): void {
+        const { cost, price } = this.tradeAdvisor.advisor.lastTrade;
         let message = `${this.ticker.pair} PRICE: ${this.candle.price}. OrderId: ${
             this.order.orderId
-        }. Day: ${getDayOfWeekName(this.order.day)}`;
+        } OrderPrice: ${price} Cost: ${cost}. Day: ${getDayOfWeekName(this.order.day)}`;
         this.consoleColour(message);
     }
 }

@@ -1,4 +1,5 @@
 import { Trade, TradeModel } from '../db/trade';
+import { IExchangeService } from '../services/IExchange-service';
 import { returnPercentageIncrease } from '../utilities/utility';
 
 export class Trades {
@@ -20,6 +21,26 @@ export class Trades {
 
     checkTrades(isBacktest: boolean) {
         if (isBacktest) return;
+    }
+
+    async completeLimitOrder(exchange: IExchangeService) {
+        try {
+            const hasClosed = await exchange.updateOrder(this.lastTrade);
+            this.lastTrade.status = 'complete';
+            if (!hasClosed) {
+                setTimeout(() => {
+                    console.log('OrderId: ' + this.lastTrade.orderId + ' Not Completed');
+                    this.completeLimitOrder(exchange);
+                }, 10000);
+            } else {
+                const doc = await TradeModel.findOne({ orderId: this.lastTrade.orderId });
+                doc.status = 'complete';
+
+                await doc.save();
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     get lastBuy(): Trade {

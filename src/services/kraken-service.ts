@@ -19,7 +19,7 @@ class Mapper {
 }
 
 const CurrencyMapper: Mapper = {
-    XBT: 'XXBT',
+    BTC: 'XXBT',
     GBP: 'ZGBP',
     ETH: 'XETH',
 };
@@ -150,8 +150,8 @@ export class KrakenService implements IExchangeService {
             const { [pair]: settings } = result;
             this.ticker.pairDecimals = settings.pair_decimals;
             this.ticker.lotDecimals = settings.lot_decimals;
-            this.ticker.asset = settings.base;
-            this.ticker.currency = settings.quote;
+            // this.ticker.asset = settings.base;
+            // this.ticker.currency = settings.quote;
             await this.getTradingBalance();
         } catch (error: any) {
             throw new Error('something went wrong: ' + error?.message);
@@ -160,8 +160,8 @@ export class KrakenService implements IExchangeService {
 
     async getTradingBalance(): Promise<Ticker> {
         try {
-            const cq = await this.getBalance(this.ticker.currency);
-            const aq = await this.getBalance(this.ticker.asset);
+            const cq = await this.getBalance(CurrencyMapper[this.ticker.currency]);
+            const aq = await this.getBalance(CurrencyMapper[this.ticker.asset]);
             this.ticker.currencyQuantity = +cq;
             this.ticker.assetQuantity = +aq;
             return this.ticker;
