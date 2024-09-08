@@ -1,7 +1,6 @@
-import { addIndicator } from '../indicators/base-indicator';
 import { CallbackDelay } from '../model/callback-delay';
 import { Candle } from '../model/candle';
-import { ActionType, AdvisorType } from '../model/enums';
+import { AdvisorType } from '../model/enums';
 import { IExchangeService } from '../services/IExchange-service';
 import { BaseStrategy } from './base-strategy';
 
