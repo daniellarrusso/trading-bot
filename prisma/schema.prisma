@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model symbols {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  v      Int    @map("__v")
+  symbol String
+}
+
+model tickers {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  v            Int     @map("__v")
+  amount       Int
+  marketOrders Boolean
+  ticker       String
+}
+
+model trades {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  v           Int      @map("__v")
+  advisorType String
+  asset       String
+  /// Multiple data types found: Float: 36.4%, Int: 63.6% out of 11 sampled entries
+  cost        Float
+  currency    String
+  date        DateTime @db.Date
+  price       Float
+  /// Multiple data types found: Float: 72.7%, Int: 27.3% out of 11 sampled entries
+  quantity    Float
+  side        String
+  status      String
+}

@@ -262,10 +262,13 @@ export abstract class BaseStrategy implements Strat {
         }
     }
 
+    setCanTrade(cb: () => boolean) {
+        if (!this.canTrade)
+            this.canTrade = cb();
+    }
+
     checkTradeStatus(cb: any) {
-        if (cb()) {
-            this.canTrade = true;
-        }
+        this.canTrade = cb();
     }
 
     printDate = printDate;

@@ -11,16 +11,16 @@ export class TemplateStrategy extends BaseStrategy {
         this.strategyName = 'Test';
     }
 
-    loadIndicators() {}
+    loadIndicators() { }
 
-    async realtimeAdvice(candle: Candle) {}
+    async realtimeAdvice(candle: Candle) { }
 
     async advice() {
         // Get percentage increase
 
         // Can Trade after certain criteria met (sometimes you don't want to trade straight away)
-        this.checkTradeStatus(() => {
-            return true;
+        this.setCanTrade(() => {
+            return this.candle.close > this.ema20.result;
         });
 
         /// Go Long
