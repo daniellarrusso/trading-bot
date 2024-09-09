@@ -11,11 +11,12 @@ import { HeikinLongStrategy } from './strategies/swing/heikin-long';
 import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
 import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
 import { DailySpikeStrategy } from './strategies/static/daily-spike';
+import { MovingAverageStrategy } from './strategies/moving-average.strategy';
 
 const trader = Trader.getInstance();
 const advisor: AdvisorType = AdvisorType.live;
-const testStrat = new TemplateStrategy(
-    new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m')),
+const testStrat = new MovingAverageStrategy(
+    new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '1h')),
     AdvisorType.paper
 );
 

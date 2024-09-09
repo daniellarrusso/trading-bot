@@ -28,7 +28,7 @@ export class PaperAdvisor extends Advisor {
     }
 
     notifyTelegramBot(message: string): void {
-        // this.telegram.sendMessage(message);
+        this.telegram.sendMessage(message);
     }
 
     async setup(): Promise<void> {
