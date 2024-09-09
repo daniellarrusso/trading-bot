@@ -39,6 +39,7 @@ export class KrakenService implements IExchangeService {
     exchange: any;
     _last: number = 0;
     trys: number = 0;
+    exchangeName = 'Kraken';
 
     set lastProcessed(val: number) {
         if (this._last != val) this._last = val;

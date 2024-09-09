@@ -135,6 +135,7 @@ export abstract class BaseStrategy implements Strat {
         this.calculateIndicatorWeight();
         this.history = candleHistory.length;
         try {
+            console.log('Getting Exchange Info from ' + this.tradeAdvisor.advisor.exchange.exchangeName);
             await this.tradeAdvisor.advisor.exchange.getExchangeInfo();
             for (let i = 0; i < candleHistory.length; i++) {
                 await this.update(candleHistory[i]);

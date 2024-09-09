@@ -19,6 +19,7 @@ const history = 1000;
 
 export class BinanceService implements IExchangeService {
     exchange: any;
+    exchangeName = 'Binance';
     limitOrder = new OrderSubject();
 
     constructor(public ticker: Ticker) {

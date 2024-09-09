@@ -20,6 +20,7 @@ const history = 1000;
 export class MockExchangeService implements IExchangeService {
     exchange: any;
     mockOrders = new MockOrders();
+    exchangeName: string = 'Binance Mock';
 
     constructor(public ticker: Ticker) {
         this.exchange = new Binance().options({

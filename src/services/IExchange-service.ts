@@ -12,6 +12,7 @@ import { TradeResponse } from '../model/trade-response';
 export interface IExchangeService {
     ticker: Ticker;
     exchange: any;
+    exchangeName: string;
 
     getExchangeInfo();
     // Candle
