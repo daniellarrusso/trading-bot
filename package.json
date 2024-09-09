@@ -11,7 +11,7 @@
     "top100": "tsc && node dist/coin-gecko-output.js"
   },
   "engines": {
-    "node": "=>18"
+    "node": ">=18"
   },
   "author": "",
   "license": "ISC",
