@@ -2,8 +2,6 @@ import { ApiAccount } from '../model/api-account';
 import { Ticker } from '../model/ticker';
 import connect from '../db/connection';
 import { Strat } from '../model/interfaces/strat';
-import { TradeModel } from '../db/trade';
-import { TradeResponse } from '../model/trade-response';
 import { TickerDbModel } from '../db/ticker';
 
 export class Trader {
@@ -20,7 +18,7 @@ export class Trader {
         return this._strategies;
     }
 
-    private constructor() {}
+    private constructor() { }
 
     static getInstance() {
         if (!Trader.instance) {
@@ -48,6 +46,9 @@ export class Trader {
 
     async addSymbolMongoDb(ticker: Ticker) {
         const symbol = await this.findSymbolMongoDb(ticker);
+        if (symbol) {
+            await symbol.updateOne({ count: symbol.count + 1 });
+        }
         const doc = new TickerDbModel({
             ticker: ticker.pair,
             amount: ticker.currencyAmount,

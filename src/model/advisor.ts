@@ -1,16 +1,13 @@
-import { Candle } from './candle';
 import { TelegramBot } from './telegram-bot';
-import { ChatGroups, Settings } from '../../settings';
+import { ChatGroups } from '../../settings';
 import { IExchangeService } from '../services/IExchange-service';
-import { TradeResponse } from './trade-response';
-import { ordertypes, Side } from './literals';
+import { Side } from './literals';
 import { Ticker } from './ticker';
 import { LimitOrder } from './limit-order';
 import { Trade, TradeModel } from '../db/trade';
 import { Trades } from './trades';
 import { ActionType } from './enums';
 import { Subject } from './subject';
-import { TickerDbModel } from '../db/ticker';
 
 export abstract class Advisor extends Subject {
     profitResults: number[];

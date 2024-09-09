@@ -3,15 +3,9 @@ import { ActionType, AdvisorType } from './model/enums';
 import './utilities/extensions';
 import { Trader } from './services/trader-service';
 import { Strat } from './model/interfaces/strat';
-import { BinanceService } from './services/binance-service';
-import { TemplateStrategy } from './strategies/template-strategy';
 import connectApi from './api';
 import { KrakenService } from './services/kraken-service';
-import { HeikinLongStrategy } from './strategies/swing/heikin-long';
-import { SimpleMAStrategy } from './strategies/swing/simple-ma.strategy';
-import { DCAWeeklytrategy } from './strategies/DCA/dca-weekly.strategy';
-import { DailySpikeStrategy } from './strategies/static/daily-spike';
-import { MovingAverageStrategy } from './strategies/moving-average.strategy';
+import { MovingAverageStrategy, DailySpikeStrategy, TemplateStrategy } from './strategies';
 
 const trader = Trader.getInstance();
 const advisor: AdvisorType = AdvisorType.live;
