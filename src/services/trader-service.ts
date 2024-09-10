@@ -47,7 +47,7 @@ export class Trader {
     async addSymbolMongoDb(ticker: Ticker) {
         const symbol = await this.findSymbolMongoDb(ticker);
         if (symbol) {
-            await symbol.updateOne({ count: symbol.count + 1 });
+            await symbol.updateOne({ count: symbol.count + 1, dateStarted: new Date() });
         }
         const doc = new TickerDbModel({
             ticker: ticker.pair,
