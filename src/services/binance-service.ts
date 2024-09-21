@@ -28,6 +28,7 @@ export class BinanceService implements IExchangeService {
             APISECRET: apiKeys.crypAccount.secret,
             useServerTime: true,
             recvWindow: 60000,
+            'family': 4
         });
     }
     updateOrder(trade: Trade): Promise<boolean> {

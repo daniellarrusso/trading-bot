@@ -48,7 +48,7 @@ export class TradeAdvisor {
     }
 
     get profit() {
-        if (!this.longPrice) return 0;
+        if (!this.longPrice || !this.inTrade) return 0;
         return returnPercentageIncrease(this.candle.close, this.longPrice);
     }
 
@@ -81,8 +81,7 @@ export class TradeAdvisor {
         this.roundtripProfit =
             ((this.shortPrice - this.longPrice) / this.longPrice) * 100;
         console.log(
-            `'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${
-                this.ticker.pair
+            `'** ROUNDTRIP COMPLETE ** Profit: ${this.roundtripProfit.toFixed(2)} (${this.ticker.pair
             })`
         );
         this.advisor.addProfitResults(this.shortPrice, this.lastBuy);
@@ -101,11 +100,10 @@ export class TradeAdvisor {
         const orderType = market ? 'Market' : 'Limit';
         const currencyAmount =
             this.ticker.normalisePrice(+trade.cost) ?? this.ticker.currencyAmount;
-        let message = `${candle.printTime}: ${currencyAmount} ${currency} ${orderType} ${
-            trade.side
-        } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(
-            tickSize
-        )}`;
+        let message = `${candle.printTime}: ${currencyAmount} ${currency} ${orderType} ${trade.side
+            } for ${quantity} ${asset}. Entry Price: ${Number(candle.price).normalise(
+                tickSize
+            )}`;
 
         console.log(message);
         this.advisor.notifyTelegramBot(message);

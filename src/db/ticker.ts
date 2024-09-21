@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Model, Schema, model } from 'mongoose';
 
 export interface TickerDb {
     ticker: string;
@@ -10,7 +10,7 @@ export interface TickerDb {
 
 export const TickerDbModel = model<TickerDb>(
     'Ticker',
-    new Schema<Symbol>({
+    new Schema<TickerDb>({
         ticker: { type: String, required: true },
         amount: { type: Number, default: 0 },
         marketOrders: { type: Boolean, default: false },

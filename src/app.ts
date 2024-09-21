@@ -6,11 +6,12 @@ import { Strat } from './model/interfaces/strat';
 import connectApi from './api';
 import { KrakenService } from './services/kraken-service';
 import { MovingAverageStrategy, DailySpikeStrategy, TemplateStrategy } from './strategies';
+import { BinanceService } from './services/binance-service';
 
 const trader = Trader.getInstance();
 const advisor: AdvisorType = AdvisorType.live;
 const testStrat = new MovingAverageStrategy(
-    new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '1h')),
+    new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1m')),
     AdvisorType.paper
 );
 
