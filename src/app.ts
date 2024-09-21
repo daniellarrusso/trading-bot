@@ -11,7 +11,7 @@ import { BinanceService } from './services/binance-service';
 const trader = Trader.getInstance();
 const advisor: AdvisorType = AdvisorType.live;
 const testStrat = new MovingAverageStrategy(
-    new BinanceService(new Ticker('BTC', 'USDT', ActionType.Short, '1m')),
+    new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '1h')),
     AdvisorType.paper
 );
 
