@@ -1,12 +1,9 @@
-import { apiKeys } from '../keys';
 import { Settings } from '../settings';
 import { ActionType } from './model/enums';
 import { LimitOrder } from './model/limit-order';
 import { Ticker } from './model/ticker';
 import { BinanceService } from './services/binance-service';
 import { Trader } from './services/trader-service';
-
-const apiAccount = apiKeys.crypAccount;
 
 const SELLHALF = 1;
 

@@ -7,6 +7,10 @@ import connectApi from './api';
 import { KrakenService } from './services/kraken-service';
 import { MovingAverageStrategy, DailySpikeStrategy, TemplateStrategy } from './strategies';
 import { BinanceService } from './services/binance-service';
+import 'dotenv/config';
+
+
+
 
 const trader = Trader.getInstance();
 const advisor: AdvisorType = AdvisorType.live;
@@ -18,10 +22,10 @@ const testStrat = new MovingAverageStrategy(
 async function loadStrategy() {
     trader.addStrategy([
         testStrat,
-        // new DailySpikeStrategy(
-        //     new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1m', 10)),
-        //     AdvisorType.order
-        // ),
+        new DailySpikeStrategy(
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '15m', 10)),
+            AdvisorType.order
+        ),
     ]);
 
     await setup();

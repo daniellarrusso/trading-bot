@@ -1,6 +1,5 @@
 import Binance from 'node-binance-api';
 import { Candle } from '../model/candle';
-import { apiKeys } from '../../keys';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 import { LimitOrder, OrderSubject } from '../model/limit-order';
@@ -22,10 +21,20 @@ export class BinanceService implements IExchangeService {
     exchangeName = 'Binance';
     limitOrder = new OrderSubject();
 
+    get env(): EnvVariables {
+        return {
+            API_KEY: process.env.BINANCE_KEY,
+            API_SECRET: process.env.BINANCE_SECRET
+        } as EnvVariables;
+    }
+
     constructor(public ticker: Ticker) {
+        if (!this.env.API_KEY || !this.env.API_SECRET) {
+            throw new Error('Missing required environment variables');
+        }
         this.exchange = new Binance().options({
-            APIKEY: apiKeys.crypAccount.key,
-            APISECRET: apiKeys.crypAccount.secret,
+            APIKEY: this.env.API_KEY,
+            APISECRET: this.env.API_SECRET,
             useServerTime: true,
             recvWindow: 60000,
             'family': 4

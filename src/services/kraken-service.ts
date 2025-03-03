@@ -1,5 +1,4 @@
 import KrakenClient from 'kraken-api-na';
-import { apiKeys } from '../../keys';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
@@ -9,10 +8,9 @@ import { CandlesIndicatorResponse } from '../model/multi-timeframe';
 import { Ticker } from '../model/ticker';
 import { TradeResponse } from '../model/trade-response';
 import { IExchangeService } from './IExchange-service';
-import { Interval, Intervals } from '../model/interval-converter';
+import { Interval } from '../model/interval-converter';
 import { printDate } from '../utilities/utility';
 import { Trade } from '../db/trade';
-import moment from 'moment';
 
 class Mapper {
     [pair: string]: string;
@@ -45,10 +43,20 @@ export class KrakenService implements IExchangeService {
         if (this._last != val) this._last = val;
     }
 
+    get env(): EnvVariables {
+        return {
+            API_KEY: process.env.KRAKEN_KEY,
+            API_SECRET: process.env.KRAKEN_SECRET
+        } as EnvVariables;
+    }
+
     constructor(public ticker: Ticker) {
+        if (!this.env.API_KEY || !this.env.API_SECRET) {
+            throw new Error('Missing required environment variables');
+        }
         this.exchange = new KrakenClient(
-            apiKeys.krakenAccount.key,
-            apiKeys.krakenAccount.secret
+            this.env.API_KEY,
+            this.env.API_SECRET
         );
     }
 
