@@ -13,7 +13,7 @@ export class MovingAverageStrategy extends BaseStrategy {
   hr4SmA: Indicator;
   constructor(exchange: IExchangeService, advisor: AdvisorType) {
     super(exchange, advisor);
-    this.strategyName = 'Test';
+    this.strategyName = 'Moving Average Day One';
   }
 
   loadIndicators() {
