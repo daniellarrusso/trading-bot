@@ -5,25 +5,16 @@ import { Trader } from './services/trader-service';
 import { Strat } from './model/interfaces/strat';
 import connectApi from './api';
 import { KrakenService } from './services/kraken-service';
-import { MovingAverageStrategy, DailySpikeStrategy, TemplateStrategy } from './strategies';
-import { BinanceService } from './services/binance-service';
 import 'dotenv/config';
-
-
+import { HeikinAshiStrategy } from './strategies/heikin-ashi.strategy';
 
 
 const trader = Trader.getInstance();
-const advisor: AdvisorType = AdvisorType.live;
-const testStrat = new MovingAverageStrategy(
-    new KrakenService(new Ticker('BTC', 'GBP', ActionType.Short, '1h')),
-    AdvisorType.paper
-);
 
 async function loadStrategy() {
     trader.addStrategy([
-        testStrat,
-        new DailySpikeStrategy(
-            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '15m', 10)),
+        new HeikinAshiStrategy(
+            new KrakenService(new Ticker('BTC', 'GBP', ActionType.Long, '1h', 100)),
             AdvisorType.paper
         ),
     ]);

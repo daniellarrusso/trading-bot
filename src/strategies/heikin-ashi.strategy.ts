@@ -3,6 +3,7 @@ import { CallbackDelay } from '../model/callback-delay';
 import { Candle } from '../model/candle';
 import { AdvisorType } from '../model/enums';
 import { Indicator } from '../model/indicator';
+import { Interval } from '../model/interval-converter';
 import { IExchangeService } from '../services/IExchange-service';
 import { BaseStrategy } from './base-strategy';
 
@@ -16,7 +17,9 @@ export class HeikinAshiStrategy extends BaseStrategy {
   }
 
   loadIndicators() {
-
+    this.hr4 = this.createAlternateTimeframe(new Interval('4h'));
+    this.hr4fMa = this.hr4.createIndicator('ema', { weight: 20 });
+    this.hr4SmA = this.hr4.createIndicator('sma', { weight: 50 });
   }
 
   async realtimeAdvice(candle: Candle) { }
