@@ -35,7 +35,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.18.2",
-    "kraken-api-na": "^1.0.0",
+    "krakened-api": "^1.1.0",
     "moment": "^2.29.2",
     "mongoose": "^8.12.0",
     "node-binance-api": "^0.13.1",

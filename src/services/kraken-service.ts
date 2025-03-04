@@ -1,4 +1,4 @@
-import KrakenClient from 'kraken-api-na';
+import KrakenClient from 'krakened-api';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
