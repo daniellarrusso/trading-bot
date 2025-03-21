@@ -1,6 +1,6 @@
 # Trading Bot
 
-A Node.js trading bot built with TypeScript, designed to interact with cryptocurrency exchanges like **Kraken** and **Binance** using node third party libraries to communicate with their official APIs. This bot is customizable, uses **MongoDB** for data storage, and can be extended to support additional exchanges or trading strategies.
+A Node.js trading bot built with TypeScript, designed to interact with cryptocurrency exchanges, **Kraken** and **Binance** using node third party libraries to communicate with their official APIs. The bot and the strategies can be customised to use popular indicators to trade with. The bot uses **MongoDB** for data storage, and can be extended to support additional exchanges or trading strategies.
 
 ---
 
