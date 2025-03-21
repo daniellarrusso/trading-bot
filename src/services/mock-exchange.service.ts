@@ -57,12 +57,13 @@ export class MockExchangeService implements IExchangeService {
         const side = this.ticker.isMarketOrders ? order.marketSide : order.side;
         order.quantity = this.exchange.roundStep(order.quantity, this.ticker.stepSize);
         const priceString = this.normalisePrice(order.price);
-        const res = await this.mockOrders[side](
+        const fn = side === 'sell' ? this.mockOrders.sell : this.mockOrders.buy;
+        const res = await fn(
             this.ticker.pair,
-            order.quantity,
+            order.quantity.toString(),
             priceString
         );
-        return this.assignQuoteQtyAndPrice(res);
+        return this.assignQuoteQtyAndPrice(res as TradeResponse);
     }
 
     private assignQuoteQtyAndPrice(res: TradeResponse): Trade {
