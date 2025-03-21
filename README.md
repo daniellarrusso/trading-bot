@@ -8,7 +8,7 @@ A Node.js trading bot built with TypeScript, designed to interact with cryptocur
 
 - **Multi-Exchange Support**: Integrates with **Kraken** and **Binance** APIs.
 - **TypeScript**: Written in TypeScript for type safety and better developer experience.
-- **Customizable Strategies**: Easily implement and test your own trading strategies.
+- **Customizable Strategies**: Implement and test your own trading strategies using a template. (front end to do this is on backlog).
 - **Environment Variables**: Securely manage API keys, secrets, and MongoDB connection strings using `.env`.
 - **MongoDB Integration**: Stores trading data, logs, and strategy results in MongoDB.
 - **Modular Design**: Clean and modular codebase for easy maintenance and extension.
