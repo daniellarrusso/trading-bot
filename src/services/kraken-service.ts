@@ -1,4 +1,4 @@
-import KrakenClient from 'kraken-api-na';
+import { krakenPublic, krakenPrivate } from './kraken-client';
 import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
 import { Candle } from '../model/candle';
 import { Indicator } from '../model/indicator';
@@ -34,7 +34,7 @@ export interface KrakenOrderResponse {
 }
 
 export class KrakenService implements IExchangeService {
-    exchange: any;
+    exchange: any = null;
     _last: number = 0;
     trys: number = 0;
     exchangeName = 'Kraken';
@@ -43,33 +43,38 @@ export class KrakenService implements IExchangeService {
         if (this._last != val) this._last = val;
     }
 
-    get env(): EnvVariables {
+    get env(): { API_KEY: string; API_SECRET: string } {
         return {
-            API_KEY: process.env.KRAKEN_KEY,
-            API_SECRET: process.env.KRAKEN_SECRET
-        } as EnvVariables;
+            API_KEY: process.env.KRAKEN_KEY!,
+            API_SECRET: process.env.KRAKEN_SECRET!,
+        };
     }
 
     constructor(public ticker: Ticker) {
         if (!this.env.API_KEY || !this.env.API_SECRET) {
             throw new Error('Missing required environment variables');
         }
-        this.exchange = new KrakenClient(
-            this.env.API_KEY,
-            this.env.API_SECRET
-        );
+    }
+
+    private publicApi(method: string, params: Record<string, any> = {}): Promise<any> {
+        return krakenPublic(method, params);
+    }
+
+    private privateApi(method: string, params: Record<string, any> = {}): Promise<any> {
+        return krakenPrivate(method, this.env.API_KEY, this.env.API_SECRET, params);
     }
 
     async updateOrder(trade: Trade): Promise<boolean> {
-        const res = await this.exchange.api('ClosedOrders');
+        const res = await this.privateApi('ClosedOrders');
         const result = res?.result?.closed?.[trade.orderId]?.status === 'closed';
         return result;
     }
+
     async getHistory(ticker: Ticker) {
         const { krakenPair: pair } = this.ticker;
 
         try {
-            const { result } = await this.exchange.api('OHLC', {
+            const { result } = await this.publicApi('OHLC', {
                 pair,
                 interval: ticker.intervalObj.minutes,
             });
@@ -88,7 +93,7 @@ export class KrakenService implements IExchangeService {
         const { krakenPair: pair2 } = this.ticker;
 
         try {
-            const { result } = await this.exchange.api('OHLC', {
+            const { result } = await this.publicApi('OHLC', {
                 pair: pair2,
                 interval: interval.minutes,
             });
@@ -111,6 +116,7 @@ export class KrakenService implements IExchangeService {
     ): Promise<CandlesIndicatorResponse> {
         throw new Error('Method not implemented.');
     }
+
     async createOrder(order: LimitOrder): Promise<Trade> {
         const limitOrder = {
             pair: this.ticker.pair,
@@ -120,10 +126,7 @@ export class KrakenService implements IExchangeService {
             volume: order.quantity.toFixed(this.ticker.lotDecimals),
         };
         try {
-            const res: KrakenOrderResponse = await this.exchange.api(
-                'AddOrder',
-                limitOrder
-            );
+            const res: KrakenOrderResponse = await this.privateApi('AddOrder', limitOrder);
             return this.generateTradeResponse(res, order);
         } catch (error) {
             console.log(error);
@@ -147,20 +150,18 @@ export class KrakenService implements IExchangeService {
     }
 
     async cancelOrder(orderId: any) {
-        const price = await this.exchange.api('CancelOrder', { txid: orderId });
-        return price.result;
+        const res = await this.privateApi('CancelOrder', { txid: orderId });
+        return res.result;
     }
 
     async getExchangeInfo(): Promise<void> {
         console.log('Loading Kraken Exchange config');
         const { krakenPair: pair } = this.ticker;
         try {
-            const { result } = await this.exchange.api('AssetPairs', { info: {}, pair });
+            const { result } = await this.publicApi('AssetPairs', { pair });
             const { [pair]: settings } = result;
             this.ticker.pairDecimals = settings.pair_decimals;
             this.ticker.lotDecimals = settings.lot_decimals;
-            // this.ticker.asset = settings.base;
-            // this.ticker.currency = settings.quote;
             await this.getTradingBalance();
         } catch (error: any) {
             throw new Error('something went wrong: ' + error?.message);
@@ -180,7 +181,7 @@ export class KrakenService implements IExchangeService {
     }
 
     private async getBalance(currency: string): Promise<string> {
-        const bal = await this.exchange.api('Balance');
+        const bal = await this.privateApi('Balance');
         if (CurrencyMapper[currency]) {
             return bal.result[CurrencyMapper[currency]];
         }
@@ -188,10 +189,10 @@ export class KrakenService implements IExchangeService {
     }
 
     async getOHLCLatest(ticker: Ticker, cb) {
-        const { krakenPair: pair, interval } = this.ticker;
+        const { krakenPair: pair } = this.ticker;
         try {
             if (new Date().getSeconds() === 5) {
-                const { result } = await this.exchange.api('OHLC', {
+                const { result } = await this.publicApi('OHLC', {
                     pair,
                     interval: ticker.intervalObj.minutes,
                 });
@@ -215,7 +216,7 @@ export class KrakenService implements IExchangeService {
             this.trys++;
             console.log(`Try: ${this.trys} trying again`);
             if (this.trys < 60)
-                setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000); // try next minute
+                setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000);
         }
     }
 
@@ -224,9 +225,8 @@ export class KrakenService implements IExchangeService {
         quantity: number,
         price: number = 0
     ): Promise<TradeResponse> {
-        // const order = this.baseOrder.createOrder(side, quantity, price | this.ticker.candle.close);
         try {
-            const res = await this.exchange.api('AddOrder', {});
+            const res = await this.privateApi('AddOrder', {});
             await this.getTradingBalance();
             return res;
         } catch (error: any) {
@@ -241,28 +241,29 @@ export class KrakenService implements IExchangeService {
     getOrders(pair: string): Promise<any[]> {
         throw new Error('Method not implemented.');
     }
+
     checkOrderStatus(orderId: any) {
         throw new Error('Method not implemented.');
     }
 
     async getTickerSettings(pair: string) {
-        const res = await this.exchange.api('AssetPairs', { info: {}, pair: pair });
-        const result = res.result[pair];
-        return result;
+        const { result } = await this.publicApi('AssetPairs', { pair });
+        return result[pair];
     }
 
     async getPrice(ticker?: string) {
-        const price = await this.exchange.api('Ticker', { pair: ticker });
-        return price.result;
+        const { result } = await this.publicApi('Ticker', { pair: ticker });
+        return result;
     }
 
     async addOrder(limitOrder: any) {
-        const res = await this.exchange.api('AddOrder', limitOrder);
+        const res = await this.privateApi('AddOrder', limitOrder);
         return res.result;
     }
+
     async getAssetPairs(pair?: string) {
-        const res = await this.exchange.api('AssetPairs', pair);
-        return res.result;
+        const { result } = await this.publicApi('AssetPairs', pair ? { pair } : {});
+        return result;
     }
 
     private createCandle(arr: any, minutes?: number) {
@@ -296,6 +297,5 @@ export class KrakenService implements IExchangeService {
 
 function addMinutes(date, minutes) {
     date.setMinutes(date.getMinutes() + minutes);
-
     return date;
 }
