@@ -1,301 +1,319 @@
-import { krakenPublic, krakenPrivate } from './kraken-client';
-import { IndicatorStrategies } from '../indicators/indicator-strategies/indicator-strats';
-import { Candle } from '../model/candle';
-import { Indicator } from '../model/indicator';
-import { LimitOrder } from '../model/limit-order';
-import { Side } from '../model/literals';
-import { CandlesIndicatorResponse } from '../model/multi-timeframe';
-import { Ticker } from '../model/ticker';
-import { TradeResponse } from '../model/trade-response';
-import { IExchangeService } from './IExchange-service';
-import { Interval } from '../model/interval-converter';
-import { printDate } from '../utilities/utility';
-import { Trade } from '../db/trade';
+import { krakenPublic, krakenPrivate } from "./kraken-client";
+import { IndicatorStrategies } from "../indicators/indicator-strategies/indicator-strats";
+import { Candle } from "../model/candle";
+import { Indicator } from "../model/indicator";
+import { LimitOrder } from "../model/limit-order";
+import { Side } from "../model/literals";
+import { CandlesIndicatorResponse } from "../model/multi-timeframe";
+import { Ticker } from "../model/ticker";
+import { TradeResponse } from "../model/trade-response";
+import { IExchangeService } from "./IExchange-service";
+import { Interval } from "../model/interval-converter";
+import { printDate } from "../utilities/utility";
+import { Trade } from "../db/trade";
 
 class Mapper {
-    [pair: string]: string;
+  [pair: string]: string;
 }
 
 const CurrencyMapper: Mapper = {
-    BTC: 'XXBT',
-    GBP: 'ZGBP',
-    ETH: 'XETH',
+  BTC: "XXBT",
+  GBP: "ZGBP",
+  ETH: "XETH",
 };
 
 export interface KrakenOrderResponse {
-    error: [];
-    result: {
-        descr: {
-            order: string;
-            close: string;
-        };
-        txid: string[];
+  error: [];
+  result: {
+    descr: {
+      order: string;
+      close: string;
     };
+    txid: string[];
+  };
 }
 
 export class KrakenService implements IExchangeService {
-    exchange: any = null;
-    _last: number = 0;
-    trys: number = 0;
-    exchangeName = 'Kraken';
+  exchange: any = null;
+  _last: number = 0;
+  trys: number = 0;
+  exchangeName = "Kraken";
 
-    set lastProcessed(val: number) {
-        if (this._last != val) this._last = val;
+  set lastProcessed(val: number) {
+    if (this._last != val) this._last = val;
+  }
+
+  get env(): { API_KEY: string; API_SECRET: string } {
+    return {
+      API_KEY: process.env.KRAKEN_KEY!,
+      API_SECRET: process.env.KRAKEN_SECRET!,
+    };
+  }
+
+  constructor(public ticker: Ticker) {
+    if (!this.env.API_KEY || !this.env.API_SECRET) {
+      throw new Error("Missing required environment variables");
     }
+  }
 
-    get env(): { API_KEY: string; API_SECRET: string } {
-        return {
-            API_KEY: process.env.KRAKEN_KEY!,
-            API_SECRET: process.env.KRAKEN_SECRET!,
-        };
+  private publicApi(
+    method: string,
+    params: Record<string, any> = {},
+  ): Promise<any> {
+    return krakenPublic(method, params);
+  }
+
+  private privateApi(
+    method: string,
+    params: Record<string, any> = {},
+  ): Promise<any> {
+    return krakenPrivate(method, this.env.API_KEY, this.env.API_SECRET, params);
+  }
+
+  async updateOrder(trade: Trade): Promise<boolean> {
+    const res = await this.privateApi("ClosedOrders");
+    const result = res?.result?.closed?.[trade.orderId]?.status === "closed";
+    return result;
+  }
+
+  async getHistory(ticker: Ticker) {
+    const { krakenPair: pair } = this.ticker;
+
+    try {
+      const { result } = await this.publicApi("OHLC", {
+        pair,
+        interval: ticker.intervalObj.minutes,
+      });
+      this.lastProcessed = result.last;
+      const history: Candle[] = result[pair].map((candle: Candle) =>
+        this.createCandle(candle),
+      );
+      history.pop();
+      return history;
+    } catch (error: any) {
+      console.log(error.message);
+      return [];
     }
+  }
 
-    constructor(public ticker: Ticker) {
-        if (!this.env.API_KEY || !this.env.API_SECRET) {
-            throw new Error('Missing required environment variables');
+  async getOHLCHistoryByPair(
+    pair: string,
+    interval: Interval,
+  ): Promise<Candle[]> {
+    const { krakenPair: pair2 } = this.ticker;
+
+    try {
+      const { result } = await this.publicApi("OHLC", {
+        pair: pair2,
+        interval: interval.minutes,
+      });
+      const history: Candle[] = result[pair2].map((candle: Candle) =>
+        this.createCandle(candle, interval.minutes),
+      );
+      history.pop();
+      return history;
+    } catch (error: any) {
+      console.log(error.message);
+      return [];
+    }
+  }
+
+  getHistoryWithIndicator(
+    pair: any,
+    interval: any,
+    indicator?: Indicator,
+    indicators?: IndicatorStrategies,
+    firstLiveLoad?: boolean,
+  ): Promise<CandlesIndicatorResponse> {
+    throw new Error("Method not implemented.");
+  }
+
+  async createOrder(order: LimitOrder): Promise<Trade> {
+    const limitOrder = {
+      pair: this.ticker.pair,
+      type: order.side,
+      ordertype: "limit",
+      price: order.price.toFixed(this.ticker.pairDecimals),
+      volume: order.quantity.toFixed(this.ticker.lotDecimals),
+    };
+    try {
+      const res: KrakenOrderResponse = await this.privateApi(
+        "AddOrder",
+        limitOrder,
+      );
+      return this.generateTradeResponse(res, order);
+    } catch (error) {
+      console.log(error);
+      return {} as Trade;
+    }
+  }
+
+  private generateTradeResponse(
+    res: KrakenOrderResponse,
+    order: LimitOrder,
+  ): Trade {
+    return {
+      date: new Date(),
+      quantity: order.quantity,
+      asset: this.ticker.asset,
+      currency: this.ticker.currency,
+      cost: +order.quantity * order.price,
+      price: order.price,
+      side: order.side,
+      closeTime: this.ticker.candle.closeTime,
+      orderId: res.result.txid[0],
+      status: "NEW",
+      advisorType: "",
+    };
+  }
+
+  async cancelOrder(orderId: any) {
+    const res = await this.privateApi("CancelOrder", { txid: orderId });
+    return res.result;
+  }
+
+  async getExchangeInfo(): Promise<void> {
+    console.log("Loading Kraken Exchange config");
+    const { krakenPair: pair } = this.ticker;
+    try {
+      const { result } = await this.publicApi("AssetPairs", { pair });
+      const { [pair]: settings } = result;
+      this.ticker.pairDecimals = settings.pair_decimals;
+      this.ticker.lotDecimals = settings.lot_decimals;
+      await this.getTradingBalance();
+    } catch (error: any) {
+      throw new Error("something went wrong: " + error?.message);
+    }
+  }
+
+  async getTradingBalance(): Promise<Ticker> {
+    try {
+      const cq = await this.getBalance(CurrencyMapper[this.ticker.currency]);
+      const aq = await this.getBalance(CurrencyMapper[this.ticker.asset]);
+      this.ticker.currencyQuantity = +cq;
+      this.ticker.assetQuantity = +aq;
+      return this.ticker;
+    } catch (error: any) {
+      console.log(error.message, " Unable to update currency/asset balances");
+      return {} as Ticker;
+    }
+  }
+
+  private async getBalance(currency: string): Promise<string> {
+    const bal = await this.privateApi("Balance");
+    if (CurrencyMapper[currency]) {
+      return bal.result[CurrencyMapper[currency]];
+    }
+    return bal.result[currency];
+  }
+
+  async getOHLCLatest(ticker: Ticker, cb: any) {
+    const { krakenPair: pair } = this.ticker;
+    try {
+      if (new Date().getSeconds() === 5) {
+        const { result } = await this.publicApi("OHLC", {
+          pair,
+          interval: ticker.intervalObj.minutes,
+        });
+        const lastCandles: Array<Candle> = result[pair].map((candle: Candle) =>
+          this.createCandle(candle),
+        );
+        if (this._last !== result.last) {
+          this.trys = 0;
+          const candle = lastCandles[lastCandles.length - 2];
+          this._last = result.last;
+          cb(candle);
         }
+      }
+      setTimeout(() => this.getOHLCLatest(this.ticker, cb), 800);
+    } catch (error) {
+      console.log(
+        "Error getting latest Candle",
+        `\nLast Candle processed ${this.ticker.candle.closeTime}`,
+      );
+      this.trys++;
+      console.log(`Try: ${this.trys} trying again`);
+      if (this.trys < 60)
+        setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000);
     }
+  }
 
-    private publicApi(method: string, params: Record<string, any> = {}): Promise<any> {
-        return krakenPublic(method, params);
+  async createLimitOrder(
+    side: Side,
+    quantity: number,
+    price: number = 0,
+  ): Promise<TradeResponse> {
+    try {
+      const res = await this.privateApi("AddOrder", {});
+      await this.getTradingBalance();
+      return res;
+    } catch (error: any) {
+      throw new Error("Error Creating Limit Order: " + error.message);
     }
+  }
 
-    private privateApi(method: string, params: Record<string, any> = {}): Promise<any> {
-        return krakenPrivate(method, this.env.API_KEY, this.env.API_SECRET, params);
-    }
+  getLatest(): void {
+    throw new Error("Method not implemented.");
+  }
 
-    async updateOrder(trade: Trade): Promise<boolean> {
-        const res = await this.privateApi('ClosedOrders');
-        const result = res?.result?.closed?.[trade.orderId]?.status === 'closed';
-        return result;
-    }
+  getOrders(pair: string): Promise<any[]> {
+    throw new Error("Method not implemented.");
+  }
 
-    async getHistory(ticker: Ticker) {
-        const { krakenPair: pair } = this.ticker;
+  checkOrderStatus(orderId: any) {
+    throw new Error("Method not implemented.");
+  }
 
-        try {
-            const { result } = await this.publicApi('OHLC', {
-                pair,
-                interval: ticker.intervalObj.minutes,
-            });
-            this.lastProcessed = result.last;
-            const history: Candle[] = result[pair].map((candle: Candle) =>
-                this.createCandle(candle)
-            );
-            history.pop();
-            return history;
-        } catch (error: any) {
-            console.log(error.message);
-        }
-    }
+  async getTickerSettings(pair: string) {
+    const { result } = await this.publicApi("AssetPairs", { pair });
+    return result[pair];
+  }
 
-    async getOHLCHistoryByPair(pair: string, interval: Interval): Promise<Candle[]> {
-        const { krakenPair: pair2 } = this.ticker;
+  async getPrice(ticker?: string) {
+    const { result } = await this.publicApi("Ticker", { pair: ticker });
+    return result;
+  }
 
-        try {
-            const { result } = await this.publicApi('OHLC', {
-                pair: pair2,
-                interval: interval.minutes,
-            });
-            const history: Candle[] = result[pair2].map((candle: Candle) =>
-                this.createCandle(candle, interval.minutes)
-            );
-            history.pop();
-            return history;
-        } catch (error: any) {
-            console.log(error.message);
-        }
-    }
+  async addOrder(limitOrder: any) {
+    const res = await this.privateApi("AddOrder", limitOrder);
+    return res.result;
+  }
 
-    getHistoryWithIndicator(
-        pair: any,
-        interval: any,
-        indicator?: Indicator,
-        indicators?: IndicatorStrategies,
-        firstLiveLoad?: boolean
-    ): Promise<CandlesIndicatorResponse> {
-        throw new Error('Method not implemented.');
-    }
+  async getAssetPairs(pair?: string) {
+    const { result } = await this.publicApi("AssetPairs", pair ? { pair } : {});
+    return result;
+  }
 
-    async createOrder(order: LimitOrder): Promise<Trade> {
-        const limitOrder = {
-            pair: this.ticker.pair,
-            type: order.side,
-            ordertype: 'limit',
-            price: order.price.toFixed(this.ticker.pairDecimals),
-            volume: order.quantity.toFixed(this.ticker.lotDecimals),
-        };
-        try {
-            const res: KrakenOrderResponse = await this.privateApi('AddOrder', limitOrder);
-            return this.generateTradeResponse(res, order);
-        } catch (error) {
-            console.log(error);
-        }
-    }
+  private createCandle(arr: any, minutes?: number) {
+    const [time, open, high, low, close, vwap, volume] = arr;
+    const candle: Candle = {
+      pair: this.ticker.pair,
+      open: +open,
+      high: +high,
+      low: +low,
+      close: +close,
+      price: close,
+      volume,
+      green: +close > +open,
+      isFinal: true,
+      time: new Date(time * 1000),
+      closeTime: addMinutes(
+        new Date(time * 1000),
+        minutes || this.ticker.intervalObj.minutes,
+      ),
+      printTime: printDate(
+        addMinutes(
+          new Date(time * 1000),
+          minutes || this.ticker.intervalObj.minutes,
+        ),
+      ),
+    } as Candle;
 
-    private generateTradeResponse(res: KrakenOrderResponse, order: LimitOrder): Trade {
-        return {
-            date: new Date(),
-            quantity: order.quantity,
-            asset: this.ticker.asset,
-            currency: this.ticker.currency,
-            cost: +order.quantity * order.price,
-            price: order.price,
-            side: order.side,
-            closeTime: this.ticker.candle.closeTime,
-            orderId: res.result.txid[0],
-            status: 'NEW',
-            advisorType: '',
-        };
-    }
-
-    async cancelOrder(orderId: any) {
-        const res = await this.privateApi('CancelOrder', { txid: orderId });
-        return res.result;
-    }
-
-    async getExchangeInfo(): Promise<void> {
-        console.log('Loading Kraken Exchange config');
-        const { krakenPair: pair } = this.ticker;
-        try {
-            const { result } = await this.publicApi('AssetPairs', { pair });
-            const { [pair]: settings } = result;
-            this.ticker.pairDecimals = settings.pair_decimals;
-            this.ticker.lotDecimals = settings.lot_decimals;
-            await this.getTradingBalance();
-        } catch (error: any) {
-            throw new Error('something went wrong: ' + error?.message);
-        }
-    }
-
-    async getTradingBalance(): Promise<Ticker> {
-        try {
-            const cq = await this.getBalance(CurrencyMapper[this.ticker.currency]);
-            const aq = await this.getBalance(CurrencyMapper[this.ticker.asset]);
-            this.ticker.currencyQuantity = +cq;
-            this.ticker.assetQuantity = +aq;
-            return this.ticker;
-        } catch (error: any) {
-            console.log(error.message, ' Unable to update currency/asset balances');
-        }
-    }
-
-    private async getBalance(currency: string): Promise<string> {
-        const bal = await this.privateApi('Balance');
-        if (CurrencyMapper[currency]) {
-            return bal.result[CurrencyMapper[currency]];
-        }
-        return bal.result[currency];
-    }
-
-    async getOHLCLatest(ticker: Ticker, cb) {
-        const { krakenPair: pair } = this.ticker;
-        try {
-            if (new Date().getSeconds() === 5) {
-                const { result } = await this.publicApi('OHLC', {
-                    pair,
-                    interval: ticker.intervalObj.minutes,
-                });
-                const lastCandles: Array<Candle> = result[pair].map((candle: Candle) =>
-                    this.createCandle(candle)
-                );
-                if (this._last !== result.last) {
-                    this.trys = 0;
-                    const candle = lastCandles[lastCandles.length - 2];
-                    this._last = result.last;
-                    cb(candle);
-                }
-            }
-            setTimeout(() => this.getOHLCLatest(this.ticker, cb), 800);
-        } catch (error) {
-            console.log(
-                'Error getting latest Candle',
-                error.message,
-                `\nLast Candle processed ${this.ticker.candle.closeTime}`
-            );
-            this.trys++;
-            console.log(`Try: ${this.trys} trying again`);
-            if (this.trys < 60)
-                setTimeout(() => this.getOHLCLatest(this.ticker, cb), 10000);
-        }
-    }
-
-    async createLimitOrder(
-        side: Side,
-        quantity: number,
-        price: number = 0
-    ): Promise<TradeResponse> {
-        try {
-            const res = await this.privateApi('AddOrder', {});
-            await this.getTradingBalance();
-            return res;
-        } catch (error: any) {
-            throw new Error('Error Creating Limit Order: ' + error.message);
-        }
-    }
-
-    getLatest(): void {
-        throw new Error('Method not implemented.');
-    }
-
-    getOrders(pair: string): Promise<any[]> {
-        throw new Error('Method not implemented.');
-    }
-
-    checkOrderStatus(orderId: any) {
-        throw new Error('Method not implemented.');
-    }
-
-    async getTickerSettings(pair: string) {
-        const { result } = await this.publicApi('AssetPairs', { pair });
-        return result[pair];
-    }
-
-    async getPrice(ticker?: string) {
-        const { result } = await this.publicApi('Ticker', { pair: ticker });
-        return result;
-    }
-
-    async addOrder(limitOrder: any) {
-        const res = await this.privateApi('AddOrder', limitOrder);
-        return res.result;
-    }
-
-    async getAssetPairs(pair?: string) {
-        const { result } = await this.publicApi('AssetPairs', pair ? { pair } : {});
-        return result;
-    }
-
-    private createCandle(arr: any, minutes?: number) {
-        const [time, open, high, low, close, vwap, volume] = arr;
-        const candle: Candle = {
-            pair: this.ticker.pair,
-            open: +open,
-            high: +high,
-            low: +low,
-            close: +close,
-            price: close,
-            volume,
-            green: +close > +open,
-            isFinal: true,
-            time: new Date(time * 1000),
-            closeTime: addMinutes(
-                new Date(time * 1000),
-                minutes || this.ticker.intervalObj.minutes
-            ),
-            printTime: printDate(
-                addMinutes(
-                    new Date(time * 1000),
-                    minutes || this.ticker.intervalObj.minutes
-                )
-            ),
-        } as Candle;
-
-        return candle;
-    }
+    return candle;
+  }
 }
 
-function addMinutes(date, minutes) {
-    date.setMinutes(date.getMinutes() + minutes);
-    return date;
+function addMinutes(date: Date, minutes: number) {
+  date.setMinutes(date.getMinutes() + minutes);
+  return date;
 }
