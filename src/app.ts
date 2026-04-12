@@ -15,7 +15,7 @@ const trader = Trader.getInstance();
 async function loadStrategy() {
   trader.addStrategy([
     new HeikinAshiStrategy(
-      new BinanceService(new Ticker("BTC", "USDT", ActionType.Long, "1h", 100)),
+      new KrakenService(new Ticker("BTC", "USDT", ActionType.Long, "1h", 100)),
       AdvisorType.paper,
     ),
   ]);
@@ -38,9 +38,12 @@ async function setup() {
 function getLatest(tickers: any) {
   for (let i = 0; i < tickers; i++) {
     const strategy: Strat = trader.strategies[i];
-    strategy.exchange.getOHLCLatest(strategy.exchange.ticker, async (c) => {
-      await strategy.update(c);
-    });
+    strategy.exchange.getOHLCLatest(
+      strategy.exchange.ticker,
+      async (c: any) => {
+        await strategy.update(c);
+      },
+    );
   }
 }
 
